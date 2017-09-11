@@ -1,3 +1,26 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate preferences;
+extern crate notify;
+extern crate rand;
+
+mod game_config;
+
 fn main() {
-    println!("Hello, world!");
+
+    // Load GameConfig from disk
+    let mut config = game_config::GameConfig::retrieve();
+    println!("Initial config is: {:?}", config);
+
+    // Reload GameConfig if file on disk changes
+    loop {
+        match game_config::GameConfig::await_update() {
+            Ok(new_config) => {
+                config = new_config;
+                println!("Updated, config now: {:?}", config);
+            }
+            Err(e) => println!("Error: {}", e),
+        }
+    }
 }
