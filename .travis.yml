@@ -4,7 +4,4 @@ rust:
     - nightly
 before_script: (cargo install rustfmt || true)
 script:
-    - |
-    cargo fmt -- --write-mode=diff &&
-    cargo build &&
-    cargo test
+    - cargo fmt -- --write-mode=diff && cargo build && cargo test
