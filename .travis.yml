@@ -1,7 +1,18 @@
 language: rust
 cache: cargo
 rust:
-    - nightly
-before_script: (cargo install rustfmt || true)
+- nightly
+before_script: "(cargo install rustfmt || true)"
 script:
-    - cargo fmt -- --write-mode=diff && cargo build && cargo test
+- cargo fmt -- --write-mode=diff && cargo build && cargo test
+after_success: |
+  [ $TRAVIS_BRANCH = master ] &&
+  [ $TRAVIS_PULL_REQUEST = false ] &&
+  cargo rustdoc -- --no-defaults --passes collapse-docs --passes unindent-comments &&
+  echo "<meta http-equiv=refresh content=0;url=`echo $TRAVIS_REPO_SLUG | cut -d '/' -f 2`/index.html>" > target/doc/index.html &&
+  sudo pip install ghp-import &&
+  ghp-import -n target/doc &&
+  git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+env:
+  global:
+    secure: 4f+StlRm+dkG/cHjgc9K9hFyoT7EbpM48J2hdBOoxIFWQTkUCtV+ZehIwLFht2olVmuURdTgU7q307WGvYYztpu8gujMQx9zQIaS+HH7fwho804q1fwdgXlwPDz/KuivqlBpGtGwxFu1OCu9787siQ4oVDyuXYzz5euWC7Z7SVJ0Kcwx9KSaTy16HybME8/s5O/P1k1tr8P6w8l3FlGospro8P09cHnf5Uoo2iuPRNjzQKXkUjBYhs8Pdc/hrYvkyCmNikKgR+Wf6EA2ukNKP9nSewDB7YD7mJbl2ZUzeSEQkYzBAJ2jExItJhs2OvNZ3jfQq7XK8vrUaU+lx2+uN7zYQzw6OeoQ2LaFCXdcXO+BMDKxRphuPLqx7xduPh+6lVdaiwQVwczlkMkkWjqYBCKy7ZOUXp1tAWvZL78xWMX/NN8krQRCelRTSvrpFO3xpQIQNiN5mJp1Gq28gI7yaplQXB7HjmTEtRQLATlWa3UGMEK28eDb00wfKwip0qLmI92ySXBRKE+Ms/DFwyzPlxWg09Dg/7z7dzJ7Fn8UH8rTQnkbFXgROTtZhREgoVx0fUVqfs4m/1TCVncOcKrhbmNoPgvTHNASat8dvqo1RCBsECCKq0VrhqoIdXI8zv56BXJcASJVS7kQ3RneVLGZTFjiPL42GKFX9XY6oRtaoc0=
