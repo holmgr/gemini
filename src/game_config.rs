@@ -63,8 +63,7 @@ impl GameConfig {
         let mut config_path = prefs_base_dir().unwrap();
         config_path.push(APP_INFO.name);
         config_path.push(format!("{}.prefs.json", PREFS_KEY));
-        watcher
-            .watch(config_path, RecursiveMode::Recursive)
+        watcher.watch(config_path, RecursiveMode::Recursive)
             .unwrap();
 
         match rx.recv() {
