@@ -4,8 +4,10 @@ extern crate serde;
 extern crate preferences;
 extern crate notify;
 extern crate rand;
+extern crate petgraph;
 
 mod game_config;
+mod markov;
 
 fn main() {
 
