@@ -6,7 +6,7 @@ use rand::{Rng, SeedableRng, StdRng};
 /// Basic Markov chain for generating random strings which are similar to the
 /// trained data provided.
 pub struct MarkovChain {
-    graph: Graph<String, f64>,
+    graph: Graph<char, f64>,
     start: NodeIndex,
     end: NodeIndex,
     strings: Vec<String>,
@@ -25,38 +25,11 @@ impl MarkovChain {
             .max_by_key(|s| s.len())
             .unwrap()
             .len();
-        let mut graph = Graph::<String, f64>::new();
-        let start = graph.add_node(String::from("Start"));
-        let end = graph.add_node(String::from("End"));
+        let mut graph = Graph::<char, f64>::new();
+        let start = graph.add_node('<');
+        let end = graph.add_node('>');
 
-        let alphabet = vec![
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
-            "M",
-            "N",
-            "O",
-            "P",
-            "Q",
-            "R",
-            "S",
-            "T",
-            "U",
-            "V",
-            "W",
-            "X",
-            "Y",
-            "Z",
-        ];
+        let alphabet: Vec<char> = String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").chars().collect();
 
         // Temporary container of all nodes in previous layer
         let mut prev_layer = Vec::<NodeIndex>::new();
@@ -67,7 +40,7 @@ impl MarkovChain {
             let mut current_layer = vec![];
 
             for chr in alphabet.clone() {
-                let current_node = graph.add_node(String::from(chr));
+                let current_node = graph.add_node(chr);
                 current_layer.push(current_node);
 
                 // Add edges to all nodes in previous layer
@@ -115,7 +88,7 @@ impl MarkovChain {
         fn increment_edge(
             first_node: &NodeIndex,
             second_node: &NodeIndex,
-            graph: &mut Graph<String, f64>,
+            graph: &mut Graph<char, f64>,
         ) {
             let edge = graph.find_edge(*first_node, *second_node).unwrap();
             let current_edge_weight = graph.edge_weight(edge).unwrap().clone();
@@ -125,9 +98,7 @@ impl MarkovChain {
         while let Some(current_char) = chars.next() {
             let next_node = self.graph
                 .neighbors(current_node)
-                .find(|node| {
-                    self.graph.node_weight(*node) == Some(&current_char.to_string())
-                })
+                .find(|node| self.graph.node_weight(*node) == Some(&current_char))
                 .unwrap();
 
             increment_edge(&current_node, &next_node, &mut self.graph);
@@ -180,7 +151,7 @@ impl MarkovChain {
                 // Go through this edge
                 if sample <= 0.0 {
                     // Add current node value to the final string
-                    final_string += self.graph.node_weight(current_node).unwrap();
+                    final_string.push(*self.graph.node_weight(current_node).unwrap());
                     if let Some(nodes) = self.graph.edge_endpoints(edge) {
                         current_node = nodes.1;
                         break;
@@ -190,7 +161,7 @@ impl MarkovChain {
         }
         // TODO: Ensure that all generated strings are unique, and not part of
         // training data
-        final_string.drain(0..self.graph.node_weight(self.start).unwrap().len());
+        final_string.drain(0..1);
         final_string
     }
 }
