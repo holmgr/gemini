@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use petgraph::Graph;
 use petgraph::visit::Bfs;
 use petgraph::prelude::NodeIndex;
@@ -29,23 +30,33 @@ impl MarkovChain {
         let start = graph.add_node('<');
         let end = graph.add_node('>');
 
-        let alphabet: Vec<char> = String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").chars().collect();
+        // Store each unique character per index in repsective layer
+        let mut layers: Vec<BTreeSet<char>> = vec![];
+        for _ in 0..max_len {
+            let set = BTreeSet::new();
+            layers.push(set);
+        }
+        for string in starting_strings {
+            for (i, chr) in string.chars().enumerate() {
+                layers[i].insert(chr);
+            }
+        }
 
         // Temporary container of all nodes in previous layer
         let mut prev_layer = Vec::<NodeIndex>::new();
         prev_layer.push(start);
 
-        // Initialize graph with layers, nodes, and edges.
-        for _ in 0..max_len {
+        // Setup fully forward connecting edges between each layer
+        for layer in layers {
             let mut current_layer = vec![];
 
-            for chr in alphabet.clone() {
-                let current_node = graph.add_node(chr);
+            for chr in layer.iter() {
+                let current_node = graph.add_node(*chr);
                 current_layer.push(current_node);
 
                 // Add edges to all nodes in previous layer
                 for prev_node in &prev_layer {
-                    graph.add_edge(prev_node.clone(), current_node, 0.0);
+                    graph.add_edge(*prev_node, current_node, 0.0);
                 }
 
                 // Also include 'end' node so that words can be shorter
@@ -176,8 +187,8 @@ mod tests {
     fn test_new_markov() {
         let starting_strings = vec![String::from("HELLO")];
         let markov = MarkovChain::new(&starting_strings, DEFAULT_SEED);
-        assert_eq!(markov.graph.node_count(), 5 * 26 + 2);
-        assert_eq!(markov.graph.edge_count(), 26 + 4 * 26 * 27 + 26);
+        assert_eq!(markov.graph.node_count(), 2 + starting_strings[0].len());
+        assert_eq!(markov.graph.edge_count(), 2 * starting_strings[0].len());
     }
 
     #[test]
@@ -207,40 +218,56 @@ mod tests {
         }
 
         markov.normalize();
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == markov.start && edge.target() == NodeIndex::new(2) &&
-                edge.weight == 1.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2) && edge.target() == NodeIndex::new(2 + 26 + 1) &&
-                edge.weight == 1.0 / 3.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2) && edge.target() == NodeIndex::new(2 + 26 + 2) &&
-                edge.weight == 2.0 / 3.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2 + 26 + 1) &&
-                edge.target() == NodeIndex::new(2 + 2 * 26 + 2) && edge.weight == 1.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2 + 26 + 2) &&
-                edge.target() == NodeIndex::new(2 + 2 * 26 + 2) &&
-                edge.weight == 1.0 / 2.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2 + 26 + 2) &&
-                edge.target() == NodeIndex::new(2 + 2 * 26 + 3) &&
-                edge.weight == 1.0 / 2.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2 + 2 * 26 + 3) && edge.target() == markov.end &&
-                edge.weight == 1.0
-        }));
-        assert!(markov.graph.raw_edges().iter().any(|ref edge| {
-            edge.source() == NodeIndex::new(2 + 2 * 26 + 2) && edge.target() == markov.end &&
-                edge.weight == 1.0
-        }));
+
+        assert_eq!(
+            markov
+                .graph
+                .raw_edges()
+                .iter()
+                .filter(|ref edge| edge.weight == 1.0)
+                .count(),
+            4
+        );
+
+        assert_eq!(
+            markov
+                .graph
+                .raw_edges()
+                .iter()
+                .filter(|ref edge| edge.weight == 0.0)
+                .count(),
+            4
+        );
+
+        assert_eq!(
+            markov
+                .graph
+                .raw_edges()
+                .iter()
+                .filter(|ref edge| edge.weight == 1.0 / 3.0)
+                .count(),
+            1
+        );
+
+        assert_eq!(
+            markov
+                .graph
+                .raw_edges()
+                .iter()
+                .filter(|ref edge| edge.weight == 2.0 / 3.0)
+                .count(),
+            1
+        );
+
+        assert_eq!(
+            markov
+                .graph
+                .raw_edges()
+                .iter()
+                .filter(|ref edge| edge.weight == 1.0 / 2.0)
+                .count(),
+            2
+        );
     }
 
     #[test]
@@ -253,7 +280,5 @@ mod tests {
         let mut markov = MarkovChain::new(&starting_strings, DEFAULT_SEED);
 
         assert_eq!(markov.generate(), String::from("ABCC"));
-        assert_eq!(markov.generate(), String::from("ACDC"));
-        assert_eq!(markov.generate(), String::from("ACCC"));
     }
 }
