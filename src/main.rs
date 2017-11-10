@@ -6,10 +6,12 @@ extern crate preferences;
 extern crate notify;
 extern crate rand;
 extern crate petgraph;
+extern crate rayon;
 
 mod game_config;
 mod markov;
 mod resources;
+mod generators;
 
 fn main() {
 
