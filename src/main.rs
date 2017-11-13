@@ -1,4 +1,5 @@
 #[macro_use]
+
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde;
@@ -9,9 +10,10 @@ extern crate petgraph;
 extern crate rayon;
 
 mod game_config;
-mod markov;
 mod resources;
 mod generators;
+
+use generators::Gen;
 
 fn main() {
 
@@ -23,10 +25,11 @@ fn main() {
     let astro = fac.fetch_resource::<resources::AstronomicalNamesResource>()
         .unwrap();
 
-    let mut markov = markov::MarkovChain::new(&astro.names, 42);
+    let mut name_gen = generators::names::NameGen::new(42);
+    name_gen.train(&astro);
 
     for _ in 0..10 {
-        println!("{}", markov.generate());
+        println!("{:?}", name_gen.generate());
     }
 
     // Reload GameConfig if file on disk changes
