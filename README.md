@@ -1,5 +1,5 @@
 # Gemini
-![](https://travis-ci.com/holmgr/gemini.svg?token=RDpR67WchTNcoAMabkRa&branch=master)
+![](https://travis-ci.org/holmgr/gemini.svg?branch=master)
 
 Science fiction space trading/smuggling simulation game using procedural generation.
 
