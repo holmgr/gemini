@@ -55,9 +55,13 @@ impl Resource for AstronomicalNamesResource {
 #[cfg(test)]
 mod tests {
     use super::*;
+    extern crate env_logger;
 
     #[test]
     fn test_fetch_resource() {
+        // Init logger
+        let _ = env_logger::init();
+
         let factory = ResourceHandler::new();
         let res = factory
             .fetch_resource::<AstronomicalNamesResource>()

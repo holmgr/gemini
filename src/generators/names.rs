@@ -75,6 +75,12 @@ impl Gen for NameGen {
             // Add connection to end from last character
             self.graph.update_edge(prev, self.end, 0.0);
         }
+        info!(
+            "Model has been trained, is using {} layers, {} nodes and {} edges",
+            depth,
+            self.graph.node_count(),
+            self.graph.edge_count()
+        );
     }
 
     /// Attempts to generate a new name from the model.
@@ -126,6 +132,7 @@ impl Gen for NameGen {
                 return Some(name);
             }
         }
+        info!("Unsuccessful generation used {} tries", gen_num_attempts);
         None
 
     }
@@ -134,11 +141,14 @@ impl Gen for NameGen {
 #[cfg(test)]
 mod names_test {
     use super::*;
+    extern crate env_logger;
     use resources::{AstronomicalNamesResource, ResourceHandler};
 
     #[test]
     // All genrated names must be unique
     fn test_generate_unique() {
+        let _ = env_logger::init();
+
         let mut gen = NameGen::new(0);
         let factory = ResourceHandler::new();
         let res = factory
