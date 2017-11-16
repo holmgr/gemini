@@ -1,5 +1,4 @@
 #[macro_use]
-
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde;
@@ -9,6 +8,10 @@ extern crate rand;
 extern crate petgraph;
 extern crate rayon;
 
+#[macro_use(info, log)]
+extern crate log;
+extern crate env_logger;
+
 mod game_config;
 mod resources;
 mod generators;
@@ -16,10 +19,12 @@ mod generators;
 use generators::Gen;
 
 fn main() {
+    // Init logger
+    let _ = env_logger::init();
 
     // Load GameConfig from disk
     let mut config = game_config::GameConfig::retrieve();
-    println!("Initial config is: {:?}", config);
+    info!("Initial config is: {:?}", config);
 
     let fac = resources::ResourceHandler::new();
     let astro = fac.fetch_resource::<resources::AstronomicalNamesResource>()
@@ -37,7 +42,10 @@ fn main() {
         match game_config::GameConfig::await_update() {
             Ok(new_config) => {
                 config = new_config;
-                println!("Updated, config now: {:?}", config);
+                info!(
+                    "Game config updated, reloading, config is now: {:?}",
+                    config
+                );
             }
             Err(e) => println!("Error: {}", e),
         }

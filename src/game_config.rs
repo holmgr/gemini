@@ -29,6 +29,7 @@ impl GameConfig {
         match GameConfig::load(&APP_INFO, PREFS_KEY) {
             Ok(config) => config,
             _ => {
+                info!("Failed loading config, serving default");
                 let config = GameConfig { map_seed: DEFAULT_SEED };
                 let _ = config.store();
                 config
