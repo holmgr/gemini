@@ -15,6 +15,7 @@ pub struct NameGen {
     graph: Graph<char, f64>,
     start: NodeIndex,
     end: NodeIndex,
+    suffixes: Vec<String>
 }
 
 impl Gen for NameGen {
@@ -32,6 +33,7 @@ impl Gen for NameGen {
         let start = graph.add_node('<');
         let end = graph.add_node('>');
         let generated = HashSet::<String>::new();
+        let suffixes = Vec::<String>::new();
 
         NameGen {
             rng,
@@ -39,6 +41,7 @@ impl Gen for NameGen {
             graph,
             start,
             end,
+            suffixes
         }
     }
 
@@ -81,6 +84,10 @@ impl Gen for NameGen {
             self.graph.node_count(),
             self.graph.edge_count()
         );
+
+        // Load suffixes
+        self.suffixes.extend_from_slice(&data.greek[..]);
+        self.suffixes.extend_from_slice(&data.decorators[..]);
     }
 
     /// Attempts to generate a new name from the model.
@@ -117,6 +124,17 @@ impl Gen for NameGen {
             final_string
         };
 
+        // Randomly generate a suffix uniformlly from training data, has a high
+        // chance of returning None
+        // TODO: Load threshold from config
+        fn get_suffix(rng: &mut StdRng, suffixes: &Vec<String>) -> Option<String> {
+            let suffix_chance = 0.1;
+            match rng.next_f64() {
+                 x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),
+                 _ => None
+            }
+        }
+
         // Check if a name is valid according to constraints
         // TODO: Extract this to a seperate method, should also probably be
         // based on configuration entries
@@ -129,7 +147,10 @@ impl Gen for NameGen {
             let name = generate_attempt(&self.graph, &self.start, &self.end, &mut self.rng);
             if is_valid_name(&name) && !self.generated.contains(&name) {
                 self.generated.insert(name.clone());
-                return Some(name);
+                return match get_suffix(&mut self.rng, &self.suffixes) {
+                     Some(suffix) => Some(format!("{} {}", name, &suffix)),
+                     _ => Some(name)
+                }
             }
         }
         info!("Unsuccessful generation used {} tries", gen_num_attempts);
