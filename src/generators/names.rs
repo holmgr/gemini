@@ -15,7 +15,7 @@ pub struct NameGen {
     graph: Graph<char, f64>,
     start: NodeIndex,
     end: NodeIndex,
-    suffixes: Vec<String>
+    suffixes: Vec<String>,
 }
 
 impl Gen for NameGen {
@@ -41,7 +41,7 @@ impl Gen for NameGen {
             graph,
             start,
             end,
-            suffixes
+            suffixes,
         }
     }
 
@@ -130,8 +130,8 @@ impl Gen for NameGen {
         fn get_suffix(rng: &mut StdRng, suffixes: &Vec<String>) -> Option<String> {
             let suffix_chance = 0.1;
             match rng.next_f64() {
-                 x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),
-                 _ => None
+                x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),
+                _ => None,
             }
         }
 
@@ -148,9 +148,9 @@ impl Gen for NameGen {
             if is_valid_name(&name) && !self.generated.contains(&name) {
                 self.generated.insert(name.clone());
                 return match get_suffix(&mut self.rng, &self.suffixes) {
-                     Some(suffix) => Some(format!("{} {}", name, &suffix)),
-                     _ => Some(name)
-                }
+                    Some(suffix) => Some(format!("{} {}", name, &suffix)),
+                    _ => Some(name),
+                };
             }
         }
         info!("Unsuccessful generation used {} tries", gen_num_attempts);
