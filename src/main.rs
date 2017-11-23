@@ -7,6 +7,8 @@ extern crate notify;
 extern crate rand;
 extern crate petgraph;
 extern crate rayon;
+extern crate nalgebra;
+extern crate statrs;
 
 #[macro_use(info, log)]
 extern crate log;
@@ -15,6 +17,7 @@ extern crate env_logger;
 mod game_config;
 mod resources;
 mod generators;
+mod astronomicals;
 
 use generators::Gen;
 
