@@ -2,6 +2,16 @@ use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use nalgebra::geometry::Point3;
 
+pub struct Galaxy {
+    systems: Vec<System>,
+}
+
+impl Galaxy {
+    pub fn new(systems: Vec<System>) -> Self {
+        Galaxy { systems }
+    }
+}
+
 struct Star {
     mass: f64,
     luminosity: f64,
