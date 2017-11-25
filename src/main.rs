@@ -19,7 +19,7 @@ mod resources;
 mod generators;
 mod astronomicals;
 
-use generators::Gen;
+use generators::{Gen, generate_galaxy};
 
 fn main() {
     // Init logger
@@ -29,16 +29,8 @@ fn main() {
     let mut config = game_config::GameConfig::retrieve();
     info!("Initial config is: {:?}", config);
 
-    let fac = resources::ResourceHandler::new();
-    let astro = fac.fetch_resource::<resources::AstronomicalNamesResource>()
-        .unwrap();
-
-    let mut name_gen = generators::names::NameGen::new(42);
-    name_gen.train(&astro);
-
-    for _ in 0..10 {
-        println!("{:?}", name_gen.generate());
-    }
+    info!("Generating galaxy...");
+    generate_galaxy(&config);
 
     // Reload GameConfig if file on disk changes
     loop {
@@ -49,6 +41,8 @@ fn main() {
                     "Game config updated, reloading, config is now: {:?}",
                     config
                 );
+                info!("Regenerating galaxy...");
+                generate_galaxy(&config);
             }
             Err(e) => println!("Error: {}", e),
         }
