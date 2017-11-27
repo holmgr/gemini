@@ -9,7 +9,6 @@ const APP_INFO: AppInfo = AppInfo {
     author: "holmgr",
 };
 const PREFS_KEY: &str = "conf/general";
-const DEFAULT_SEED: u32 = 42;
 
 // Deriving `Serialize` and `Deserialize` on a struct/enum automatically
 // implements the `Preferences` trait.
@@ -17,7 +16,12 @@ const DEFAULT_SEED: u32 = 42;
 /// for generation.
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct GameConfig {
-    map_seed: u32,
+    pub map_seed: u32,
+    pub galaxy_size: f64,
+    pub number_of_clusters: u64,
+    pub cluster_spread: f64,
+    pub cluster_size_mean: f64,
+    pub cluster_size_std: f64,
 }
 
 impl GameConfig {
@@ -30,7 +34,7 @@ impl GameConfig {
             Ok(config) => config,
             _ => {
                 info!("Failed loading config, serving default");
-                let config = GameConfig { map_seed: DEFAULT_SEED };
+                let config: GameConfig = Default::default();
                 let _ = config.store();
                 config
             }
@@ -71,6 +75,19 @@ impl GameConfig {
         match rx.recv() {
             Ok(_) => Ok(GameConfig::retrieve()),
             Err(e) => Err(e),
+        }
+    }
+}
+
+impl Default for GameConfig {
+    fn default() -> GameConfig {
+        GameConfig {
+            map_seed: 42,
+            galaxy_size: 100000.,
+            number_of_clusters: 1000,
+            cluster_spread: 1000.,
+            cluster_size_mean: 1000.,
+            cluster_size_std: 250.,
         }
     }
 }
