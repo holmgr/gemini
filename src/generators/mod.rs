@@ -9,7 +9,7 @@ pub mod names;
 
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
-
+use resources::{ResourceHandler, StarTypesResource};
 
 /// Generic Generator trait to be implemented by concrete generators of different kinds.
 pub trait Gen {
