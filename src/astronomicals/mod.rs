@@ -1,6 +1,8 @@
-use std::hash::{Hash, Hasher};
-use std::collections::hash_map::DefaultHasher;
 use nalgebra::geometry::Point3;
+use rand::{Rng, SeedableRng};
+use rand::isaac::Isaac64Rng;
+
+use generators::stars::StarGen;
 
 pub struct Galaxy {
     systems: Vec<System>,
@@ -12,10 +14,20 @@ impl Galaxy {
     }
 }
 
-struct Star {
+pub struct Star {
     mass: f64,
     luminosity: f64,
     metalicity: f64,
+}
+
+impl Star {
+    pub fn new(mass: f64, luminosity: f64, metalicity: f64) -> Self {
+        Star {
+            mass,
+            luminosity,
+            metalicity,
+        }
+    }
 }
 
 struct Planet {
@@ -31,17 +43,16 @@ pub struct System {
 }
 
 impl System {
-    pub fn new(location: Point3<f64>) -> Self {
+    pub fn new(location: Point3<f64>, star_gen: &StarGen) -> Self {
 
         // Calculate hash
         let hash = System::hash(location);
+        let seed: &[_] = &[hash];
+        let mut rng: Isaac64Rng = SeedableRng::from_seed(seed);
 
-        // TODO: Generate Star and Planets
-        let star = Star {
-            mass: 0.0,
-            luminosity: 0.0,
-            metalicity: 0.0,
-        };
+        let star = star_gen.generate(&mut rng);
+
+        // TODO: Planets
         let satelites = vec![];
 
         System {
