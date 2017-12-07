@@ -1,0 +1,388 @@
+{
+  "main_sequence": [
+    {
+      "kind": "O3",
+      "surface_temp": 53000,
+      "radius": 15,
+      "mass": 120,
+      "absolute_magnitude": -6,
+      "luminosity": 1400000,
+      "habitable_zone": 1200,
+      "abundance": 0.0000000333
+    },
+    {
+      "kind": "O5",
+      "surface_temp": 45000,
+      "radius": 12,
+      "mass": 60,
+      "absolute_magnitude": -5.7,
+      "luminosity": 790000,
+      "habitable_zone": 890,
+      "abundance": 0.0000000333
+    },
+    {
+      "kind": "O8",
+      "surface_temp": 35000,
+      "radius": 8.5,
+      "mass": 23,
+      "absolute_magnitude": -4.9,
+      "luminosity": 170000,
+      "habitable_zone": 410,
+      "abundance": 0.0000000333
+    },
+    {
+      "kind": "B0",
+      "surface_temp": 30000,
+      "radius": 7.4,
+      "mass": 17,
+      "absolute_magnitude": -4,
+      "luminosity": 50000,
+      "habitable_zone": 220,
+      "abundance": 0.00025
+    },
+    {
+      "kind": "B3",
+      "surface_temp": 19000,
+      "radius": 4.8,
+      "mass": 7.6,
+      "absolute_magnitude": -1.6,
+      "luminosity": 1900,
+      "habitable_zone": 44,
+      "abundance": 0.00025
+    },
+    {
+      "kind": "B5",
+      "surface_temp": 15000,
+      "radius": 3.9,
+      "mass": 5.9,
+      "absolute_magnitude": -1.2,
+      "luminosity": 830,
+      "habitable_zone": 29,
+      "abundance": 0.00025
+    },
+    {
+      "kind": "B8",
+      "surface_temp": 12000,
+      "radius": 3,
+      "mass": 3.8,
+      "absolute_magnitude": -0.2,
+      "luminosity": 180,
+      "habitable_zone": 13,
+      "abundance": 0.00025
+    },
+    {
+      "kind": "A0",
+      "surface_temp": 9500,
+      "radius": 2.4,
+      "mass": 2.9,
+      "absolute_magnitude": 0.6,
+      "luminosity": 54,
+      "habitable_zone": 7.3,
+      "abundance": 0.0035
+    },
+    {
+      "kind": "A5",
+      "surface_temp": 8200,
+      "radius": 1.7,
+      "mass": 2,
+      "absolute_magnitude": 1.9,
+      "luminosity": 14,
+      "habitable_zone": 3.7,
+      "abundance": 0.0035
+    },
+    {
+      "kind": "F0",
+      "surface_temp": 7200,
+      "radius": 1.5,
+      "mass": 1.6,
+      "absolute_magnitude": 2.7,
+      "luminosity": 6.5,
+      "habitable_zone": 2.5,
+      "abundance": 0.01
+    },
+    {
+      "kind": "F5",
+      "surface_temp": 6400,
+      "radius": 1.3,
+      "mass": 1.3,
+      "absolute_magnitude": 3.5,
+      "luminosity": 3.2,
+      "habitable_zone": 1.8,
+      "abundance": 0.01
+    },
+    {
+      "kind": "G0",
+      "surface_temp": 6000,
+      "radius": 1.1,
+      "mass": 1.05,
+      "absolute_magnitude": 4.4,
+      "luminosity": 1.5,
+      "habitable_zone": 1.2,
+      "abundance": 0.016
+    },
+    {
+      "kind": "G2",
+      "surface_temp": 5800,
+      "radius": 1,
+      "mass": 1,
+      "absolute_magnitude": 4.8,
+      "luminosity": 1,
+      "habitable_zone": 1,
+      "abundance": 0.016
+    },
+    {
+      "kind": "G5",
+      "surface_temp": 5700,
+      "radius": 0.92,
+      "mass": 0.92,
+      "absolute_magnitude": 5.1,
+      "luminosity": 0.79,
+      "habitable_zone": 0.89,
+      "abundance": 0.016
+    },
+    {
+      "kind": "K0",
+      "surface_temp": 5200,
+      "radius": 0.85,
+      "mass": 0.79,
+      "absolute_magnitude": 5.9,
+      "luminosity": 0.42,
+      "habitable_zone": 0.65,
+      "abundance": 0.04
+    },
+    {
+      "kind": "K5",
+      "surface_temp": 4300,
+      "radius": 0.72,
+      "mass": 0.67,
+      "absolute_magnitude": 7.4,
+      "luminosity": 0.15,
+      "habitable_zone": 0.39,
+      "abundance": 0.04
+    },
+    {
+      "kind": "M0",
+      "surface_temp": 3800,
+      "radius": 0.6,
+      "mass": 0.51,
+      "absolute_magnitude": 8.8,
+      "luminosity": 0.08,
+      "habitable_zone": 0.28,
+      "abundance": 0.26
+    },
+    {
+      "kind": "M5",
+      "surface_temp": 3200,
+      "radius": 0.27,
+      "mass": 0.21,
+      "absolute_magnitude": 12.3,
+      "luminosity": 0.011,
+      "habitable_zone": 0.1,
+      "abundance": 0.26
+    },
+    {
+      "kind": "M8",
+      "surface_temp": 2600,
+      "radius": 0.15,
+      "mass": 0.06,
+      "absolute_magnitude": 16,
+      "luminosity": 0.001,
+      "habitable_zone": 0.03,
+      "abundance": 0.26
+    }
+  ],
+  "giant": [
+    {
+      "kind": "B0",
+      "surface_temp": 29000,
+      "radius": 15,
+      "mass": 20,
+      "absolute_magnitude": -5.1,
+      "luminosity": 1100000,
+      "habitable_zone": 1000,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "B5",
+      "surface_temp": 15000,
+      "radius": 8,
+      "mass": 7,
+      "absolute_magnitude": -2.2,
+      "luminosity": 1800,
+      "habitable_zone": 42,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "A0",
+      "surface_temp": 10000,
+      "radius": 5,
+      "mass": 4,
+      "absolute_magnitude": 0,
+      "luminosity": 110,
+      "habitable_zone": 11,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "F0",
+      "surface_temp": 7200,
+      "radius": 5,
+      "mass": 2,
+      "absolute_magnitude": 0.5,
+      "luminosity": 60,
+      "habitable_zone": 7.7,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "G0",
+      "surface_temp": 5800,
+      "radius": 6,
+      "mass": 1,
+      "absolute_magnitude": 1,
+      "luminosity": 34,
+      "habitable_zone": 5.8,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "G5",
+      "surface_temp": 5100,
+      "radius": 10,
+      "mass": 1.1,
+      "absolute_magnitude": 0.9,
+      "luminosity": 43,
+      "habitable_zone": 6.6,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "K0",
+      "surface_temp": 4700,
+      "radius": 15,
+      "mass": 1.1,
+      "absolute_magnitude": 0.7,
+      "luminosity": 60,
+      "habitable_zone": 7.7,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "K5",
+      "surface_temp": 3900,
+      "radius": 25,
+      "mass": 1.2,
+      "absolute_magnitude": -0.2,
+      "luminosity": 220,
+      "habitable_zone": 15,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "M0",
+      "surface_temp": 3800,
+      "radius": 40,
+      "mass": 1.2,
+      "absolute_magnitude": -0.4,
+      "luminosity": 330,
+      "habitable_zone": 18,
+      "abundance": 0.0004
+    },
+    {
+      "kind": "M5",
+      "surface_temp": 3300,
+      "radius": 80,
+      "mass": 1.2,
+      "absolute_magnitude": -0.3,
+      "luminosity": 930,
+      "habitable_zone": 30,
+      "abundance": 0.0004
+    }
+  ],
+  "supergiant": [
+    {
+      "kind": "O5",
+      "surface_temp": 40000,
+      "radius": 30,
+      "mass": 70,
+      "absolute_magnitude": -6.6,
+      "luminosity": 11000000,
+      "habitable_zone": 3300,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "B0",
+      "surface_temp": 26000,
+      "radius": 30,
+      "mass": 25,
+      "absolute_magnitude": -6.4,
+      "luminosity": 2600000,
+      "habitable_zone": 1600,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "A0",
+      "surface_temp": 9700,
+      "radius": 60,
+      "mass": 16,
+      "absolute_magnitude": -6.3,
+      "luminosity": 35000,
+      "habitable_zone": 190,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "F0",
+      "surface_temp": 7700,
+      "radius": 80,
+      "mass": 12,
+      "absolute_magnitude": -6.6,
+      "luminosity": 32000,
+      "habitable_zone": 180,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "G0",
+      "surface_temp": 5500,
+      "radius": 120,
+      "mass": 10,
+      "absolute_magnitude": -6.4,
+      "luminosity": 30000,
+      "habitable_zone": 170,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "G5",
+      "surface_temp": 4800,
+      "radius": 150,
+      "mass": 12,
+      "absolute_magnitude": -6.2,
+      "luminosity": 29000,
+      "habitable_zone": 170,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "K0",
+      "surface_temp": 4400,
+      "radius": 200,
+      "mass": 13,
+      "absolute_magnitude": -6.0,
+      "luminosity": 29000,
+      "habitable_zone": 170,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "K5",
+      "surface_temp": 3800,
+      "radius": 400,
+      "mass": 13,
+      "absolute_magnitude": -5.8,
+      "luminosity": 38000,
+      "habitable_zone": 190,
+      "abundance": 0.00000015
+    },
+    {
+      "kind": "M0",
+      "surface_temp": 3600,
+      "radius": 500,
+      "mass": 13,
+      "absolute_magnitude": -5.6,
+      "luminosity": 41000,
+      "habitable_zone": 200,
+      "abundance": 0.00000015
+    }
+  ]
+}

@@ -28,6 +28,11 @@ impl ResourceHandler {
             include_str!("../res/astronomical_names.json"),
         );
 
+        resources.insert(
+            StarTypesResource::KEY,
+            include_str!("../res/star_types.json"),
+        );
+
         ResourceHandler { resources }
     }
 
@@ -50,6 +55,31 @@ pub struct AstronomicalNamesResource {
 
 impl Resource for AstronomicalNamesResource {
     const KEY: &'static str = "astronomical_names";
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+/// Resource of different star types of stellar objects
+pub struct StarTypesResource {
+    pub main_sequence: Vec<StarType>,
+    pub giant: Vec<StarType>,
+    pub supergiant: Vec<StarType>,
+}
+
+/// Struct describing one type of star
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub struct StarType {
+    pub kind: String,
+    pub surface_temp: u32,
+    pub radius: f64,
+    pub mass: f64,
+    pub absolute_magnitude: f64,
+    pub luminosity: f64,
+    pub habitable_zone: f64,
+    pub abundance: f64,
+}
+
+impl Resource for StarTypesResource {
+    const KEY: &'static str = "star_types";
 }
 
 #[cfg(test)]

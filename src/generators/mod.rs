@@ -6,10 +6,10 @@ use statrs::distribution::{Distribution, Uniform, Normal};
 use nalgebra::geometry::Point3 as Point;
 
 pub mod names;
+pub mod stars;
 
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
-
 
 /// Generic Generator trait to be implemented by concrete generators of different kinds.
 pub trait Gen {
@@ -52,6 +52,9 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         ))
     }
 
+    // Create Star generator
+    let star_gen = stars::StarGen::new();
+
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will
     //combine them to the final result
@@ -70,11 +73,14 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 
             // Generate systems
             for _ in 0..cluster_size {
-                cluster_systems.push(System::new(Point::new(
-                    norm_x.sample::<IsaacRng>(&mut rng),
-                    norm_y.sample::<IsaacRng>(&mut rng),
-                    norm_z.sample::<IsaacRng>(&mut rng),
-                )));
+                cluster_systems.push(System::new(
+                    Point::new(
+                        norm_x.sample::<IsaacRng>(&mut rng),
+                        norm_y.sample::<IsaacRng>(&mut rng),
+                        norm_z.sample::<IsaacRng>(&mut rng),
+                    ),
+                    &star_gen,
+                ));
             }
             cluster_systems
         })
