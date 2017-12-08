@@ -1,5 +1,5 @@
 use nalgebra::geometry::Point3;
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 use rand::isaac::Isaac64Rng;
 
 use generators::stars::StarGen;
