@@ -19,7 +19,7 @@ mod resources;
 mod generators;
 mod astronomicals;
 
-use generators::{generate_galaxy};
+use generators::generate_galaxy;
 
 fn main() {
     // Init logger

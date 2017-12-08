@@ -3,6 +3,7 @@ use rand::SeedableRng;
 use rand::isaac::Isaac64Rng;
 
 use generators::stars::StarGen;
+use generators::Gen;
 
 pub struct Galaxy {
     systems: Vec<System>,
@@ -50,7 +51,7 @@ impl System {
         let seed: &[_] = &[hash];
         let mut rng: Isaac64Rng = SeedableRng::from_seed(seed);
 
-        let star = star_gen.generate(&mut rng);
+        let star = star_gen.generate(&mut rng).unwrap();
 
         // TODO: Planets
         let satelites = vec![];
