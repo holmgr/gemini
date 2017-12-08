@@ -9,6 +9,7 @@ pub struct StarGen {
 }
 
 impl StarGen {
+    /// Create a new Star generator which loads the star resources needed
     pub fn new() -> Self {
         let star_resources = ResourceHandler::new()
             .fetch_resource::<StarTypesResource>()
@@ -21,8 +22,10 @@ impl StarGen {
         StarGen { star_types }
     }
 
+    /// Generates a new Star from the _distribution_ using the provided random
+    /// generator
     pub fn generate<R: Rng>(&self, gen: &mut R) -> Star {
-        // Data does not sum to 1
+        // Data may not sum to 1
         let max_abundance = self.star_types.iter().fold(0., |abund, ref star_type| {
             abund + star_type.abundance
         });
