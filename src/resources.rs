@@ -45,7 +45,7 @@ impl ResourceHandler {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 /// Resource of all training names for name generation of celestial objects
 pub struct AstronomicalNamesResource {
     pub names: Vec<String>,
@@ -57,7 +57,7 @@ impl Resource for AstronomicalNamesResource {
     const KEY: &'static str = "astronomical_names";
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 /// Resource of different star types of stellar objects
 pub struct StarTypesResource {
     pub main_sequence: Vec<StarType>,
@@ -66,7 +66,7 @@ pub struct StarTypesResource {
 }
 
 /// Struct describing one type of star
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct StarType {
     pub kind: String,
     pub surface_temp: u32,

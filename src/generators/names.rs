@@ -4,8 +4,8 @@ use std::usize;
 use std::collections::{BTreeSet, HashSet};
 use petgraph::Graph;
 use petgraph::prelude::NodeIndex;
-use generators::Gen;
-use resources::AstronomicalNamesResource as anr;
+use generators::{MutGen, SeedableGenerator, TrainableGenerator};
+use resources::AstronomicalNamesResource;
 
 /// Basic non deterministic name generator for generating random strings which
 /// are similar to the trained data provided.
@@ -18,13 +18,9 @@ pub struct NameGen {
     suffixes: Vec<String>,
 }
 
-impl Gen for NameGen {
-    type GenItem = String;
-    type TrainData = anr;
-
-
+impl SeedableGenerator for NameGen {
     /// Creates a new NameGen with the given seed
-    fn new(seed: u32) -> NameGen {
+    fn from_seed(seed: u32) -> NameGen {
 
         // Create and initialize random generator using seed
         let new_seed: &[_] = &[seed.clone() as usize];
@@ -45,8 +41,21 @@ impl Gen for NameGen {
         }
     }
 
+    /// Creates a new NameGen with the given seed
+    fn reseed(&mut self, seed: u32) {
+
+        // Create and initialize random generator using seed
+        let new_seed: &[_] = &[seed.clone() as usize];
+        let rng: StdRng = SeedableRng::from_seed(new_seed);
+        self.rng = rng;
+    }
+}
+
+impl TrainableGenerator for NameGen {
+    type TrainRes = AstronomicalNamesResource;
+
     /// Trains the underlying model using the given AstronomicalNamesResource
-    fn train(&mut self, data: &anr) {
+    fn train(&mut self, data: &AstronomicalNamesResource) {
 
         let depth = data.names.iter().fold(0, |acc, ref s| max(acc, s.len()));
 
@@ -89,6 +98,10 @@ impl Gen for NameGen {
         self.suffixes.extend_from_slice(&data.greek[..]);
         self.suffixes.extend_from_slice(&data.decorators[..]);
     }
+}
+
+impl MutGen for NameGen {
+    type GenItem = String;
 
     /// Attempts to generate a new name from the model.
     /// This name is guaranteed to exist in the training set or to have been
@@ -170,7 +183,7 @@ mod names_test {
     fn test_generate_unique() {
         let _ = env_logger::init();
 
-        let mut gen = NameGen::new(0);
+        let mut gen = NameGen::from_seed(0);
         let factory = ResourceHandler::new();
         let res = factory
             .fetch_resource::<AstronomicalNamesResource>()

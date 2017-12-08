@@ -1,4 +1,4 @@
-use rand::SeedableRng;
+use rand::{Rng, SeedableRng};
 use std::time::Instant;
 use rayon::prelude::*;
 use rand::isaac::IsaacRng;
@@ -8,22 +8,42 @@ use nalgebra::geometry::Point3 as Point;
 pub mod names;
 pub mod stars;
 
+use resources::{ResourceHandler, StarTypesResource};
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
 
-/// Generic Generator trait to be implemented by concrete generators of different kinds.
-pub trait Gen {
-    type GenItem;
-    type TrainData;
+/// A generator that can be explicitly seeded in order to the produce the same
+/// stream of psuedo randomness each time
+pub trait SeedableGenerator {
+    /// Reseed a generator with the given seed
+    fn reseed(&mut self, seed: u32);
 
-    /// Create a new genrator with the given seed for the random generator
-    fn new(seed: u32) -> Self;
+    /// Create a new generator with the given seed
+    fn from_seed(seed: u32) -> Self;
+}
+
+/// A generator which can be trained by provided some training resource
+pub trait TrainableGenerator {
+    type TrainRes;
 
     /// Train the generator with the given data
-    fn train(&mut self, &Self::TrainData);
+    fn train(&mut self, &Self::TrainRes);
+}
+
+/// Generic mutable Generator, may modify the generator after generating an item
+pub trait MutGen: TrainableGenerator + SeedableGenerator {
+    type GenItem;
 
     /// Generate a new item from the generator, can be None if the generator is empty etc.
     fn generate(&mut self) -> Option<Self::GenItem>;
+}
+
+/// Generic Generator, does not modify the generator instead uses provided random number generator
+pub trait Gen: TrainableGenerator {
+    type GenItem;
+
+    /// Generate a new item from the generator, can be None if the generator is empty etc.
+    fn generate<R: Rng>(&self, gen: &mut R) -> Option<Self::GenItem>;
 }
 
 /// Generate a galaxy with systems etc, will use the provided config to guide
@@ -53,7 +73,10 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     }
 
     // Create Star generator
-    let star_gen = stars::StarGen::new();
+    let mut star_gen = stars::StarGen::new();
+    star_gen.train(&ResourceHandler::new()
+        .fetch_resource::<StarTypesResource>()
+        .unwrap());
 
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will

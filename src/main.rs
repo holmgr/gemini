@@ -19,7 +19,7 @@ mod resources;
 mod generators;
 mod astronomicals;
 
-use generators::{Gen, generate_galaxy};
+use generators::generate_galaxy;
 
 fn main() {
     // Init logger
@@ -30,7 +30,7 @@ fn main() {
     info!("Initial config is: {:?}", config);
 
     info!("Generating galaxy...");
-    generate_galaxy(&config);
+    let mut galaxy = generate_galaxy(&config);
 
     // Reload GameConfig if file on disk changes
     loop {
@@ -42,7 +42,7 @@ fn main() {
                     config
                 );
                 info!("Regenerating galaxy...");
-                generate_galaxy(&config);
+                galaxy = generate_galaxy(&config);
             }
             Err(e) => println!("Error: {}", e),
         }
