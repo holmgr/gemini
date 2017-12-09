@@ -10,7 +10,7 @@ extern crate rayon;
 extern crate nalgebra;
 extern crate statrs;
 
-#[macro_use(info, log)]
+#[macro_use(info, debug, log)]
 extern crate log;
 extern crate env_logger;
 
@@ -31,6 +31,7 @@ fn main() {
 
     info!("Generating galaxy...");
     let mut galaxy = generate_galaxy(&config);
+    debug!("Generated galaxy: {:?}", galaxy);
 
     // Reload GameConfig if file on disk changes
     loop {
@@ -43,6 +44,7 @@ fn main() {
                 );
                 info!("Regenerating galaxy...");
                 galaxy = generate_galaxy(&config);
+                debug!("Generated galaxy: {:?}", galaxy);
             }
             Err(e) => println!("Error: {}", e),
         }
