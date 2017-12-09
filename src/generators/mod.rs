@@ -4,11 +4,12 @@ use rayon::prelude::*;
 use rand::isaac::IsaacRng;
 use statrs::distribution::{Distribution, Uniform, Normal};
 use nalgebra::geometry::Point3 as Point;
+use std::sync::{Arc, Mutex};
 
 pub mod names;
 pub mod stars;
 
-use resources::{ResourceHandler, StarTypesResource};
+use resources::{ResourceHandler, StarTypesResource, AstronomicalNamesResource};
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
 
@@ -72,6 +73,13 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         ))
     }
 
+    // Create name generator to be shared mutably
+    let mut name_gen_unwraped = names::NameGen::from_seed(config.map_seed);
+    name_gen_unwraped.train(&ResourceHandler::new()
+        .fetch_resource::<AstronomicalNamesResource>()
+        .unwrap());
+    let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
+
     // Create Star generator
     let mut star_gen = stars::StarGen::new();
     star_gen.train(&ResourceHandler::new()
@@ -102,6 +110,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                         norm_y.sample::<IsaacRng>(&mut rng),
                         norm_z.sample::<IsaacRng>(&mut rng),
                     ),
+                    name_gen.clone(),
                     &star_gen,
                 ));
             }

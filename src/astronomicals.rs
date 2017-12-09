@@ -1,10 +1,14 @@
 use nalgebra::geometry::Point3;
 use rand::SeedableRng;
 use rand::isaac::Isaac64Rng;
+use std::sync::{Arc, Mutex};
 
 use generators::stars::StarGen;
+use generators::names::NameGen;
+use generators::MutGen;
 use generators::Gen;
 
+#[derive(Debug)]
 pub struct Galaxy {
     systems: Vec<System>,
 }
@@ -15,6 +19,7 @@ impl Galaxy {
     }
 }
 
+#[derive(Debug)]
 pub struct Star {
     mass: f64,
     luminosity: f64,
@@ -31,20 +36,23 @@ impl Star {
     }
 }
 
+#[derive(Debug)]
 struct Planet {
     mass: f64,
     orbit_distance: f64,
     orbit_time: f64,
 }
 
+#[derive(Debug)]
 pub struct System {
     location: Point3<f64>,
+    name: String,
     star: Star,
     satelites: Vec<Planet>,
 }
 
 impl System {
-    pub fn new(location: Point3<f64>, star_gen: &StarGen) -> Self {
+    pub fn new(location: Point3<f64>, name_gen: Arc<Mutex<NameGen>>, star_gen: &StarGen) -> Self {
 
         // Calculate hash
         let hash = System::hash(location);
@@ -53,11 +61,16 @@ impl System {
 
         let star = star_gen.generate(&mut rng).unwrap();
 
+        // Unwrap and lock name generator as it is mutated by generation
+        let mut name_gen_unwraped = name_gen.lock().unwrap();
+        let name = name_gen_unwraped.generate().unwrap();
+
         // TODO: Planets
         let satelites = vec![];
 
         System {
             location,
+            name,
             star,
             satelites,
         }
@@ -77,14 +90,12 @@ impl System {
 
 #[cfg(test)]
 mod tests {
-    use rand::{Rng, SeedableRng};
+    use rand::SeedableRng;
     use rand::isaac::Isaac64Rng;
     use super::*;
     extern crate env_logger;
     use statrs::distribution::{Distribution, Uniform};
-    use statrs::statistics::{Median, Variance};
     use std::collections::HashMap;
-    use std::i64::MAX;
 
     #[test]
     fn test_hash_uniqueness() {
