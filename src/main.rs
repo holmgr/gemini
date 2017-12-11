@@ -9,6 +9,8 @@ extern crate petgraph;
 extern crate rayon;
 extern crate nalgebra;
 extern crate statrs;
+#[macro_use]
+extern crate lazy_static;
 
 #[macro_use(info, debug, log)]
 extern crate log;

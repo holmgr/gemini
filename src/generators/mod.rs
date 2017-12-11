@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 pub mod names;
 pub mod stars;
 
-use resources::{ResourceHandler, StarTypesResource, AstronomicalNamesResource};
+use resources::{fetch_resource, StarTypesResource, AstronomicalNamesResource};
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
 
@@ -75,16 +75,12 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 
     // Create name generator to be shared mutably
     let mut name_gen_unwraped = names::NameGen::from_seed(config.map_seed);
-    name_gen_unwraped.train(&ResourceHandler::new()
-        .fetch_resource::<AstronomicalNamesResource>()
-        .unwrap());
+    name_gen_unwraped.train(&fetch_resource::<AstronomicalNamesResource>().unwrap());
     let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
 
     // Create Star generator
     let mut star_gen = stars::StarGen::new();
-    star_gen.train(&ResourceHandler::new()
-        .fetch_resource::<StarTypesResource>()
-        .unwrap());
+    star_gen.train(&fetch_resource::<StarTypesResource>().unwrap());
 
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will

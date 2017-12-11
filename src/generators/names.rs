@@ -176,7 +176,7 @@ impl MutGen for NameGen {
 mod names_test {
     use super::*;
     extern crate env_logger;
-    use resources::{AstronomicalNamesResource, ResourceHandler};
+    use resources::{AstronomicalNamesResource, fetch_resource};
 
     #[test]
     // All genrated names must be unique
@@ -184,10 +184,7 @@ mod names_test {
         let _ = env_logger::init();
 
         let mut gen = NameGen::from_seed(0);
-        let factory = ResourceHandler::new();
-        let res = factory
-            .fetch_resource::<AstronomicalNamesResource>()
-            .unwrap();
+        let res = fetch_resource::<AstronomicalNamesResource>().unwrap();
         gen.train(&res);
 
         let mut names = HashSet::<String>::new();
