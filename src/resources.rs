@@ -24,6 +24,10 @@ lazy_static! {
             StarTypesResource::KEY,
             include_str!("../res/star_types.json"),
         );
+        res.insert(
+            PlanetTypesResource::KEY,
+            include_str!("../res/planet_types.json"),
+        );
         res
     };
 }
@@ -71,6 +75,14 @@ pub struct StarType {
 
 impl Resource for StarTypesResource {
     const KEY: &'static str = "star_types";
+}
+
+/// Struct describing one type of star
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct PlanetTypesResource {}
+
+impl Resource for PlanetTypesResource {
+    const KEY: &'static str = "planet_types";
 }
 
 #[cfg(test)]

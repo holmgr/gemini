@@ -8,8 +8,9 @@ use std::sync::{Arc, Mutex};
 
 pub mod names;
 pub mod stars;
+pub mod planets;
 
-use resources::{fetch_resource, StarTypesResource, AstronomicalNamesResource};
+use resources::{fetch_resource, StarTypesResource, PlanetTypesResource, AstronomicalNamesResource};
 use astronomicals::{Galaxy, System};
 use game_config::GameConfig;
 
@@ -82,6 +83,10 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let mut star_gen = stars::StarGen::new();
     star_gen.train(&fetch_resource::<StarTypesResource>().unwrap());
 
+    // Create Planet generator
+    let mut planet_gen = planets::PlanetGen::new();
+    planet_gen.train(&fetch_resource::<PlanetTypesResource>().unwrap());
+
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will
     //combine them to the final result
@@ -108,6 +113,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                     ),
                     name_gen.clone(),
                     &star_gen,
+                    &planet_gen,
                 ));
             }
             cluster_systems
@@ -118,10 +124,18 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         });
 
     info!(
-        "Generated new galaxy containing: {} clusters and {} systems taking {} ms",
+        "Generated new galaxy containing: {} clusters and {} systems and {} planets taking {} ms",
         config.number_of_clusters,
         systems.len(),
+        systems.iter().fold(
+            0,
+            |acc, ref sys| acc + sys.satelites.len(),
+        ),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
+    );
+    debug!(
+        "Generated System examples: {:?}",
+        systems.iter().take(5).collect::<Vec<_>>()
     );
     Galaxy::new(systems)
 }

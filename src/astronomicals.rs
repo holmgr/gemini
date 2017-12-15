@@ -1,10 +1,13 @@
 use nalgebra::geometry::Point3;
-use rand::SeedableRng;
+use rand::{Rng, SeedableRng};
 use rand::isaac::Isaac64Rng;
 use std::sync::{Arc, Mutex};
+use std::f64::consts::PI;
+use statrs::distribution::{Gamma, Distribution};
 
 use generators::stars::StarGen;
 use generators::names::NameGen;
+use generators::planets::PlanetGen;
 use generators::MutGen;
 use generators::Gen;
 
@@ -37,10 +40,52 @@ impl Star {
 }
 
 #[derive(Debug)]
-struct Planet {
+pub struct Planet {
+    name: String,
     mass: f64,
+    gravity: f64,
     orbit_distance: f64,
-    orbit_time: f64,
+    surface_temperature: f64,
+    planet_type: PlanetType,
+}
+
+#[derive(Debug)]
+enum PlanetType {
+    Metal_rich,
+    Icy,
+    Rocky,
+    Gas_giant,
+    Earth_like,
+    Water,
+    Water_giant,
+}
+
+impl Planet {
+    pub fn new(mass: f64, orbit_distance: f64) -> Self {
+
+        // TODO: Make something a bit more accurate
+        let gravity = mass;
+        Planet {
+            mass,
+            gravity,
+            orbit_distance,
+            name: String::new(),
+            surface_temperature: 0.,
+            planet_type: PlanetType::Rocky,
+        }
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn set_surface_temperature(&mut self, star: &Star) {
+        self.surface_temperature = (star.luminosity * 3.846 * 10f64.powi(26) * (1. - 0.29) /
+                                        (16. * PI * (299692458. * self.orbit_distance).powi(2) *
+                                             5.670373 *
+                                             10f64.powi(-8)))
+            .powf(0.25);
+    }
 }
 
 #[derive(Debug)]
@@ -48,11 +93,16 @@ pub struct System {
     location: Point3<f64>,
     name: String,
     star: Star,
-    satelites: Vec<Planet>,
+    pub satelites: Vec<Planet>,
 }
 
 impl System {
-    pub fn new(location: Point3<f64>, name_gen: Arc<Mutex<NameGen>>, star_gen: &StarGen) -> Self {
+    pub fn new(
+        location: Point3<f64>,
+        name_gen: Arc<Mutex<NameGen>>,
+        star_gen: &StarGen,
+        planet_gen: &PlanetGen,
+    ) -> Self {
 
         // Calculate hash
         let hash = System::hash(location);
@@ -64,13 +114,33 @@ impl System {
         // Unwrap and lock name generator as it is mutated by generation
         let mut name_gen_unwraped = name_gen.lock().unwrap();
 
-        // Fallback to "Unnamed"
-        let name = name_gen_unwraped.generate().unwrap_or(
-            String::from("Unnamed"),
-        );
 
-        // TODO: Planets
-        let satelites = vec![];
+        // TODO: Replace constant in config
+        let num_planets = Gamma::new(1., 0.5)
+            .unwrap()
+            .sample::<Isaac64Rng>(&mut rng)
+            .round() as u32;
+        let mut satelites: Vec<Planet> = (0..num_planets)
+            .map(|_| planet_gen.generate(&mut rng).unwrap())
+            .collect();
+
+        // Fallback to "Unnamed" for names
+        for planet in &mut satelites {
+            planet.set_name(name_gen_unwraped.generate().unwrap_or(
+                String::from("Unnamed"),
+            ));
+            planet.set_surface_temperature(&star);
+        }
+
+        // System name is the same as one random planet
+        let name = match rng.choose(&satelites) {
+            Some(planet) => planet.name.clone(),
+            None => {
+                name_gen_unwraped.generate().unwrap_or(
+                    String::from("Unnamed"),
+                )
+            }
+        } + " System";
 
         System {
             location,
