@@ -63,7 +63,11 @@ impl System {
 
         // Unwrap and lock name generator as it is mutated by generation
         let mut name_gen_unwraped = name_gen.lock().unwrap();
-        let name = name_gen_unwraped.generate().unwrap();
+
+        // Fallback to "Unnamed"
+        let name = name_gen_unwraped.generate().unwrap_or(
+            String::from("Unnamed"),
+        );
 
         // TODO: Planets
         let satelites = vec![];
