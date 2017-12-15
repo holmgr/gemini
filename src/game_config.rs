@@ -86,8 +86,8 @@ impl Default for GameConfig {
             galaxy_size: 100000.,
             number_of_clusters: 1000,
             cluster_spread: 1000.,
-            cluster_size_mean: 1000.,
-            cluster_size_std: 250.,
+            cluster_size_mean: 100.,
+            cluster_size_std: 25.,
         }
     }
 }
