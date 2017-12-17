@@ -9,6 +9,7 @@ use generators::names::NameGen;
 use generators::planets::PlanetGen;
 use generators::MutGen;
 use generators::Gen;
+use astronomicals::hash;
 use astronomicals::star::Star;
 use astronomicals::planet::Planet;
 
@@ -29,7 +30,7 @@ impl System {
     ) -> Self {
 
         // Calculate hash
-        let hash = System::hash(location);
+        let hash = hash(location);
         let seed: &[_] = &[hash];
         let mut rng: Isaac64Rng = SeedableRng::from_seed(seed);
 
@@ -74,46 +75,4 @@ impl System {
         }
     }
 
-    /// Hash based on location, algorithm used is presented in the paper:
-    /// Optimized Spatial Hashing for Collision Detection of Deformable Objects
-    fn hash(location: Point<f64>) -> u64 {
-        let values = location
-            .iter()
-            .zip(&[73856093f64, 19349663f64, 83492791f64])
-            .map(|(&a, &b)| (a * b) as u64)
-            .collect::<Vec<_>>();
-        values.iter().fold(0, |acc, &val| acc ^ val)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use rand::SeedableRng;
-    use rand::isaac::Isaac64Rng;
-    use super::*;
-    extern crate env_logger;
-    use statrs::distribution::{Distribution, Uniform};
-    use std::collections::HashMap;
-
-    #[test]
-    fn test_hash_uniqueness() {
-        let _ = env_logger::init();
-
-        let new_seed: &[_] = &[42 as u64];
-        let mut rng: Isaac64Rng = SeedableRng::from_seed(new_seed);
-        let n = Uniform::new(0., 100000.).unwrap();
-
-        let mut hashes = HashMap::new();
-        let tries = 10000;
-        for _ in 0..tries {
-            let loc = Point::new(
-                n.sample::<Isaac64Rng>(&mut rng),
-                n.sample::<Isaac64Rng>(&mut rng),
-                n.sample::<Isaac64Rng>(&mut rng),
-            );
-            hashes.insert(System::hash(loc), loc);
-        }
-        assert_eq!(hashes.len(), tries);
-
-    }
 }
