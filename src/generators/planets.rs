@@ -2,7 +2,7 @@ use rand::Rng;
 use statrs::distribution::{Distribution, Exponential, Gamma};
 use resources::PlanetTypesResource;
 use generators::{TrainableGenerator, Gen};
-use astronomicals::Planet;
+use astronomicals::planet::Planet;
 
 /// Basic non deterministic name generator for generating new Planets which
 /// are similar to the trained data provided.

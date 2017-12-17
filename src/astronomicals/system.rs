@@ -1,8 +1,7 @@
-use nalgebra::geometry::Point3;
+use nalgebra::geometry::Point3 as Point;
 use rand::{Rng, SeedableRng};
 use rand::isaac::Isaac64Rng;
 use std::sync::{Arc, Mutex};
-use std::f64::consts::PI;
 use statrs::distribution::{Gamma, Distribution};
 
 use generators::stars::StarGen;
@@ -10,87 +9,12 @@ use generators::names::NameGen;
 use generators::planets::PlanetGen;
 use generators::MutGen;
 use generators::Gen;
+use astronomicals::star::Star;
+use astronomicals::planet::Planet;
 
-#[derive(Debug)]
-pub struct Galaxy {
-    systems: Vec<System>,
-}
-
-impl Galaxy {
-    pub fn new(systems: Vec<System>) -> Self {
-        Galaxy { systems }
-    }
-}
-
-#[derive(Debug)]
-pub struct Star {
-    mass: f64,
-    luminosity: f64,
-    metalicity: f64,
-}
-
-impl Star {
-    pub fn new(mass: f64, luminosity: f64, metalicity: f64) -> Self {
-        Star {
-            mass,
-            luminosity,
-            metalicity,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct Planet {
-    name: String,
-    mass: f64,
-    gravity: f64,
-    orbit_distance: f64,
-    surface_temperature: f64,
-    planet_type: PlanetType,
-}
-
-#[derive(Debug)]
-enum PlanetType {
-    Metal_rich,
-    Icy,
-    Rocky,
-    Gas_giant,
-    Earth_like,
-    Water,
-    Water_giant,
-}
-
-impl Planet {
-    pub fn new(mass: f64, orbit_distance: f64) -> Self {
-
-        // TODO: Make something a bit more accurate
-        let gravity = mass;
-        Planet {
-            mass,
-            gravity,
-            orbit_distance,
-            name: String::new(),
-            surface_temperature: 0.,
-            planet_type: PlanetType::Rocky,
-        }
-    }
-
-    pub fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-
-    pub fn set_surface_temperature(&mut self, star: &Star) {
-        self.surface_temperature = (star.luminosity * 3.846 * 10f64.powi(26) * (1. - 0.29) /
-                                        (16. * PI * (299692458. * self.orbit_distance).powi(2) *
-                                             5.670373 *
-                                             10f64.powi(-8)))
-            .powf(0.25);
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Builder)]
 pub struct System {
-    location: Point3<f64>,
+    location: Point<f64>,
     name: String,
     star: Star,
     pub satelites: Vec<Planet>,
@@ -98,7 +22,7 @@ pub struct System {
 
 impl System {
     pub fn new(
-        location: Point3<f64>,
+        location: Point<f64>,
         name_gen: Arc<Mutex<NameGen>>,
         star_gen: &StarGen,
         planet_gen: &PlanetGen,
@@ -152,7 +76,7 @@ impl System {
 
     /// Hash based on location, algorithm used is presented in the paper:
     /// Optimized Spatial Hashing for Collision Detection of Deformable Objects
-    fn hash(location: Point3<f64>) -> u64 {
+    fn hash(location: Point<f64>) -> u64 {
         let values = location
             .iter()
             .zip(&[73856093f64, 19349663f64, 83492791f64])
@@ -182,7 +106,7 @@ mod tests {
         let mut hashes = HashMap::new();
         let tries = 10000;
         for _ in 0..tries {
-            let loc = Point3::new(
+            let loc = Point::new(
                 n.sample::<Isaac64Rng>(&mut rng),
                 n.sample::<Isaac64Rng>(&mut rng),
                 n.sample::<Isaac64Rng>(&mut rng),

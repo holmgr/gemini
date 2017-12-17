@@ -1,7 +1,7 @@
 use rand::Rng;
 use resources::{StarTypesResource, StarType};
 use generators::{TrainableGenerator, Gen};
-use astronomicals::Star;
+use astronomicals::star::Star;
 
 /// Basic non deterministic name generator for generating new Stars which
 /// are similar to the trained data provided.

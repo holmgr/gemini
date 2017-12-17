@@ -11,7 +11,8 @@ pub mod stars;
 pub mod planets;
 
 use resources::{fetch_resource, StarTypesResource, PlanetTypesResource, AstronomicalNamesResource};
-use astronomicals::{Galaxy, System};
+use astronomicals::Galaxy;
+use astronomicals::system::System;
 use game_config::GameConfig;
 
 /// A generator that can be explicitly seeded in order to the produce the same
