@@ -2,7 +2,7 @@ use rand::Rng;
 use statrs::distribution::{Distribution, Exponential, Gamma};
 use resources::PlanetTypesResource;
 use generators::{TrainableGenerator, Gen};
-use astronomicals::planet::Planet;
+use astronomicals::planet::{PlanetBuilder, PlanetType};
 
 /// Basic non deterministic name generator for generating new Planets which
 /// are similar to the trained data provided.
@@ -34,18 +34,25 @@ impl TrainableGenerator for PlanetGen {
     fn train(&mut self, _: &PlanetTypesResource) {}
 }
 
-
 impl Gen for PlanetGen {
-    type GenItem = Planet;
+    type GenItem = PlanetBuilder;
 
-    /// Generates a new Planet from the _distribution_ using the provided random
-    /// generator
-    fn generate<R: Rng>(&self, gen: &mut R) -> Option<Planet> {
+    /// Generates a new PlanetBuilder from the _distribution_ using the provided random
+    /// generator. Sets the fields which are independent on the context
+    fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {
         let mass = self.mass_gen.sample(gen);
 
         // Magic constant, needed to scale back since scaling needed to fit gamma
         let orbit_distance = PlanetGen::MIN_DIST + 1000. * self.orbit_dist_gen.sample(gen);
 
-        Some(Planet::new(mass, orbit_distance))
+        // TODO: Make something a bit more accurate regarding planet type and gravity
+        Some(
+            PlanetBuilder::default()
+                .mass(mass)
+                .orbit_distance(orbit_distance)
+                .gravity(mass)
+                .planet_type(PlanetType::Rocky)
+                .to_owned(),
+        )
     }
 }

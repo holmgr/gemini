@@ -12,12 +12,11 @@ pub mod planets;
 
 use resources::{fetch_resource, StarTypesResource, PlanetTypesResource, AstronomicalNamesResource};
 use astronomicals::{Galaxy, hash};
-use astronomicals::system::System;
+use astronomicals::system::{SystemBuilder, System};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
 use generators::planets::PlanetGen;
-use astronomicals::star::Star;
 use astronomicals::planet::Planet;
 
 /// A generator that can be explicitly seeded in order to the produce the same
@@ -168,18 +167,28 @@ pub fn generate_system(
         .unwrap()
         .sample::<IsaacRng>(&mut rng)
         .round() as u32;
-    let mut satelites: Vec<Planet> = (0..num_planets)
-        .map(|_| planet_gen.generate(&mut rng).unwrap())
+    let satelites: Vec<Planet> = (0..num_planets)
+        .map(|_| {
+            let mut builder = planet_gen.generate(&mut rng).unwrap();
+            let orbit_distance = builder.orbit_distance.unwrap();
+            builder
+                .name(name_gen_unwraped.generate().unwrap_or(
+                    String::from("Unnamed"),
+                ))
+                .surface_temperature(Planet::calculate_surface_temperature(orbit_distance, &star))
+                .build()
+                .unwrap()
+        })
         .collect();
 
+    /*
     // Fallback to "Unnamed" for names
     for planet in &mut satelites {
         planet.set_name(name_gen_unwraped.generate().unwrap_or(
             String::from("Unnamed"),
         ));
-        planet.set_surface_temperature(&star);
     }
-
+    */
     // System name is the same as one random planet
     let name = match rng.choose(&satelites) {
         Some(planet) => planet.name.clone(),
@@ -190,5 +199,11 @@ pub fn generate_system(
         }
     } + " System";
 
-    System::new(location, name, star, satelites)
+    SystemBuilder::default()
+        .location(location)
+        .name(name)
+        .star(star)
+        .satelites(satelites)
+        .build()
+        .unwrap()
 }
