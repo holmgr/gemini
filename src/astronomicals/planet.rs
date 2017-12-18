@@ -36,7 +36,7 @@ impl Planet {
         match (surface_temperature, mass) {
             (x, y) if x < 124.5 && y >= 8.185 => PlanetType::GasGiant,
             (x, y) if x < 124.5 && y < 8.185 => PlanetType::Icy,
-            (x, y) if x <= 300. && y <= 2. => PlanetType::Earth,
+            (x, y) if x > 280. && x < 300. && y <= 2. => PlanetType::Earth,
             (x, y) if x >= 124.5 && y < 0.02032 => PlanetType::Rocky,
             (x, y) if x >= 124.5 && y >= 0.02032 => PlanetType::Metal,
             _ => PlanetType::Rocky,

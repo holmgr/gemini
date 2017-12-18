@@ -1,8 +1,7 @@
 use rand::Rng;
 use statrs::distribution::{Distribution, Exponential, Gamma};
-use resources::PlanetTypesResource;
-use generators::{TrainableGenerator, Gen};
-use astronomicals::planet::{PlanetBuilder, PlanetType};
+use generators::Gen;
+use astronomicals::planet::PlanetBuilder;
 
 /// Basic non deterministic name generator for generating new Planets which
 /// are similar to the trained data provided.
@@ -25,13 +24,6 @@ impl PlanetGen {
             orbit_dist_gen,
         }
     }
-}
-
-impl TrainableGenerator for PlanetGen {
-    type TrainRes = PlanetTypesResource;
-
-    /// Train the generator with the given data
-    fn train(&mut self, _: &PlanetTypesResource) {}
 }
 
 impl Gen for PlanetGen {

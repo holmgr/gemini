@@ -10,7 +10,7 @@ pub mod names;
 pub mod stars;
 pub mod planets;
 
-use resources::{fetch_resource, StarTypesResource, PlanetTypesResource, AstronomicalNamesResource};
+use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{Galaxy, hash};
 use astronomicals::system::{SystemBuilder, System};
 use game_config::GameConfig;
@@ -46,7 +46,7 @@ pub trait MutGen: TrainableGenerator + SeedableGenerator {
 }
 
 /// Generic Generator, does not modify the generator instead uses provided random number generator
-pub trait Gen: TrainableGenerator {
+pub trait Gen {
     type GenItem;
 
     /// Generate a new item from the generator, can be None if the generator is empty etc.
@@ -85,12 +85,10 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
 
     // Create Star generator
-    let mut star_gen = stars::StarGen::new();
-    star_gen.train(&fetch_resource::<StarTypesResource>().unwrap());
+    let star_gen = stars::StarGen::new();
 
     // Create Planet generator
-    let mut planet_gen = planets::PlanetGen::new();
-    planet_gen.train(&fetch_resource::<PlanetTypesResource>().unwrap());
+    let planet_gen = planets::PlanetGen::new();
 
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will
@@ -138,10 +136,11 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         ),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
     );
-    debug!(
-        "Generated System examples: {:?}",
-        systems.iter().take(5).collect::<Vec<_>>()
-    );
+    debug!("Generated System examples:");
+    for system in systems.iter().take(10) {
+        debug!("{:?}\n", system);
+    }
+
     Galaxy::new(systems)
 }
 
