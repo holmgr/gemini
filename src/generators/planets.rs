@@ -51,7 +51,6 @@ impl Gen for PlanetGen {
                 .mass(mass)
                 .orbit_distance(orbit_distance)
                 .gravity(mass)
-                .planet_type(PlanetType::Rocky)
                 .to_owned(),
         )
     }

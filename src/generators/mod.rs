@@ -170,12 +170,15 @@ pub fn generate_system(
     let satelites: Vec<Planet> = (0..num_planets)
         .map(|_| {
             let mut builder = planet_gen.generate(&mut rng).unwrap();
-            let orbit_distance = builder.orbit_distance.unwrap();
+            let mass = builder.mass.unwrap();
+            let surface_temperature =
+                Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
             builder
                 .name(name_gen_unwraped.generate().unwrap_or(
                     String::from("Unnamed"),
                 ))
-                .surface_temperature(Planet::calculate_surface_temperature(orbit_distance, &star))
+                .surface_temperature(surface_temperature)
+                .planet_type(Planet::predict_type(surface_temperature, mass))
                 .build()
                 .unwrap()
         })
