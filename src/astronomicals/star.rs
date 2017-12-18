@@ -7,9 +7,6 @@ pub struct Star {
 
 impl Star {
     pub fn new(mass: f64, luminosity: f64) -> Self {
-        Star {
-            mass,
-            luminosity,
-        }
+        Star { mass, luminosity }
     }
 }

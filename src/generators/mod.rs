@@ -183,14 +183,6 @@ pub fn generate_system(
         })
         .collect();
 
-    /*
-    // Fallback to "Unnamed" for names
-    for planet in &mut satelites {
-        planet.set_name(name_gen_unwraped.generate().unwrap_or(
-            String::from("Unnamed"),
-        ));
-    }
-    */
     // System name is the same as one random planet
     let name = match rng.choose(&satelites) {
         Some(planet) => planet.name.clone(),
