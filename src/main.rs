@@ -11,6 +11,8 @@ extern crate nalgebra;
 extern crate statrs;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate derive_builder;
 
 #[macro_use(info, debug, log)]
 extern crate log;
@@ -33,7 +35,6 @@ fn main() {
 
     info!("Generating galaxy...");
     let mut galaxy = generate_galaxy(&config);
-    debug!("Generated galaxy: {:?}", galaxy);
 
     // Reload GameConfig if file on disk changes
     loop {
@@ -46,7 +47,6 @@ fn main() {
                 );
                 info!("Regenerating galaxy...");
                 galaxy = generate_galaxy(&config);
-                debug!("Generated galaxy: {:?}", galaxy);
             }
             Err(e) => println!("Error: {}", e),
         }

@@ -2,16 +2,22 @@ use rand::{Rng, SeedableRng};
 use std::time::Instant;
 use rayon::prelude::*;
 use rand::isaac::IsaacRng;
-use statrs::distribution::{Distribution, Uniform, Normal};
+use statrs::distribution::{Distribution, Gamma, Uniform, Normal};
 use nalgebra::geometry::Point3 as Point;
 use std::sync::{Arc, Mutex};
 
 pub mod names;
 pub mod stars;
+pub mod planets;
 
-use resources::{fetch_resource, StarTypesResource, AstronomicalNamesResource};
-use astronomicals::{Galaxy, System};
+use resources::{fetch_resource, AstronomicalNamesResource};
+use astronomicals::{Galaxy, hash};
+use astronomicals::system::{SystemBuilder, System};
 use game_config::GameConfig;
+use generators::stars::StarGen;
+use generators::names::NameGen;
+use generators::planets::PlanetGen;
+use astronomicals::planet::Planet;
 
 /// A generator that can be explicitly seeded in order to the produce the same
 /// stream of psuedo randomness each time
@@ -40,7 +46,7 @@ pub trait MutGen: TrainableGenerator + SeedableGenerator {
 }
 
 /// Generic Generator, does not modify the generator instead uses provided random number generator
-pub trait Gen: TrainableGenerator {
+pub trait Gen {
     type GenItem;
 
     /// Generate a new item from the generator, can be None if the generator is empty etc.
@@ -79,8 +85,10 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
 
     // Create Star generator
-    let mut star_gen = stars::StarGen::new();
-    star_gen.train(&fetch_resource::<StarTypesResource>().unwrap());
+    let star_gen = stars::StarGen::new();
+
+    // Create Planet generator
+    let planet_gen = planets::PlanetGen::new();
 
     // Generate systems for each cluster in parallel
     // Fold will generate one vector per thread (per cluster), reduce will
@@ -100,7 +108,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 
             // Generate systems
             for _ in 0..cluster_size {
-                cluster_systems.push(System::new(
+                cluster_systems.push(generate_system(
                     Point::new(
                         norm_x.sample::<IsaacRng>(&mut rng),
                         norm_y.sample::<IsaacRng>(&mut rng),
@@ -108,6 +116,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                     ),
                     name_gen.clone(),
                     &star_gen,
+                    &planet_gen,
                 ));
             }
             cluster_systems
@@ -118,10 +127,77 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         });
 
     info!(
-        "Generated new galaxy containing: {} clusters and {} systems taking {} ms",
+        "Generated new galaxy containing: {} clusters and {} systems and {} planets taking {} ms",
         config.number_of_clusters,
         systems.len(),
+        systems.iter().fold(
+            0,
+            |acc, ref sys| acc + sys.satelites.len(),
+        ),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
     );
+    debug!("Generated System examples:");
+    for system in systems.iter().take(10) {
+        debug!("{:?}\n", system);
+    }
+
     Galaxy::new(systems)
+}
+
+// Generate a new star system using the given generators and a location as seed
+pub fn generate_system(
+    location: Point<f64>,
+    name_gen: Arc<Mutex<NameGen>>,
+    star_gen: &StarGen,
+    planet_gen: &PlanetGen,
+) -> System {
+    // Calculate hash
+    let hash = hash(location);
+    let seed: &[_] = &[hash as u32];
+    let mut rng: IsaacRng = SeedableRng::from_seed(seed);
+
+    let star = star_gen.generate(&mut rng).unwrap();
+
+    // Unwrap and lock name generator as it is mutated by generation
+    let mut name_gen_unwraped = name_gen.lock().unwrap();
+
+    // TODO: Replace constant in config
+    let num_planets = Gamma::new(1., 0.5)
+        .unwrap()
+        .sample::<IsaacRng>(&mut rng)
+        .round() as u32;
+    let satelites: Vec<Planet> = (0..num_planets)
+        .map(|_| {
+            let mut builder = planet_gen.generate(&mut rng).unwrap();
+            let mass = builder.mass.unwrap();
+            let surface_temperature =
+                Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
+            builder
+                .name(name_gen_unwraped.generate().unwrap_or(
+                    String::from("Unnamed"),
+                ))
+                .surface_temperature(surface_temperature)
+                .planet_type(Planet::predict_type(surface_temperature, mass))
+                .build()
+                .unwrap()
+        })
+        .collect();
+
+    // System name is the same as one random planet
+    let name = match rng.choose(&satelites) {
+        Some(planet) => planet.name.clone(),
+        None => {
+            name_gen_unwraped.generate().unwrap_or(
+                String::from("Unnamed"),
+            )
+        }
+    } + " System";
+
+    SystemBuilder::default()
+        .location(location)
+        .name(name)
+        .star(star)
+        .satelites(satelites)
+        .build()
+        .unwrap()
 }
