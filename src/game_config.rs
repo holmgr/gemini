@@ -3,7 +3,7 @@ use notify::{Watcher, RecursiveMode, watcher};
 use std::sync::mpsc::{channel, RecvError};
 use std::time::Duration;
 
-// Configuration level constants, location for configs is determined by this
+// Configuration level constants, location for configs is determined by this.
 const APP_INFO: AppInfo = AppInfo {
     name: "gemini",
     author: "holmgr",

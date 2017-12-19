@@ -19,11 +19,11 @@ pub struct NameGen {
 }
 
 impl SeedableGenerator for NameGen {
-    /// Creates a new NameGen with the given seed
+    /// Creates a new NameGen with the given seed.
     fn from_seed(seed: u32) -> NameGen {
 
-        // Create and initialize random generator using seed
-        let new_seed: &[_] = &[seed.clone() as usize];
+        // Create and initialize random generator using seed.
+        let new_seed: &[_] = &[seed as usize];
         let rng: StdRng = SeedableRng::from_seed(new_seed);
         let mut graph = Graph::<char, f64>::new();
         let start = graph.add_node('<');
@@ -41,11 +41,11 @@ impl SeedableGenerator for NameGen {
         }
     }
 
-    /// Creates a new NameGen with the given seed
+    /// Creates a new NameGen with the given seed.
     fn reseed(&mut self, seed: u32) {
 
-        // Create and initialize random generator using seed
-        let new_seed: &[_] = &[seed.clone() as usize];
+        // Create and initialize random generator using seed.
+        let new_seed: &[_] = &[seed as usize];
         let rng: StdRng = SeedableRng::from_seed(new_seed);
         self.rng = rng;
     }
@@ -54,20 +54,20 @@ impl SeedableGenerator for NameGen {
 impl TrainableGenerator for NameGen {
     type TrainRes = AstronomicalNamesResource;
 
-    /// Trains the underlying model using the given AstronomicalNamesResource
+    /// Trains the underlying model using the given AstronomicalNamesResource.
     fn train(&mut self, data: &AstronomicalNamesResource) {
 
         let depth = data.names.iter().fold(0, |acc, ref s| max(acc, s.len()));
 
         // Instansiate layers, number of layers is equal to the longest training
-        // string
+        // string.
         let mut layers = Vec::<BTreeSet<NodeIndex>>::new();
         for _ in 0..depth {
             layers.push(BTreeSet::<NodeIndex>::new());
         }
 
         // Add edges between all characters following each other at every
-        // position producing a forward connected graph
+        // position producing a forward connected graph.
         for name in &data.names {
             let chars = name.chars();
             let mut prev = self.start;
@@ -84,7 +84,7 @@ impl TrainableGenerator for NameGen {
                 self.graph.update_edge(prev, node, 0.0);
                 prev = node;
             }
-            // Add connection to end from last character
+            // Add connection to end from last character.
             self.graph.update_edge(prev, self.end, 0.0);
         }
         info!(
@@ -94,7 +94,7 @@ impl TrainableGenerator for NameGen {
             self.graph.edge_count()
         );
 
-        // Load suffixes
+        // Load suffixes.
         self.suffixes.extend_from_slice(&data.greek[..]);
         self.suffixes.extend_from_slice(&data.decorators[..]);
     }
@@ -107,12 +107,12 @@ impl MutGen for NameGen {
     /// This name is guaranteed to exist in the training set or to have been
     /// previously generated.
     /// Attempts N number of tries, if no unique name could be found it will
-    /// return None
+    /// return None.
     fn generate(&mut self) -> Option<String> {
 
-        // Non deterministicly generate a new string from the model,
+        // Non deterministicly generate a new string from the model.
         // Note: This may produce an exisiting string in the training set or
-        // previously generated set
+        // previously generated set.
         fn generate_attempt(
             graph: &Graph<char, f64>,
             start: &NodeIndex,
@@ -122,24 +122,24 @@ impl MutGen for NameGen {
             let mut final_string = String::new();
             let mut current_node = start.clone();
 
-            // Traverse until we hit end
+            // Traverse until we hit end.
             while current_node != end.clone() {
 
                 // Step to random neighbor in next layer for which it exists
-                // an edge
+                // an edge.
                 let neighbors = graph.neighbors(current_node).collect::<Vec<NodeIndex>>();
                 let next_node = rng.choose(neighbors.as_slice()).unwrap();
                 final_string.push(*graph.node_weight(current_node).unwrap());
                 current_node = *next_node;
             }
-            // Remove start node character
+            // Remove start node character.
             final_string.remove(0);
             final_string
         };
 
         // Randomly generate a suffix uniformlly from training data, has a high
-        // chance of returning None
-        // TODO: Load threshold from config
+        // chance of returning None.
+        // TODO: Load threshold from config.
         fn get_suffix(rng: &mut StdRng, suffixes: &Vec<String>) -> Option<String> {
             let suffix_chance = 0.1;
             match rng.next_f64() {
@@ -148,13 +148,14 @@ impl MutGen for NameGen {
             }
         }
 
-        // Check if a name is valid according to constraints
+        // Check if a name is valid according to constraints.
         // TODO: Extract this to a seperate method, should also probably be
-        // based on configuration entries
+        // based on configuration entries.
         let is_valid_name = |name: &String| name.contains(" ") || name.len() < 9;
 
         // Attempt N number of attempts retuning none if no unique string was
-        // generated which fullfils the criteria
+        // generated which fullfils the criteria.
+        // TODO: Move name retries to config.
         let gen_num_attempts = 27;
         for _ in 0..gen_num_attempts {
             let name = generate_attempt(&self.graph, &self.start, &self.end, &mut self.rng);
@@ -168,7 +169,6 @@ impl MutGen for NameGen {
         }
         info!("Unsuccessful generation used {} tries", gen_num_attempts);
         None
-
     }
 }
 
@@ -179,7 +179,7 @@ mod names_test {
     use resources::{AstronomicalNamesResource, fetch_resource};
 
     #[test]
-    // All genrated names must be unique
+    // All genrated names must be unique.
     fn test_generate_unique() {
         let _ = env_logger::init();
 

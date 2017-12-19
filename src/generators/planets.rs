@@ -11,11 +11,11 @@ pub struct PlanetGen {
 }
 
 impl PlanetGen {
-    /// Minimal distance to star
-    // TODO: Move to config
+    /// Minimal distance to star.
+    // TODO: Move to config.
     const MIN_DIST: f64 = 500.;
 
-    /// Create a new Planet generator which loads the star resources needed
+    /// Create a new Planet generator which loads the star resources needed.
     pub fn new() -> Self {
         let mass_gen = Exponential::new(1.432).unwrap();
         let orbit_dist_gen = Gamma::new(0.28, 0.17).unwrap();
@@ -30,14 +30,14 @@ impl Gen for PlanetGen {
     type GenItem = PlanetBuilder;
 
     /// Generates a new PlanetBuilder from the _distribution_ using the provided random
-    /// generator. Sets the fields which are independent on the context
+    /// generator. Sets the fields which are independent on the context.
     fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {
         let mass = self.mass_gen.sample(gen);
 
-        // Magic constant, needed to scale back since scaling needed to fit gamma
+        // Magic constant, needed to scale back since scaling needed to fit gamma.
         let orbit_distance = PlanetGen::MIN_DIST + 1000. * self.orbit_dist_gen.sample(gen);
 
-        // TODO: Make something a bit more accurate regarding planet type and gravity
+        // TODO: Make something a bit more accurate regarding planet type and gravity.
         Some(
             PlanetBuilder::default()
                 .mass(mass)

@@ -20,24 +20,24 @@ use generators::planets::PlanetGen;
 use astronomicals::planet::Planet;
 
 /// A generator that can be explicitly seeded in order to the produce the same
-/// stream of psuedo randomness each time
+/// stream of psuedo randomness each time.
 pub trait SeedableGenerator {
-    /// Reseed a generator with the given seed
+    /// Reseed a generator with the given seed.
     fn reseed(&mut self, seed: u32);
 
-    /// Create a new generator with the given seed
+    /// Create a new generator with the given seed.
     fn from_seed(seed: u32) -> Self;
 }
 
-/// A generator which can be trained by provided some training resource
+/// A generator which can be trained by provided some training resource.
 pub trait TrainableGenerator {
     type TrainRes;
 
-    /// Train the generator with the given data
+    /// Train the generator with the given data.
     fn train(&mut self, &Self::TrainRes);
 }
 
-/// Generic mutable Generator, may modify the generator after generating an item
+/// Generic mutable Generator, may modify the generator after generating an item.
 pub trait MutGen: TrainableGenerator + SeedableGenerator {
     type GenItem;
 
@@ -45,7 +45,7 @@ pub trait MutGen: TrainableGenerator + SeedableGenerator {
     fn generate(&mut self) -> Option<Self::GenItem>;
 }
 
-/// Generic Generator, does not modify the generator instead uses provided random number generator
+/// Generic Generator, does not modify the generator instead uses provided random number generator.
 pub trait Gen {
     type GenItem;
 
@@ -54,19 +54,19 @@ pub trait Gen {
 }
 
 /// Generate a galaxy with systems etc, will use the provided config to guide
-/// the generation
+/// the generation.
 pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let new_seed: &[_] = &[config.map_seed];
     let mut rng: IsaacRng = SeedableRng::from_seed(new_seed);
 
-    // Measure time for generation
+    // Measure time for generation.
     let now = Instant::now();
 
-    // Clusters are spaced uniformly, systems gaussian
+    // Clusters are spaced uniformly, systems gaussian.
     let cluster_loc_gen = Uniform::new(0., config.galaxy_size).unwrap();
     let system_loc_gen = Normal::new(config.cluster_size_mean, config.cluster_size_std).unwrap();
 
-    // Generate clusters
+    // Generate clusters.
     let mut clusters = vec![];
     for _ in 0..config.number_of_clusters {
         clusters.push((
@@ -79,20 +79,20 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         ))
     }
 
-    // Create name generator to be shared mutably
+    // Create name generator to be shared mutably.
     let mut name_gen_unwraped = names::NameGen::from_seed(config.map_seed);
     name_gen_unwraped.train(&fetch_resource::<AstronomicalNamesResource>().unwrap());
     let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
 
-    // Create Star generator
+    // Create Star generator.
     let star_gen = stars::StarGen::new();
 
-    // Create Planet generator
+    // Create Planet generator.
     let planet_gen = planets::PlanetGen::new();
 
-    // Generate systems for each cluster in parallel
+    // Generate systems for each cluster in parallel.
     // Fold will generate one vector per thread (per cluster), reduce will
-    //combine them to the final result
+    // combine them to the final result.
     let systems = clusters
         .into_par_iter()
         .fold(|| Vec::<System>::new(), |mut cluster_systems: Vec<System>,
@@ -103,7 +103,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             let norm_z = Normal::new(cluster_pos.coords.z, config.cluster_spread).unwrap();
 
             // TODO: Do something smarter than cloning state of generator,
-            // since all clusters will be generated identically now
+            // since all clusters will be generated identically now.
             let mut rng = rng.clone();
 
             // Generate systems
@@ -144,28 +144,30 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     Galaxy::new(systems)
 }
 
-// Generate a new star system using the given generators and a location as seed
+/// Generate a new star system using the given generators and a location as seed.
 pub fn generate_system(
     location: Point<f64>,
     name_gen: Arc<Mutex<NameGen>>,
     star_gen: &StarGen,
     planet_gen: &PlanetGen,
 ) -> System {
-    // Calculate hash
+    // Calculate hash.
     let hash = hash(location);
     let seed: &[_] = &[hash as u32];
     let mut rng: IsaacRng = SeedableRng::from_seed(seed);
 
     let star = star_gen.generate(&mut rng).unwrap();
 
-    // Unwrap and lock name generator as it is mutated by generation
+    // Unwrap and lock name generator as it is mutated by generation.
     let mut name_gen_unwraped = name_gen.lock().unwrap();
 
-    // TODO: Replace constant in config
+    // TODO: Replace constant in config.
     let num_planets = Gamma::new(1., 0.5)
         .unwrap()
         .sample::<IsaacRng>(&mut rng)
         .round() as u32;
+
+    // Fallback to planet name: Unnamed if no name could be generated.
     let satelites: Vec<Planet> = (0..num_planets)
         .map(|_| {
             let mut builder = planet_gen.generate(&mut rng).unwrap();
@@ -183,7 +185,9 @@ pub fn generate_system(
         })
         .collect();
 
-    // System name is the same as one random planet
+    // System name is the same as one random planet.
+    // Fallback to: Unnamed System if it contains no planets and no name could
+    // be generated.
     let name = match rng.choose(&satelites) {
         Some(planet) => planet.name.clone(),
         None => {

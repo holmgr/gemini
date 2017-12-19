@@ -1,5 +1,6 @@
 
 #[derive(Debug, Clone, Builder)]
+/// Represents a Star in a system.
 pub struct Star {
     pub mass: f64,
     pub luminosity: f64,
