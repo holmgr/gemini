@@ -5,6 +5,7 @@ pub mod planet;
 pub mod system;
 
 #[derive(Debug)]
+/// Main galaxy containing all systems.
 pub struct Galaxy {
     systems: Vec<system::System>,
 }
@@ -16,7 +17,7 @@ impl Galaxy {
 }
 
 /// Hash based on location, algorithm used is presented in the paper:
-/// Optimized Spatial Hashing for Collision Detection of Deformable Objects
+/// Optimized Spatial Hashing for Collision Detection of Deformable Objects.
 pub fn hash(location: Point<f64>) -> u64 {
     let values = location
         .iter()
