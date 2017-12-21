@@ -1,4 +1,4 @@
-use rand::{Rng, SeedableRng, StdRng};
+use rand::{Rng, SeedableRng, IsaacRng};
 use std::cmp::max;
 use std::usize;
 use std::collections::{BTreeSet, HashSet};
@@ -10,7 +10,7 @@ use resources::AstronomicalNamesResource;
 /// Basic non deterministic name generator for generating random strings which
 /// are similar to the trained data provided.
 pub struct NameGen {
-    rng: StdRng,
+    rng: IsaacRng,
     generated: HashSet<String>,
     graph: Graph<char, f64>,
     start: NodeIndex,
@@ -23,8 +23,8 @@ impl SeedableGenerator for NameGen {
     fn from_seed(seed: u32) -> NameGen {
 
         // Create and initialize random generator using seed.
-        let new_seed: &[_] = &[seed as usize];
-        let rng: StdRng = SeedableRng::from_seed(new_seed);
+        let new_seed: &[_] = &[seed];
+        let rng: IsaacRng = SeedableRng::from_seed(new_seed);
         let mut graph = Graph::<char, f64>::new();
         let start = graph.add_node('<');
         let end = graph.add_node('>');
@@ -45,8 +45,8 @@ impl SeedableGenerator for NameGen {
     fn reseed(&mut self, seed: u32) {
 
         // Create and initialize random generator using seed.
-        let new_seed: &[_] = &[seed as usize];
-        let rng: StdRng = SeedableRng::from_seed(new_seed);
+        let new_seed: &[_] = &[seed];
+        let rng: IsaacRng = SeedableRng::from_seed(new_seed);
         self.rng = rng;
     }
 }
@@ -117,7 +117,7 @@ impl MutGen for NameGen {
             graph: &Graph<char, f64>,
             start: &NodeIndex,
             end: &NodeIndex,
-            rng: &mut StdRng,
+            rng: &mut IsaacRng,
         ) -> String {
             let mut final_string = String::new();
             let mut current_node = start.clone();
@@ -140,7 +140,7 @@ impl MutGen for NameGen {
         // Randomly generate a suffix uniformlly from training data, has a high
         // chance of returning None.
         // TODO: Load threshold from config.
-        fn get_suffix(rng: &mut StdRng, suffixes: &Vec<String>) -> Option<String> {
+        fn get_suffix(rng: &mut IsaacRng, suffixes: &Vec<String>) -> Option<String> {
             let suffix_chance = 0.1;
             match rng.next_f64() {
                 x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),

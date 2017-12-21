@@ -160,6 +160,7 @@ pub fn generate_system(
 
     // Unwrap and lock name generator as it is mutated by generation.
     let mut name_gen_unwraped = name_gen.lock().unwrap();
+    name_gen_unwraped.reseed(hash as u32);
 
     // TODO: Replace constant in config.
     let num_planets = Gamma::new(1., 0.5)
