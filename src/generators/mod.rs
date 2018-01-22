@@ -4,7 +4,12 @@ use rayon::prelude::*;
 use rand::isaac::IsaacRng;
 use statrs::distribution::{Distribution, Gamma, Normal, Uniform};
 use nalgebra::geometry::Point3 as Point;
+use nalgebra::distance;
 use std::sync::{Arc, Mutex};
+use petgraph::Graph;
+use petgraph::Undirected;
+use petgraph::algo::tarjan_scc;
+use std::usize::MAX;
 
 pub mod names;
 pub mod stars;
@@ -18,6 +23,7 @@ use generators::stars::StarGen;
 use generators::names::NameGen;
 use generators::planets::PlanetGen;
 use astronomicals::planet::Planet;
+use astronomicals::sector::Sector;
 
 /// A generator that can be explicitly seeded in order to the produce the same
 /// stream of psuedo randomness each time.
@@ -145,7 +151,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         debug!("{:?}\n", system);
     }
 
-    Galaxy::new(systems)
+    Galaxy::new(into_sectors(config, name_gen, systems))
 }
 
 /// Generate a new star system using the given generators and a location as seed.
@@ -209,4 +215,73 @@ pub fn generate_system(
         .satelites(satelites)
         .build()
         .unwrap()
+}
+
+/// Groups systems into seperate sectors using SCC
+pub fn into_sectors(
+    config: &GameConfig,
+    name_gen: Arc<Mutex<NameGen>>,
+    systems: Vec<System>,
+) -> Vec<Sector> {
+    // Measure time for generation.
+    let now = Instant::now();
+
+    info!("Splitting into connected components of sectors using SCC...");
+    let mut graph: Graph<System, f64, Undirected> =
+        Graph::with_capacity(systems.len(), systems.len().pow(2));
+
+    // Create a fully connected graph except edges further than max_sector_dist
+    let mut nodes = vec![];
+    for system in systems {
+        let new_node = graph.add_node(system);
+        for node in &nodes {
+            let dist = distance(
+                &graph.node_weight(new_node).unwrap().location,
+                &graph.node_weight(*node).unwrap().location,
+            );
+
+            if dist <= config.max_sector_dist {
+                graph.update_edge(new_node, *node, dist);
+            }
+        }
+
+        nodes.push(new_node);
+    }
+
+    // Split into connected components using Tarjan and map to sectors in parallel
+    let sectors: Vec<Sector> = tarjan_scc(&graph)
+        .into_par_iter()
+        .map(|group| {
+            let vect: Vec<System> = group.iter().fold(Vec::<System>::new(), |mut res, node_id| {
+                res.push(graph.node_weight(*node_id).unwrap().clone());
+                res
+            });
+
+            // Generate name from sector
+            let mut name_gen_unwraped = name_gen.lock().unwrap();
+            name_gen_unwraped.reseed((hash as u32) * (vect.len() as u32));
+            let sector_name = name_gen_unwraped
+                .generate()
+                .unwrap_or(String::from("Unnamed")) + " Sector";
+
+            Sector {
+                systems: vect,
+                name: sector_name,
+            }
+        })
+        .collect();
+    info!("Mapped Galaxy into {} sectors of {} systems, avg size: {}, max size {}, min size {}, taking {} ms",
+           sectors.len(),
+           sectors.iter().fold(0, |acc, ref sec| {
+               acc + sec.systems.len() }),
+           sectors.iter().fold(0, |acc, ref sec| {
+               acc + sec.systems.len() }) / sectors.len(),
+           sectors.iter().fold(0, |acc, ref sec| {
+               acc.max(sec.systems.len()) }),
+           sectors.iter().fold(MAX, |acc, ref sec| {
+               acc.min(sec.systems.len()) }),
+        ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
+    );
+
+    sectors
 }
