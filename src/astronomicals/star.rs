@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone, Builder)]
 /// Represents a Star in a system.
 pub struct Star {
