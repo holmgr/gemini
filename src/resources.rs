@@ -27,9 +27,9 @@ lazy_static! {
 /// Attempts to returns the resource with the given type, will return None
 /// if the type has no resource or if the deserialization fails.
 pub fn fetch_resource<T: Resource>() -> Option<T> {
-    RESOURCES.get(T::KEY).and_then(|res: &&str| {
-        serde_json::from_str(res).unwrap_or(None)
-    })
+    RESOURCES
+        .get(T::KEY)
+        .and_then(|res: &&str| serde_json::from_str(res).unwrap_or(None))
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]

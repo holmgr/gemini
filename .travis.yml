@@ -25,7 +25,7 @@ before_script:
 
 # The main build
 script:
-- cargo + nightly fmt -- --write-mode=diff && cargo build && cargo test
+- cargo +nightly fmt -- --write-mode=diff && cargo build && cargo test
 
 # Upload docs
 after_success: |

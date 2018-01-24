@@ -1,22 +1,22 @@
 #[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate serde;
-extern crate preferences;
-extern crate notify;
-extern crate rand;
-extern crate petgraph;
-extern crate rayon;
-extern crate nalgebra;
-extern crate statrs;
+extern crate derive_builder;
 #[macro_use]
 extern crate lazy_static;
+extern crate nalgebra;
+extern crate notify;
+extern crate petgraph;
+extern crate preferences;
+extern crate rand;
+extern crate rayon;
+extern crate serde;
 #[macro_use]
-extern crate derive_builder;
+extern crate serde_derive;
+extern crate serde_json;
+extern crate statrs;
 
+extern crate env_logger;
 #[macro_use(info, debug, log)]
 extern crate log;
-extern crate env_logger;
 
 mod game_config;
 mod resources;

@@ -1,5 +1,5 @@
-use preferences::{AppInfo, Preferences, PreferencesError, prefs_base_dir};
-use notify::{Watcher, RecursiveMode, watcher};
+use preferences::{prefs_base_dir, AppInfo, Preferences, PreferencesError};
+use notify::{watcher, RecursiveMode, Watcher};
 use std::sync::mpsc::{channel, RecvError};
 use std::time::Duration;
 

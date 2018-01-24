@@ -2,7 +2,7 @@ use rand::{Rng, SeedableRng};
 use std::time::Instant;
 use rayon::prelude::*;
 use rand::isaac::IsaacRng;
-use statrs::distribution::{Distribution, Gamma, Uniform, Normal};
+use statrs::distribution::{Distribution, Gamma, Normal, Uniform};
 use nalgebra::geometry::Point3 as Point;
 use std::sync::{Arc, Mutex};
 
@@ -11,8 +11,8 @@ pub mod stars;
 pub mod planets;
 
 use resources::{fetch_resource, AstronomicalNamesResource};
-use astronomicals::{Galaxy, hash};
-use astronomicals::system::{SystemBuilder, System};
+use astronomicals::{hash, Galaxy};
+use astronomicals::system::{System, SystemBuilder};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
@@ -95,45 +95,49 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     // combine them to the final result.
     let systems = clusters
         .into_par_iter()
-        .fold(|| Vec::<System>::new(), |mut cluster_systems: Vec<System>,
-         (cluster_pos, cluster_size)| {
-            // Generate x,y,z generators based at cluster location
-            let norm_x = Normal::new(cluster_pos.coords.x, config.cluster_spread).unwrap();
-            let norm_y = Normal::new(cluster_pos.coords.y, config.cluster_spread).unwrap();
-            let norm_z = Normal::new(cluster_pos.coords.z, config.cluster_spread).unwrap();
+        .fold(
+            || Vec::<System>::new(),
+            |mut cluster_systems: Vec<System>, (cluster_pos, cluster_size)| {
+                // Generate x,y,z generators based at cluster location
+                let norm_x = Normal::new(cluster_pos.coords.x, config.cluster_spread).unwrap();
+                let norm_y = Normal::new(cluster_pos.coords.y, config.cluster_spread).unwrap();
+                let norm_z = Normal::new(cluster_pos.coords.z, config.cluster_spread).unwrap();
 
-            // TODO: Do something smarter than cloning state of generator,
-            // since all clusters will be generated identically now.
-            let mut rng = rng.clone();
+                // TODO: Do something smarter than cloning state of generator,
+                // since all clusters will be generated identically now.
+                let mut rng = rng.clone();
 
-            // Generate systems
-            for _ in 0..cluster_size {
-                cluster_systems.push(generate_system(
-                    Point::new(
-                        norm_x.sample::<IsaacRng>(&mut rng),
-                        norm_y.sample::<IsaacRng>(&mut rng),
-                        norm_z.sample::<IsaacRng>(&mut rng),
-                    ),
-                    name_gen.clone(),
-                    &star_gen,
-                    &planet_gen,
-                ));
-            }
-            cluster_systems
-        })
-        .reduce(|| Vec::<System>::new(), |mut systems, subsystems| {
-            systems.extend(subsystems);
-            systems
-        });
+                // Generate systems
+                for _ in 0..cluster_size {
+                    cluster_systems.push(generate_system(
+                        Point::new(
+                            norm_x.sample::<IsaacRng>(&mut rng),
+                            norm_y.sample::<IsaacRng>(&mut rng),
+                            norm_z.sample::<IsaacRng>(&mut rng),
+                        ),
+                        name_gen.clone(),
+                        &star_gen,
+                        &planet_gen,
+                    ));
+                }
+                cluster_systems
+            },
+        )
+        .reduce(
+            || Vec::<System>::new(),
+            |mut systems, subsystems| {
+                systems.extend(subsystems);
+                systems
+            },
+        );
 
     info!(
         "Generated new galaxy containing: {} clusters and {} systems and {} planets taking {} ms",
         config.number_of_clusters,
         systems.len(),
-        systems.iter().fold(
-            0,
-            |acc, ref sys| acc + sys.satelites.len(),
-        ),
+        systems
+            .iter()
+            .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
     );
     debug!("Generated System examples:");
@@ -176,9 +180,11 @@ pub fn generate_system(
             let surface_temperature =
                 Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
             builder
-                .name(name_gen_unwraped.generate().unwrap_or(
-                    String::from("Unnamed"),
-                ))
+                .name(
+                    name_gen_unwraped
+                        .generate()
+                        .unwrap_or(String::from("Unnamed")),
+                )
                 .surface_temperature(surface_temperature)
                 .planet_type(Planet::predict_type(surface_temperature, mass))
                 .build()
@@ -191,11 +197,9 @@ pub fn generate_system(
     // be generated.
     let name = match rng.choose(&satelites) {
         Some(planet) => planet.name.clone(),
-        None => {
-            name_gen_unwraped.generate().unwrap_or(
-                String::from("Unnamed"),
-            )
-        }
+        None => name_gen_unwraped
+            .generate()
+            .unwrap_or(String::from("Unnamed")),
     } + " System";
 
     SystemBuilder::default()

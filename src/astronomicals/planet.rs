@@ -29,8 +29,8 @@ impl Planet {
     /// Calculate planet surface temperature from star luminosity and distance
     /// to it. Uses the Bond albedo for the Earth.
     pub fn calculate_surface_temperature(orbit_distance: f64, star: &Star) -> f64 {
-        (star.luminosity * 3.846 * 10f64.powi(26) * (1. - 0.29) /
-             (16. * PI * (299692458. * orbit_distance).powi(2) * 5.670373 * 10f64.powi(-8)))
+        (star.luminosity * 3.846 * 10f64.powi(26) * (1. - 0.29)
+            / (16. * PI * (299692458. * orbit_distance).powi(2) * 5.670373 * 10f64.powi(-8)))
             .powf(0.25)
     }
 

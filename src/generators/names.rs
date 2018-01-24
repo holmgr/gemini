@@ -1,4 +1,4 @@
-use rand::{Rng, SeedableRng, IsaacRng};
+use rand::{IsaacRng, Rng, SeedableRng};
 use std::cmp::max;
 use std::usize;
 use std::collections::{BTreeSet, HashSet};
@@ -21,7 +21,6 @@ pub struct NameGen {
 impl SeedableGenerator for NameGen {
     /// Creates a new NameGen with the given seed.
     fn from_seed(seed: u32) -> NameGen {
-
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
         let rng: IsaacRng = SeedableRng::from_seed(new_seed);
@@ -43,7 +42,6 @@ impl SeedableGenerator for NameGen {
 
     /// Creates a new NameGen with the given seed.
     fn reseed(&mut self, seed: u32) {
-
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
         let rng: IsaacRng = SeedableRng::from_seed(new_seed);
@@ -56,7 +54,6 @@ impl TrainableGenerator for NameGen {
 
     /// Trains the underlying model using the given AstronomicalNamesResource.
     fn train(&mut self, data: &AstronomicalNamesResource) {
-
         let depth = data.names.iter().fold(0, |acc, ref s| max(acc, s.len()));
 
         // Instansiate layers, number of layers is equal to the longest training
@@ -73,9 +70,10 @@ impl TrainableGenerator for NameGen {
             let mut prev = self.start;
 
             for (index, chr) in chars.enumerate() {
-                let node = match layers[index].iter().find(|&&node| {
-                    *self.graph.node_weight(node).unwrap() == chr
-                }) {
+                let node = match layers[index]
+                    .iter()
+                    .find(|&&node| *self.graph.node_weight(node).unwrap() == chr)
+                {
                     Some(&node) => node,
                     _ => self.graph.add_node(chr),
                 };
@@ -109,7 +107,6 @@ impl MutGen for NameGen {
     /// Attempts N number of tries, if no unique name could be found it will
     /// return None.
     fn generate(&mut self) -> Option<String> {
-
         // Non deterministicly generate a new string from the model.
         // Note: This may produce an exisiting string in the training set or
         // previously generated set.
@@ -124,7 +121,6 @@ impl MutGen for NameGen {
 
             // Traverse until we hit end.
             while current_node != end.clone() {
-
                 // Step to random neighbor in next layer for which it exists
                 // an edge.
                 let neighbors = graph.neighbors(current_node).collect::<Vec<NodeIndex>>();
@@ -176,7 +172,7 @@ impl MutGen for NameGen {
 mod names_test {
     use super::*;
     extern crate env_logger;
-    use resources::{AstronomicalNamesResource, fetch_resource};
+    use resources::{fetch_resource, AstronomicalNamesResource};
 
     #[test]
     // All genrated names must be unique.
