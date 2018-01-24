@@ -22,6 +22,8 @@ pub struct GameConfig {
     pub cluster_spread: f64,
     pub cluster_size_mean: f64,
     pub cluster_size_std: f64,
+    pub sector_seed: u32,
+    pub max_sector_dist: f64,
 }
 
 impl GameConfig {
@@ -84,10 +86,12 @@ impl Default for GameConfig {
         GameConfig {
             map_seed: 42,
             galaxy_size: 100000.,
-            number_of_clusters: 1000,
-            cluster_spread: 1000.,
-            cluster_size_mean: 100.,
-            cluster_size_std: 25.,
+            number_of_clusters: 100,
+            cluster_spread: 10.,
+            cluster_size_mean: 1000.,
+            cluster_size_std: 250.,
+            sector_seed: 42,
+            max_sector_dist: 50.,
         }
     }
 }

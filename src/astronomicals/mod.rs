@@ -3,16 +3,17 @@ use nalgebra::geometry::Point3 as Point;
 pub mod star;
 pub mod planet;
 pub mod system;
+pub mod sector;
 
 #[derive(Debug)]
 /// Main galaxy containing all systems.
 pub struct Galaxy {
-    systems: Vec<system::System>,
+    sectors: Vec<sector::Sector>,
 }
 
 impl Galaxy {
-    pub fn new(systems: Vec<system::System>) -> Self {
-        Galaxy { systems }
+    pub fn new(sectors: Vec<sector::Sector>) -> Self {
+        Galaxy { sectors }
     }
 }
 
