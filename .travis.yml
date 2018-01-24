@@ -19,11 +19,13 @@ addons:
       - binutils-dev
       - libiberty-dev
 
-before_script: "(cargo install rustfmt || true)"
+before_script: 
+  - rustup install nightly
+  - cargo +nightly install --force rustfmt-nightly
 
 # The main build
 script:
-- cargo fmt -- --write-mode=diff && cargo build && cargo test
+- cargo + nightly fmt -- --write-mode=diff && cargo build && cargo test
 
 # Upload docs
 after_success: |
