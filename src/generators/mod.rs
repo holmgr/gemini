@@ -1,4 +1,4 @@
-use rand::{Rng, SeedableRng};
+use rand::{thread_rng, Rng, SeedableRng};
 use std::time::Instant;
 use rayon::prelude::*;
 use rand::isaac::IsaacRng;
@@ -24,6 +24,7 @@ use generators::names::NameGen;
 use generators::planets::PlanetGen;
 use astronomicals::planet::Planet;
 use astronomicals::sector::Sector;
+use entities::Faction;
 
 /// A generator that can be explicitly seeded in order to the produce the same
 /// stream of psuedo randomness each time.
@@ -264,8 +265,12 @@ pub fn into_sectors(
                 .generate()
                 .unwrap_or(String::from("Unnamed")) + " Sector";
 
+            // Set Faction for sector
+            let faction = Faction::random_faction(&mut thread_rng());
+
             Sector {
                 systems: vect,
+                faction: faction,
                 name: sector_name,
             }
         })
@@ -281,6 +286,33 @@ pub fn into_sectors(
            sectors.iter().fold(MAX, |acc, ref sec| {
                acc.min(sec.systems.len()) }),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
+    );
+    info!(
+        "Sectors include: {} Cartel, {} Empire, {} Federation, {} Independent",
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + match sec.faction {
+                Faction::Cartel => 1,
+                _ => 0,
+            }),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + match sec.faction {
+                Faction::Empire => 1,
+                _ => 0,
+            }),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + match sec.faction {
+                Faction::Federation => 1,
+                _ => 0,
+            }),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + match sec.faction {
+                Faction::Independent => 1,
+                _ => 0,
+            })
     );
 
     sectors

@@ -22,6 +22,7 @@ mod game_config;
 mod resources;
 mod generators;
 mod astronomicals;
+mod entities;
 
 use generators::generate_galaxy;
 
