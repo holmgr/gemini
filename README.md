@@ -12,10 +12,10 @@ Source code documentation for the project is available at: https://holmgr.github
 
 ### Prerequisites
 
-To start developing or running the project you will need to install Rust nightly, preferably using the Rustup tool
+To start developing or running the project you will need to install Rust stable, preferably using the Rustup tool
 
 ```
-rustup install nightly
+rustup install stable
 ```
 
 ### Installing
@@ -30,6 +30,20 @@ To run the project execute the following:
 
 ```
 cargo run
+```
+
+Since the project uses quite a lot of compuations for generating a new galaxy you might want to run with optimizations on.
+To do that run:
+
+```
+cargo run --release
+```
+
+Furthermore, to see debug and info logs you need to run with the RUST_LOG environment variable:
+
+```
+bash/zsh: RUST_LOG=gemini=debug cargo run
+fish: env RUST_LOG=gemini=debug cargo run
 ```
 
 To build and install the executable on your system simply run:
@@ -51,10 +65,16 @@ Note: No branch or pull request can be merged before all tests has passed in Tra
 ### And coding style tests
 
 This project follows the Rust standard as specified by the Rustfmt project.
+Install Rustfmt by doing the following:
+
+```
+rustup component add rustfmt-preview --toolchain=nightly
+```
+
 To format the code run:
 
 ```
-cargo fmt
+cargo +nightly fmt
 ```
 
 Note: No branch or pull request can be merged before the style-guide has passed Rustfmt.
