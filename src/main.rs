@@ -32,7 +32,7 @@ fn main() {
 
     // Load GameConfig from disk
     let mut config = game_config::GameConfig::retrieve();
-    info!("Initial config is: {:?}", config);
+    info!("Initial config is: {:#?}", config);
 
     info!("Generating galaxy...");
     let mut galaxy = generate_galaxy(&config);
@@ -43,7 +43,7 @@ fn main() {
             Ok(new_config) => {
                 config = new_config;
                 info!(
-                    "Game config updated, reloading, config is now: {:?}",
+                    "Game config updated, reloading, config is now: {:#?}",
                     config
                 );
                 info!("Regenerating galaxy...");

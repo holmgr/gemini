@@ -149,7 +149,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     );
     debug!("Generated System examples:");
     for system in systems.iter().take(10) {
-        debug!("{:?}\n", system);
+        debug!("{:#?}\n", system);
     }
 
     Galaxy::new(into_sectors(config, name_gen, systems))
