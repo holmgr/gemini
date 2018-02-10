@@ -11,12 +11,12 @@ pub enum Faction {
 
 impl Faction {
     /// Generate a random faction according to the "distribution".
-    pub fn random_faction<R: Rng>(mut gen: R) -> Faction {
+    pub fn random_faction<R: Rng>(gen: &mut R) -> Faction {
         let probs = vec![
-            (Faction::Cartel, 12),
-            (Faction::Empire, 50),
+            (Faction::Cartel, 15),
+            (Faction::Empire, 45),
             (Faction::Federation, 30),
-            (Faction::Independent, 8),
+            (Faction::Independent, 10),
         ];
 
         let mut rnd: u32 = gen.gen_range(0, 100);

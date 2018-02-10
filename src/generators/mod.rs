@@ -1,14 +1,11 @@
-use rand::{thread_rng, Rng, SeedableRng};
+use rand::{sample, Rng, SeedableRng, StdRng};
 use std::time::Instant;
+use std::collections::HashMap;
 use rayon::prelude::*;
-use rand::isaac::IsaacRng;
-use statrs::distribution::{Distribution, Gamma, Normal, Uniform};
+use statrs::distribution::{Distribution, Gamma, Normal};
 use nalgebra::geometry::Point3 as Point;
 use nalgebra::distance;
 use std::sync::{Arc, Mutex};
-use petgraph::Graph;
-use petgraph::Undirected;
-use petgraph::algo::tarjan_scc;
 use std::usize::MAX;
 
 pub mod names;
@@ -63,26 +60,24 @@ pub trait Gen {
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.
 pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
-    let new_seed: &[_] = &[config.map_seed];
-    let mut rng: IsaacRng = SeedableRng::from_seed(new_seed);
+    let new_seed: &[_] = &[config.map_seed as usize];
+    let mut rng: StdRng = SeedableRng::from_seed(new_seed);
 
     // Measure time for generation.
     let now = Instant::now();
 
     // Clusters are spaced uniformly, systems gaussian.
-    let cluster_loc_gen = Uniform::new(0., config.galaxy_size).unwrap();
-    let system_loc_gen = Normal::new(config.cluster_size_mean, config.cluster_size_std).unwrap();
+    let loc_x = Normal::new(0., config.system_spread).unwrap();
+    let loc_y = Normal::new(0., config.system_spread).unwrap();
+    let loc_z = Normal::new(0., config.system_spread / 10.).unwrap();
 
-    // Generate clusters.
-    let mut clusters = vec![];
-    for _ in 0..config.number_of_clusters {
-        clusters.push((
-            Point::new(
-                cluster_loc_gen.sample::<IsaacRng>(&mut rng),
-                cluster_loc_gen.sample::<IsaacRng>(&mut rng),
-                cluster_loc_gen.sample::<IsaacRng>(&mut rng),
-            ),
-            system_loc_gen.sample::<IsaacRng>(&mut rng) as u64,
+    // Generate system locations.
+    let mut locations = vec![];
+    for _ in 0..config.number_of_systems {
+        locations.push(Point::new(
+            loc_x.sample::<StdRng>(&mut rng),
+            loc_y.sample::<StdRng>(&mut rng),
+            loc_z.sample::<StdRng>(&mut rng),
         ))
     }
 
@@ -100,34 +95,19 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     // Generate systems for each cluster in parallel.
     // Fold will generate one vector per thread (per cluster), reduce will
     // combine them to the final result.
-    let systems = clusters
+    let systems = locations
         .into_par_iter()
         .fold(
             || Vec::<System>::new(),
-            |mut cluster_systems: Vec<System>, (cluster_pos, cluster_size)| {
-                // Generate x,y,z generators based at cluster location
-                let norm_x = Normal::new(cluster_pos.coords.x, config.cluster_spread).unwrap();
-                let norm_y = Normal::new(cluster_pos.coords.y, config.cluster_spread).unwrap();
-                let norm_z = Normal::new(cluster_pos.coords.z, config.cluster_spread).unwrap();
-
-                // TODO: Do something smarter than cloning state of generator,
-                // since all clusters will be generated identically now.
-                let mut rng = rng.clone();
-
-                // Generate systems
-                for _ in 0..cluster_size {
-                    cluster_systems.push(generate_system(
-                        Point::new(
-                            norm_x.sample::<IsaacRng>(&mut rng),
-                            norm_y.sample::<IsaacRng>(&mut rng),
-                            norm_z.sample::<IsaacRng>(&mut rng),
-                        ),
-                        name_gen.clone(),
-                        &star_gen,
-                        &planet_gen,
-                    ));
-                }
-                cluster_systems
+            |mut systems: Vec<System>, location| {
+                // Generate system
+                systems.push(generate_system(
+                    location,
+                    name_gen.clone(),
+                    &star_gen,
+                    &planet_gen,
+                ));
+                systems
             },
         )
         .reduce(
@@ -139,8 +119,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         );
 
     info!(
-        "Generated new galaxy containing: {} clusters and {} systems and {} planets taking {} ms",
-        config.number_of_clusters,
+        "Generated new galaxy containing: {} systems and {} planets taking {} ms",
         systems.len(),
         systems
             .iter()
@@ -164,8 +143,8 @@ pub fn generate_system(
 ) -> System {
     // Calculate hash.
     let hash = hash(location);
-    let seed: &[_] = &[hash as u32];
-    let mut rng: IsaacRng = SeedableRng::from_seed(seed);
+    let seed: &[_] = &[hash as usize];
+    let mut rng: StdRng = SeedableRng::from_seed(seed);
 
     let star = star_gen.generate(&mut rng).unwrap();
 
@@ -176,7 +155,7 @@ pub fn generate_system(
     // TODO: Replace constant in config.
     let num_planets = Gamma::new(1., 0.5)
         .unwrap()
-        .sample::<IsaacRng>(&mut rng)
+        .sample::<StdRng>(&mut rng)
         .round() as u32;
 
     // Fallback to planet name: Unnamed if no name could be generated.
@@ -218,8 +197,8 @@ pub fn generate_system(
         .unwrap()
 }
 
-/// Groups systems into seperate sectors using SCC
-pub fn into_sectors(
+/// Split the systems in to a set number of clusters using K-means.
+fn into_sectors(
     config: &GameConfig,
     name_gen: Arc<Mutex<NameGen>>,
     systems: Vec<System>,
@@ -227,68 +206,117 @@ pub fn into_sectors(
     // Measure time for generation.
     let now = Instant::now();
 
-    info!("Splitting into connected components of sectors using SCC...");
-    let mut graph: Graph<System, f64, Undirected> =
-        Graph::with_capacity(systems.len(), systems.len().pow(2));
+    info!("Simulating expansion for initial sectors...");
+    let seed: &[_] = &[hash as usize];
+    let mut rng: StdRng = SeedableRng::from_seed(seed);
 
-    // Create a fully connected graph except edges further than max_sector_dist
-    let mut nodes = vec![];
-    for system in systems {
-        let new_node = graph.add_node(system);
-        for node in &nodes {
-            let dist = distance(
-                &graph.node_weight(new_node).unwrap().location,
-                &graph.node_weight(*node).unwrap().location,
-            );
+    // System to cluster_id mapping
+    let mut cluster_map = systems
+        .into_par_iter()
+        .fold(
+            || HashMap::<System, usize>::new(),
+            |mut partial_map: HashMap<System, usize>, system| {
+                // Generate system
+                partial_map.insert(system, 0);
+                partial_map
+            },
+        )
+        .reduce(
+            || HashMap::<System, usize>::new(),
+            |mut cluster_map, partial_map| {
+                cluster_map.extend(partial_map);
+                cluster_map
+            },
+        );
 
-            if dist <= config.max_sector_dist {
-                graph.update_edge(new_node, *node, dist);
+    // Setup initial centroids
+    let mut centroids = sample(&mut rng, cluster_map.iter(), config.number_of_sectors)
+        .into_iter()
+        .map(|(system, _)| system.location.clone())
+        .collect::<Vec<_>>();
+
+    // Run K means until convergence, i.e until no reassignments
+    let mut has_assigned = true;
+    while has_assigned {
+        has_assigned = false;
+
+        // Assign to closest centroid
+        for (system, cluster_id) in cluster_map.iter_mut() {
+            let mut closest_cluster = *cluster_id;
+            let mut closest_distance = distance(&system.location, &centroids[*cluster_id]);
+            for i in 0..centroids.len() {
+                let distance = distance(&system.location, &centroids[i]);
+                if distance < closest_distance {
+                    has_assigned = true;
+                    closest_cluster = i;
+                    closest_distance = distance;
+                }
             }
+            *cluster_id = closest_cluster;
         }
 
-        nodes.push(new_node);
+        // Calculate new centroids
+        centroids
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(id, centroid)| {
+                let mut count = 0.;
+                let mut new_centroid = Point::origin();
+                for (system, _) in cluster_map.iter().filter(|&(_, c_id)| *c_id == id) {
+                    new_centroid += system.location.coords;
+                    count += 1.;
+                }
+                new_centroid *= 1. / count;
+                *centroid = new_centroid;
+            });
     }
 
-    // Split into connected components using Tarjan and map to sectors in parallel
-    let sectors: Vec<Sector> = tarjan_scc(&graph)
-        .into_par_iter()
-        .map(|group| {
-            let vect: Vec<System> = group.iter().fold(Vec::<System>::new(), |mut res, node_id| {
-                res.push(graph.node_weight(*node_id).unwrap().clone());
-                res
-            });
+    // Setup cluster vectors
+    let mut sector_vecs =
+        (0..config.number_of_sectors).fold(Vec::<Vec<System>>::new(), |mut sectors, _| {
+            sectors.push(vec![]);
+            sectors
+        });
 
-            // Generate name from sector
-            let mut name_gen_unwraped = name_gen.lock().unwrap();
-            name_gen_unwraped.reseed((hash as u32) * (vect.len() as u32));
-            let sector_name = name_gen_unwraped
+    // Map systems to final cluster
+    for (system, id) in cluster_map.into_iter() {
+        sector_vecs[id].push(system);
+    }
+
+    // Unwrap and lock name generator as it is mutated by generation.
+    let mut name_gen_unwraped = name_gen.lock().unwrap();
+    name_gen_unwraped.reseed(config.number_of_sectors as u32);
+
+    // Create sector for each cluster
+    let sectors = sector_vecs
+        .into_iter()
+        .map(|systems| Sector {
+            systems: systems,
+            name: name_gen_unwraped
                 .generate()
-                .unwrap_or(String::from("Unnamed")) + " Sector";
-
-            // Set Faction for sector
-            let faction = Faction::random_faction(&mut thread_rng());
-
-            Sector {
-                systems: vect,
-                faction: faction,
-                name: sector_name,
-            }
+                .unwrap_or(String::from("Unnamed")) + " Sector",
+            faction: Faction::random_faction(&mut rng),
         })
-        .collect();
-    info!("Mapped Galaxy into {} sectors of {} systems, avg size: {}, max size {}, min size {}, taking {} ms",
-           sectors.len(),
-           sectors.iter().fold(0, |acc, ref sec| {
-               acc + sec.systems.len() }),
-           sectors.iter().fold(0, |acc, ref sec| {
-               acc + sec.systems.len() }) / sectors.len(),
-           sectors.iter().fold(0, |acc, ref sec| {
-               acc.max(sec.systems.len()) }),
-           sectors.iter().fold(MAX, |acc, ref sec| {
-               acc.min(sec.systems.len()) }),
-        ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
-    );
+        .collect::<Vec<Sector>>();
+
     info!(
-        "Sectors include: {} Cartel, {} Empire, {} Federation, {} Independent",
+        "Mapped galaxy into {} sectors of {} systems, avg size: {}, 
+          max size {}, min size {}, taking {} ms \n 
+          Sectors include: {} Cartel, {} Empire, {} Federation, {} Independent",
+        sectors.len(),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + sec.systems.len()),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc + sec.systems.len()) / sectors.len(),
+        sectors
+            .iter()
+            .fold(0, |acc, ref sec| acc.max(sec.systems.len())),
+        sectors
+            .iter()
+            .fold(MAX, |acc, ref sec| acc.min(sec.systems.len())),
+        ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64),
         sectors
             .iter()
             .fold(0, |acc, ref sec| acc + match sec.faction {

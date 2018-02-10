@@ -1,4 +1,6 @@
+use std::hash::{Hash, Hasher};
 use nalgebra::geometry::Point3 as Point;
+use astronomicals::hash;
 use astronomicals::star::Star;
 use astronomicals::planet::Planet;
 
@@ -11,3 +13,17 @@ pub struct System {
     pub star: Star,
     pub satelites: Vec<Planet>,
 }
+
+impl Hash for System {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        hash(self.location).hash(state);
+    }
+}
+
+impl PartialEq for System {
+    fn eq(&self, other: &System) -> bool {
+        self.location == other.location
+    }
+}
+
+impl Eq for System {}

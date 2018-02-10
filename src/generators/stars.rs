@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand;
 use statrs::distribution::{Distribution, Gamma};
 use generators::Gen;
 use astronomicals::star::Star;
@@ -21,7 +21,7 @@ impl Gen for StarGen {
 
     /// Generates a new Star from the _distribution_ using the provided random
     /// generator.
-    fn generate<R: Rng>(&self, gen: &mut R) -> Option<Star> {
+    fn generate<R: rand::Rng>(&self, gen: &mut R) -> Option<Star> {
         // Do not want too small stars.
         let mass = self.mass_gen.sample(gen).max(0.1);
 
