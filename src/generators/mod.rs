@@ -238,22 +238,24 @@ fn into_sectors(
     // Run K means until convergence, i.e until no reassignments
     let mut has_assigned = true;
     while has_assigned {
-        has_assigned = false;
+        let wrapped_assigned = Mutex::new(false);
 
         // Assign to closest centroid
-        for (system, cluster_id) in cluster_map.iter_mut() {
+        cluster_map.par_iter_mut().for_each(|(system, cluster_id)| {
             let mut closest_cluster = *cluster_id;
             let mut closest_distance = distance(&system.location, &centroids[*cluster_id]);
             for i in 0..centroids.len() {
                 let distance = distance(&system.location, &centroids[i]);
                 if distance < closest_distance {
-                    has_assigned = true;
+                    *wrapped_assigned.lock().unwrap() = true;
                     closest_cluster = i;
                     closest_distance = distance;
                 }
             }
             *cluster_id = closest_cluster;
-        }
+        });
+
+        has_assigned = *wrapped_assigned.lock().unwrap();
 
         // Calculate new centroids
         centroids
