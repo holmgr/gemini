@@ -17,13 +17,9 @@ const PREFS_KEY: &str = "conf/general";
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct GameConfig {
     pub map_seed: u32,
-    pub galaxy_size: f64,
-    pub number_of_clusters: u64,
-    pub cluster_spread: f64,
-    pub cluster_size_mean: f64,
-    pub cluster_size_std: f64,
-    pub sector_seed: u32,
-    pub max_sector_dist: f64,
+    pub number_of_systems: u64,
+    pub system_spread: f64,
+    pub number_of_sectors: usize,
 }
 
 impl GameConfig {
@@ -85,13 +81,9 @@ impl Default for GameConfig {
     fn default() -> GameConfig {
         GameConfig {
             map_seed: 42,
-            galaxy_size: 100000.,
-            number_of_clusters: 100,
-            cluster_spread: 10.,
-            cluster_size_mean: 1000.,
-            cluster_size_std: 250.,
-            sector_seed: 42,
-            max_sector_dist: 50.,
+            number_of_systems: 100000,
+            system_spread: 200.,
+            number_of_sectors: 30,
         }
     }
 }
