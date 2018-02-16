@@ -20,6 +20,8 @@ pub struct GameConfig {
     pub number_of_systems: u64,
     pub system_spread: f64,
     pub number_of_sectors: usize,
+    pub sector_approximation: bool,
+    pub num_approximation_systems: usize,
 }
 
 impl GameConfig {
@@ -84,6 +86,8 @@ impl Default for GameConfig {
             number_of_systems: 100000,
             system_spread: 200.,
             number_of_sectors: 30,
+            sector_approximation: true,
+            num_approximation_systems: 100000,
         }
     }
 }
