@@ -7,6 +7,7 @@ use nalgebra::geometry::Point3 as Point;
 use nalgebra::distance;
 use std::sync::{Arc, Mutex};
 use std::usize::MAX;
+use std::f64;
 
 pub mod names;
 pub mod stars;
@@ -210,8 +211,15 @@ fn into_sectors(
     let seed: &[_] = &[hash as usize];
     let mut rng: StdRng = SeedableRng::from_seed(seed);
 
+    // Split data into two sets if using approximation
+    let mut idx = 0;
+    let (cluster_set, rest): (Vec<System>, Vec<System>) = systems.into_iter().partition(|_| {
+        idx += 1;
+        idx < config.num_approximation_systems || !config.sector_approximation
+    });
+
     // System to cluster_id mapping
-    let mut cluster_map = systems
+    let mut cluster_map = cluster_set
         .into_par_iter()
         .fold(
             || HashMap::<System, usize>::new(),
@@ -284,6 +292,20 @@ fn into_sectors(
     for (system, id) in cluster_map.into_iter() {
         sector_vecs[id].push(system);
     }
+
+    // Assign remaining systems to closest centroid if any left
+    rest.into_iter().for_each(|system| {
+        let mut closest_cluster = 0;
+        let mut closest_distance = f64::MAX;
+        for i in 0..centroids.len() {
+            let distance = distance(&system.location, &centroids[i]);
+            if distance < closest_distance {
+                closest_cluster = i;
+                closest_distance = distance;
+            }
+        }
+        sector_vecs[closest_cluster].push(system);
+    });
 
     // Unwrap and lock name generator as it is mutated by generation.
     let mut name_gen_unwraped = name_gen.lock().unwrap();
