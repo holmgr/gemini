@@ -63,7 +63,10 @@ impl Gui {
                     keyevent::Key::Right => {
                         self.selected_tab = (self.selected_tab + 1).min(self.tabs.len() - 1);
                     }
-                    _ => {}
+                    _ => {
+                        // Forward event to current tab
+                        self.tabs[self.selected_tab].handle_event(evt);
+                    }
                 },
                 _ => {}
             }
