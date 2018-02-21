@@ -13,7 +13,6 @@ pub struct Sector {
 }
 
 impl Sector {
-
     /// Returns the point representing the centroid of the cluster.
     pub fn center(&self) -> Point<f64> {
         self.systems.iter().fold(Point::origin(), |center, system| {
