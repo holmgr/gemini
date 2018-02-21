@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use std::fmt;
 
 use astronomicals::star::Star;
 
@@ -23,6 +24,12 @@ pub enum PlanetType {
     Rocky,
     GasGiant,
     Earth,
+}
+
+impl fmt::Display for PlanetType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl Planet {
