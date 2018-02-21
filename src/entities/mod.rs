@@ -1,7 +1,8 @@
 use rand::Rng;
+use std::fmt;
 
 /// Represents a single Faction which is assigned on Sector level.
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Faction {
     Empire,
     Federation,
@@ -29,5 +30,10 @@ impl Faction {
         }
         // Default faction
         Faction::Independent
+    }
+}
+impl fmt::Display for Faction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
