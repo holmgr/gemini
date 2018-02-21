@@ -43,10 +43,8 @@ fn main() {
     let game_state = game::Game::new();
 
     // Generate galaxy
-    if let Ok(unwrapped) = Arc::try_unwrap(game_state.clone()) {
-        info!("Generating galaxy...");
-        *unwrapped.galaxy.lock().unwrap() = generate_galaxy(&config);
-    }
+    info!("Generating galaxy...");
+    *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
 
     // Init and start gui
     let mut gui = gui::Gui::new(game_state.clone());
