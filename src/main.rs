@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate derive_builder;
+extern crate env_logger;
 #[macro_use]
 extern crate lazy_static;
 extern crate nalgebra;
@@ -13,8 +14,9 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate statrs;
+extern crate termion;
+extern crate tui;
 
-extern crate env_logger;
 #[macro_use(info, debug, log)]
 extern crate log;
 
@@ -23,7 +25,10 @@ mod resources;
 mod generators;
 mod astronomicals;
 mod entities;
+mod game;
+mod gui;
 
+use std::sync::Arc;
 use generators::generate_galaxy;
 
 fn main() {
@@ -31,25 +36,19 @@ fn main() {
     let _ = env_logger::init();
 
     // Load GameConfig from disk
-    let mut config = game_config::GameConfig::retrieve();
+    let config = game_config::GameConfig::retrieve();
     info!("Initial config is: {:#?}", config);
 
-    info!("Generating galaxy...");
-    let mut galaxy = generate_galaxy(&config);
+    // Inital game state
+    let game_state = game::Game::new();
 
-    // Reload GameConfig if file on disk changes
-    loop {
-        match game_config::GameConfig::await_update() {
-            Ok(new_config) => {
-                config = new_config;
-                info!(
-                    "Game config updated, reloading, config is now: {:#?}",
-                    config
-                );
-                info!("Regenerating galaxy...");
-                galaxy = generate_galaxy(&config);
-            }
-            Err(e) => println!("Error: {}", e),
-        }
+    // Generate galaxy
+    info!("Generating galaxy...");
+    *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
+
+    // Init and start gui
+    if config.enable_gui {
+        let mut gui = gui::Gui::new(game_state.clone());
+        gui.start();
     }
 }

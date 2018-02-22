@@ -22,6 +22,7 @@ pub struct GameConfig {
     pub number_of_sectors: usize,
     pub sector_approximation: bool,
     pub num_approximation_systems: usize,
+    pub enable_gui: bool,
 }
 
 impl GameConfig {
@@ -88,6 +89,7 @@ impl Default for GameConfig {
             number_of_sectors: 30,
             sector_approximation: true,
             num_approximation_systems: 100000,
+            enable_gui: true,
         }
     }
 }

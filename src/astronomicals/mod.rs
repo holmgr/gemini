@@ -8,7 +8,7 @@ pub mod sector;
 #[derive(Debug)]
 /// Main galaxy containing all systems.
 pub struct Galaxy {
-    sectors: Vec<sector::Sector>,
+    pub sectors: Vec<sector::Sector>,
 }
 
 impl Galaxy {
