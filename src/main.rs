@@ -47,6 +47,8 @@ fn main() {
     *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
 
     // Init and start gui
-    let mut gui = gui::Gui::new(game_state.clone());
-    gui.start();
+    if config.enable_gui {
+        let mut gui = gui::Gui::new(game_state.clone());
+        gui.start();
+    }
 }
