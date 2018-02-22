@@ -57,11 +57,12 @@ impl Gui {
                     keyevent::Key::Char('q') => {
                         break;
                     }
-                    keyevent::Key::Left => {
-                        self.selected_tab = (self.selected_tab as i32 - 1).max(0) as usize;
+                    keyevent::Key::Ctrl('h') => {
+                        self.selected_tab =
+                            (self.tabs.len() + self.selected_tab - 1) % self.tabs.len();
                     }
-                    keyevent::Key::Right => {
-                        self.selected_tab = (self.selected_tab + 1).min(self.tabs.len() - 1);
+                    keyevent::Key::Ctrl('l') => {
+                        self.selected_tab = (self.selected_tab + 1) % self.tabs.len();
                     }
                     _ => {
                         // Forward event to current tab

@@ -74,7 +74,7 @@ impl Tab for MapTab {
         match event {
             Event::Input(input) => match input {
                 // Move up item list.
-                keyevent::Key::Up => match self.level {
+                keyevent::Key::Char('k') => match self.level {
                     Level::Galaxy => {
                         self.selected_sector = (self.selected_sector as i32 - 1).max(0) as usize
                     }
@@ -88,7 +88,7 @@ impl Tab for MapTab {
                 },
 
                 // Move down item list.
-                keyevent::Key::Down => match self.level {
+                keyevent::Key::Char('j') => match self.level {
                     Level::Galaxy => {
                         self.selected_sector =
                             (self.selected_sector + 1).min(self.max_selected_sector)
@@ -104,7 +104,7 @@ impl Tab for MapTab {
                 },
 
                 // Move into item.
-                keyevent::Key::Char('\n') => {
+                keyevent::Key::Char('l') => {
                     self.level = match self.level {
                         Level::Galaxy => {
                             self.max_selected_system = self.state.galaxy.lock().unwrap().sectors
@@ -126,7 +126,7 @@ impl Tab for MapTab {
                 }
 
                 // Move out of item.
-                keyevent::Key::Backspace => {
+                keyevent::Key::Char('h') => {
                     self.level = match self.level {
                         Level::System => Level::Sector,
                         Level::Sector => Level::Galaxy,
