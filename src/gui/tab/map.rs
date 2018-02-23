@@ -210,6 +210,7 @@ fn draw_galaxy_map(
             location.coords.y.abs().max(y_max),
         )
     });
+    let selected_loc = sectors[selected].center();
     Canvas::default()
         .block(Block::default().title("Galaxy").borders(Borders::ALL))
         .paint(|ctx| {
@@ -224,11 +225,17 @@ fn draw_galaxy_map(
                 match idx == selected {
                     true => ctx.print(center.coords.x, center.coords.y, "X", color),
                     false => ctx.print(center.coords.x, center.coords.y, "*", color),
-                }
+                };
             }
         })
-        .x_bounds([-max_x, max_x])
-        .y_bounds([-max_y, max_y])
+        .x_bounds([
+            -max_x + selected_loc.coords.x,
+            selected_loc.coords.x + max_x,
+        ])
+        .y_bounds([
+            -max_y + selected_loc.coords.y,
+            selected_loc.coords.y + max_y,
+        ])
         .render(term, area);
 }
 
@@ -281,6 +288,7 @@ fn draw_sector_map(
                 .max(y_max),
         )
     });
+    let selected_loc = sector.systems[selected].location;
     Canvas::default()
         .block(Block::default().title("Sector").borders(Borders::ALL))
         .paint(|ctx| {
@@ -302,14 +310,8 @@ fn draw_sector_map(
                 }
             }
         })
-        .x_bounds([
-            sector_center.coords.x - max_x,
-            sector_center.coords.x + max_x,
-        ])
-        .y_bounds([
-            sector_center.coords.y - max_y,
-            sector_center.coords.y + max_y,
-        ])
+        .x_bounds([selected_loc.coords.x - max_x, selected_loc.coords.x + max_x])
+        .y_bounds([selected_loc.coords.y - max_y, selected_loc.coords.y + max_y])
         .render(term, &area);
 }
 
