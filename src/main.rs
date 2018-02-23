@@ -29,6 +29,7 @@ mod game;
 mod gui;
 
 use std::sync::Arc;
+use std::thread;
 use generators::generate_galaxy;
 
 fn main() {
@@ -42,13 +43,17 @@ fn main() {
     // Inital game state
     let game_state = game::Game::new();
 
+    let game_state_gen = game_state.clone();
+    let enable_gui = config.enable_gui;
     // Generate galaxy
-    info!("Generating galaxy...");
-    *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
+    thread::spawn(move || {
+        info!("Generating galaxy...");
+        *game_state_gen.galaxy.lock().unwrap() = generate_galaxy(&config);
+    });
 
     // Init and start gui
-    if config.enable_gui {
-        let mut gui = gui::Gui::new(game_state.clone());
+    if enable_gui {
+        let mut gui = gui::Gui::new(game_state);
         gui.start();
     }
 }
