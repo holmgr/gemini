@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Builder)]
+#[derive(Serialize, Deserialize, Debug, Clone, Builder)]
 /// Represents a Star in a system.
 pub struct Star {
     pub mass: f64,

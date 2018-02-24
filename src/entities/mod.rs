@@ -2,7 +2,7 @@ use rand::Rng;
 use std::fmt;
 
 /// Represents a single Faction which is assigned on Sector level.
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Faction {
     Empire,
     Federation,

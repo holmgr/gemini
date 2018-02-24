@@ -15,7 +15,7 @@ petgraph = "0.4.8"
 rayon = "0.9.0"
 log = "0.3"
 env_logger = "0.3"
-nalgebra = "0.13.1"
+nalgebra = { version = "0.11", features = ["serde-serialize"] }
 statrs = "0.9.0"
 lazy_static = "1.0"
 derive_builder = "0.5.1"
