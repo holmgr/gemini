@@ -9,9 +9,9 @@ use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
 mod tab;
-mod event;
 
 use game::Game;
+use event::{add_keyboard_handler, Event, HANDLER};
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
@@ -32,8 +32,11 @@ impl Gui {
 
     /// Starts the GUI by entering an infinite loop
     pub fn start(&mut self) {
-        // Setup listener for the user events.
-        let rx = event::EventHandler::start();
+        // Get handle for the user events.
+        let rx = HANDLER.recv_handle();
+
+        // TODO: Make a bit more elegant
+        add_keyboard_handler();
 
         // Setup terminal interace.
         let backend = MouseBackend::new().unwrap();
@@ -53,7 +56,7 @@ impl Gui {
             // Await the next event.
             let evt = rx.recv().unwrap();
             match evt {
-                event::Event::Input(input) => match input {
+                Event::Input(input) => match input {
                     keyevent::Key::Char('q') => {
                         break;
                     }

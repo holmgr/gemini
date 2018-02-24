@@ -5,7 +5,7 @@ use tui::backend::MouseBackend;
 use tui::layout::Rect;
 
 use game::Game;
-use gui::event::Event;
+use event::Event;
 
 mod status;
 mod map;

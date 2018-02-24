@@ -27,6 +27,7 @@ mod astronomicals;
 mod entities;
 mod game;
 mod gui;
+mod event;
 
 use std::sync::Arc;
 use std::thread;
@@ -43,8 +44,12 @@ fn main() {
     // Inital game state
     let game_state = game::Game::new();
 
+    // Start event handler
+    event::EventHandler::start();
+
     let game_state_gen = game_state.clone();
     let enable_gui = config.enable_gui;
+
     // Generate galaxy
     thread::spawn(move || {
         info!("Generating galaxy...");
