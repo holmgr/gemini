@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate derive_builder;
 extern crate env_logger;
+extern crate inflector;
 #[macro_use]
 extern crate lazy_static;
 extern crate nalgebra;

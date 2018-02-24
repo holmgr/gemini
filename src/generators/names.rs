@@ -2,6 +2,7 @@ use rand::{IsaacRng, Rng, SeedableRng};
 use std::cmp::max;
 use std::usize;
 use std::collections::{BTreeSet, HashSet};
+use inflector::Inflector;
 use petgraph::Graph;
 use petgraph::prelude::NodeIndex;
 use generators::{MutGen, SeedableGenerator, TrainableGenerator};
@@ -154,11 +155,12 @@ impl MutGen for NameGen {
         // TODO: Move name retries to config.
         let gen_num_attempts = 27;
         for _ in 0..gen_num_attempts {
-            let name = generate_attempt(&self.graph, &self.start, &self.end, &mut self.rng);
+            let name = generate_attempt(&self.graph, &self.start, &self.end, &mut self.rng)
+                .to_title_case();
             if is_valid_name(&name) && !self.generated.contains(&name) {
                 self.generated.insert(name.clone());
                 return match get_suffix(&mut self.rng, &self.suffixes) {
-                    Some(suffix) => Some(format!("{} {}", name, &suffix)),
+                    Some(suffix) => Some(format!("{} {}", name, &suffix.to_title_case())),
                     _ => Some(name),
                 };
             }
