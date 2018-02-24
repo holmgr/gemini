@@ -41,20 +41,24 @@ fn main() {
     let config = game_config::GameConfig::retrieve();
     info!("Initial config is: {:#?}", config);
 
+    let enable_gui = config.enable_gui;
+
     // Inital game state
-    let game_state = game::Game::new();
+    let game_state = match game::Game::load() {
+        Some(game_state) => game_state,
+        None => {
+            let game_state = game::Game::new();
+
+            // Generate galaxy
+            info!("Generating galaxy...");
+            *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
+            game_state.save();
+            game_state
+        }
+    };
 
     // Start event handler
     event::EventHandler::start();
-
-    let game_state_gen = game_state.clone();
-    let enable_gui = config.enable_gui;
-
-    // Generate galaxy
-    thread::spawn(move || {
-        info!("Generating galaxy...");
-        *game_state_gen.galaxy.lock().unwrap() = generate_galaxy(&config);
-    });
 
     // Init and start gui
     if enable_gui {

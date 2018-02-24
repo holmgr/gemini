@@ -4,7 +4,7 @@ use astronomicals::hash;
 use astronomicals::star::Star;
 use astronomicals::planet::Planet;
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 /// Represets a single star system with at a given location with the given
 /// star and planets.
 pub struct System {

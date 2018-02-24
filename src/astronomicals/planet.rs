@@ -3,7 +3,7 @@ use std::fmt;
 
 use astronomicals::star::Star;
 
-#[derive(Debug, Clone, Builder)]
+#[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]
 /// Represents a visitable planet in game with some attributes.
 pub struct Planet {
@@ -15,7 +15,7 @@ pub struct Planet {
     pub planet_type: PlanetType,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Different types of planet, i.e environments. Depends on surface_temperature
 /// and mass.
 pub enum PlanetType {
