@@ -1,13 +1,12 @@
 use std::sync::Mutex;
 use std::sync::Arc;
-use preferences::{AppInfo, Preferences, PreferencesMap};
+use std::fs::{create_dir_all, File};
+use preferences::{prefs_base_dir, AppInfo, Preferences, PreferencesError};
+use serde_cbor::{from_reader, to_writer};
 
 use astronomicals::Galaxy;
 
-const APP_INFO: AppInfo = AppInfo {
-    name: "gemini",
-    author: "holmgr",
-};
+const SAVE_PATH: &str = "gemini/saves/";
 
 /// Main game state object, shared and syncronized by use of Arc and Mutex.
 pub struct Game {
@@ -24,19 +23,27 @@ impl Game {
 
     /// Creates and stores a quicksave of the current game.
     pub fn save(&self) {
-        let mut savegame = PreferencesMap::new();
-        savegame.insert("galaxy".into(), (*self.galaxy.lock().unwrap()).clone());
+        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
 
-        let prefs_key = "saves/quicksave";
-        let save_result = savegame.save(&APP_INFO, prefs_key);
+        create_dir_all(base_path.as_path())
+            .ok()
+            .and_then(|_| File::create(base_path.join("galaxy.cbor").as_path()).ok())
+            .and_then(|mut galaxy_file|
+                // Save galaxy
+                to_writer(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok());
     }
 
     /// Attempts to load a quicksave of a game state.
     pub fn load() -> Option<Arc<Self>> {
-        let prefs_key = "saves/quicksave";
-        match PreferencesMap::load(&APP_INFO, prefs_key) {
-            Ok(mut quicksave) => Some(Arc::new(Game {
-                galaxy: Mutex::new(quicksave.remove("galaxy").unwrap()),
+        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
+
+        let galaxy: Option<Galaxy> = File::open(base_path.join("galaxy.cbor").as_path())
+            .ok()
+            .and_then(|galaxy_file| from_reader(galaxy_file).ok());
+
+        match galaxy {
+            Some(g) => Some(Arc::new(Game {
+                galaxy: Mutex::new(g),
             })),
             _ => None,
         }

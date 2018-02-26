@@ -7,7 +7,7 @@ use std::collections::HashMap;
 /// be loaded at compile time.
 /// KEY must be unique to the specific resource (e.g the filename of the
 /// resource).
-pub trait Resource: Deserialize {
+pub trait Resource: Deserialize<'static> {
     const KEY: &'static str;
 }
 

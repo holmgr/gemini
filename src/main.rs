@@ -11,11 +11,13 @@ extern crate preferences;
 extern crate rand;
 extern crate rayon;
 extern crate serde;
+extern crate serde_cbor;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 extern crate statrs;
 extern crate termion;
+extern crate toml;
 extern crate tui;
 
 #[macro_use(info, debug, log)]
