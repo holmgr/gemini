@@ -5,8 +5,8 @@ pub mod planet;
 pub mod system;
 pub mod sector;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 /// Main galaxy containing all systems.
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Galaxy {
     pub sectors: Vec<sector::Sector>,
 }
