@@ -1,6 +1,5 @@
 use rand::{IsaacRng, Rng, SeedableRng};
 use std::cmp::max;
-use std::usize;
 use std::collections::{BTreeSet, HashSet};
 use inflector::Inflector;
 use petgraph::Graph;

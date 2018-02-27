@@ -32,8 +32,6 @@ mod game;
 mod gui;
 mod event;
 
-use std::sync::Arc;
-use std::thread;
 use generators::generate_galaxy;
 
 fn main() {
