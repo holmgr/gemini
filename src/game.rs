@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::fs::{create_dir_all, File};
-use preferences::{prefs_base_dir, AppInfo, Preferences, PreferencesError};
+use preferences::prefs_base_dir;
 use serde_cbor::{from_reader, to_writer};
 
 use astronomicals::Galaxy;
