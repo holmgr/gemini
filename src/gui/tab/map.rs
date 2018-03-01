@@ -141,11 +141,15 @@ impl Tab for MapTab {
         // Update sizes of lists
         let galaxy = &self.state.galaxy.lock().unwrap();
         self.max_selected_sector = galaxy.sectors.len();
+        self.selected_sector = self.selected_sector.min(self.max_selected_sector - 1);
         self.max_selected_system = galaxy.sectors[self.selected_sector].systems.len();
+        self.selected_system = self.selected_system.min(self.max_selected_system - 1);
         self.max_selected_astronomical = galaxy.sectors[self.selected_sector].systems
             [self.selected_system]
             .satelites
             .len();
+        self.selected_astronomical = self.selected_astronomical
+            .min(self.max_selected_astronomical - 1);
     }
 
     /// Draws the tab in the given terminal and area.
