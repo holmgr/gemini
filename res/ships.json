@@ -1,0 +1,58 @@
+{
+    "ships": [
+        {
+        "name" : "Scarab",
+        "manufacturer" : "Sinclair Dynamics",
+        "kind" : "Freighter",
+        "description" : "The Scarab builds on the classic Sinclair Dynamics design of 7414 but with hyperspace capabilities. It features decent cargo for its size but lacks any type of defensive armament making it a target for any pirate. However it is still the natural choice for any low level merchant or smuggler starting out, being a jack of all trades, master of none type of ship.",
+        "integrity" : 102,
+        "size" : { "length": 16.1, "width": 21.7, "height": 5.3},
+        "mass" : 30,
+        "slots" : 1,
+        "cost" : 12000,
+        "range" : 7.93,
+        "fuel" : 2.0,
+        "cargo" : 4,
+        "detectability" : 10,
+        "maneuverability" : 20,
+        "defense" : 0,
+        "shield" : 10
+        },
+        {
+        "name" : "Shamshir",
+        "manufacturer" : "Lèon de la Serre",
+        "kind" : "Corvette",
+        "description" : "The Shamshir is a classic Lèon design which have survived the centuries, with the first production vessel being constructed in 7128. This ship offers great jump range and cargo space in a discrete, well rounded package.",
+        "integrity" : 320,
+        "size" : { "length": 40.1, "width": 25.7, "height": 9.3},
+        "mass" : 144,
+        "slots" : 3,
+        "cost" : 840000,
+        "range" : 14.72,
+        "fuel" : 32.0,
+        "cargo" : 56,
+        "detectability" : 60,
+        "maneuverability" : 40,
+        "defense" : 30,
+        "shield" : 60
+        },
+        {
+        "name" : "Dao",
+        "manufacturer" : "Lèon de la Serre",
+        "kind" : "Corvette",
+        "description" : "The Dao is the pride of Lèon de La Serre's shipyards. Originally designed by Lèon himself, the Dao represents his life's work. However, the first vessel was only produce the last century due to technological limits of the time. It represents the pinnacle of imperial might and technology with its incredible cargo space and jump range, while at the same time packing a punch.",
+        "integrity" : 840,
+        "size" : { "length": 90.0, "width": 58.4, "height": 14.2},
+        "mass" : 320,
+        "slots" : 8,
+        "cost" : 56000000,
+        "range" : 18.92,
+        "fuel" : 64.0,
+        "cargo" : 144,
+        "detectability" : 30,
+        "maneuverability" : 20,
+        "defense" : 70,
+        "shield" : 120
+        }
+    ]
+}

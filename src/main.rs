@@ -31,6 +31,7 @@ mod entities;
 mod game;
 mod gui;
 mod event;
+mod ship;
 
 use generators::generate_galaxy;
 
@@ -53,6 +54,13 @@ fn main() {
             // Generate galaxy
             info!("Generating galaxy...");
             *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
+
+            info!("Loading ships...");
+            game_state
+                .shipyard
+                .lock()
+                .unwrap()
+                .add_ships(resources::fetch_resource::<resources::ShipResource>().unwrap());
             game_state.save();
             game_state
         }

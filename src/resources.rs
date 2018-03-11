@@ -3,6 +3,8 @@ use serde_json;
 use serde::de::Deserialize;
 use std::collections::HashMap;
 
+use ship::ShipCharacteristics;
+
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.
 /// KEY must be unique to the specific resource (e.g the filename of the
@@ -19,6 +21,10 @@ lazy_static! {
         res.insert(
             AstronomicalNamesResource::KEY,
             include_str!("../res/astronomical_names.json"),
+        );
+        res.insert(
+            ShipResource::KEY,
+            include_str!("../res/ships.json"),
         );
         res
     };
@@ -42,6 +48,16 @@ pub struct AstronomicalNamesResource {
 
 impl Resource for AstronomicalNamesResource {
     const KEY: &'static str = "astronomical_names";
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Resource of all ships available in the game.
+pub struct ShipResource {
+    pub ships: Vec<ShipCharacteristics>,
+}
+
+impl Resource for ShipResource {
+    const KEY: &'static str = "ships";
 }
 
 #[cfg(test)]
