@@ -1,4 +1,4 @@
-use nalgebra::geometry::Point3 as Point;
+use utils::Point;
 
 pub mod star;
 pub mod planet;
@@ -19,7 +19,7 @@ impl Galaxy {
 
 /// Hash based on location, algorithm used is presented in the paper:
 /// Optimized Spatial Hashing for Collision Detection of Deformable Objects.
-pub fn hash(location: Point<f64>) -> u64 {
+pub fn hash(location: &Point) -> u64 {
     let values = location
         .iter()
         .zip(&[73856093f64, 19349663f64, 83492791f64])

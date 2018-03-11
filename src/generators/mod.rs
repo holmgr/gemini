@@ -3,7 +3,6 @@ use std::time::Instant;
 use std::collections::HashMap;
 use rayon::prelude::*;
 use statrs::distribution::{Distribution, Gamma, Normal};
-use nalgebra::geometry::Point3 as Point;
 use nalgebra::distance;
 use std::sync::{Arc, Mutex};
 use std::usize::MAX;
@@ -13,6 +12,7 @@ pub mod names;
 pub mod stars;
 pub mod planets;
 
+use utils::Point;
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
 use astronomicals::system::{System, SystemBuilder};
@@ -137,13 +137,13 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 
 /// Generate a new star system using the given generators and a location as seed.
 pub fn generate_system(
-    location: Point<f64>,
+    location: Point,
     name_gen: Arc<Mutex<NameGen>>,
     star_gen: &StarGen,
     planet_gen: &PlanetGen,
 ) -> System {
     // Calculate hash.
-    let hash = hash(location);
+    let hash = hash(&location);
     let seed: &[_] = &[hash as usize];
     let mut rng: StdRng = SeedableRng::from_seed(seed);
 

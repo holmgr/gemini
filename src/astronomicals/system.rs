@@ -1,5 +1,5 @@
 use std::hash::{Hash, Hasher};
-use nalgebra::geometry::Point3 as Point;
+use utils::Point;
 use astronomicals::hash;
 use astronomicals::star::Star;
 use astronomicals::planet::Planet;
@@ -8,7 +8,7 @@ use astronomicals::planet::Planet;
 /// Represets a single star system with at a given location with the given
 /// star and planets.
 pub struct System {
-    pub location: Point<f64>,
+    pub location: Point,
     pub name: String,
     pub star: Star,
     pub satelites: Vec<Planet>,
@@ -16,7 +16,7 @@ pub struct System {
 
 impl Hash for System {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        hash(self.location).hash(state);
+        hash(&self.location).hash(state);
     }
 }
 

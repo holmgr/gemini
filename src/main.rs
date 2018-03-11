@@ -32,6 +32,7 @@ mod game;
 mod gui;
 mod event;
 mod ship;
+mod utils;
 
 use generators::generate_galaxy;
 
