@@ -168,10 +168,11 @@ pub fn generate_system(
     name_gen_unwraped.reseed(hash as u32);
 
     // TODO: Replace constant in config.
-    let num_planets = Gamma::new(3.5, 1.)
+    let num_planets = (Gamma::new(3.5, 1.)
         .unwrap()
         .sample::<StdRng>(&mut rng)
-        .round() as u32;
+        .round() as u32)
+        .max(1);
 
     // Fallback to planet name: Unnamed if no name could be generated.
     let satelites: Vec<Planet> = (0..num_planets)
