@@ -106,18 +106,21 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     // Generate systems for each cluster in parallel.
     // Fold will generate one vector per thread (per cluster), reduce will
     // combine them to the final result.
-    let systems = locations
-        .into_par_iter()
+    let systems = sectors
+        .par_iter()
         .fold(
             || Vec::<System>::new(),
-            |mut systems: Vec<System>, location| {
-                // Generate system
-                systems.push(generate_system(
-                    location,
-                    name_gen.clone(),
-                    &star_gen,
-                    &planet_gen,
-                ));
+            |mut systems: Vec<System>, sector| {
+                for location in &sector.system_locations {
+                    // Generate system
+                    systems.push(generate_system(
+                        location.clone(),
+                        sector.faction.clone(),
+                        name_gen.clone(),
+                        &star_gen,
+                        &planet_gen,
+                    ));
+                }
                 systems
             },
         )
@@ -148,6 +151,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 /// Generate a new star system using the given generators and a location as seed.
 pub fn generate_system(
     location: Point,
+    faction: Faction,
     name_gen: Arc<Mutex<NameGen>>,
     star_gen: &StarGen,
     planet_gen: &PlanetGen,
@@ -202,6 +206,7 @@ pub fn generate_system(
     SystemBuilder::default()
         .location(location)
         .name(name)
+        .faction(faction)
         .star(star)
         .satelites(satelites)
         .build()

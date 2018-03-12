@@ -1,5 +1,6 @@
 use std::hash::{Hash, Hasher};
 use utils::Point;
+use entities::Faction;
 use astronomicals::hash;
 use astronomicals::star::Star;
 use astronomicals::planet::Planet;
@@ -10,6 +11,7 @@ use astronomicals::planet::Planet;
 pub struct System {
     pub location: Point,
     pub name: String,
+    pub faction: Faction,
     pub star: Star,
     pub satelites: Vec<Planet>,
 }
