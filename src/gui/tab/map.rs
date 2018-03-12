@@ -134,7 +134,7 @@ impl Tab for MapTab {
             .render(term, area, |term, chunks| match self.level {
                 Level::Galaxy => {
                     // TODO: Sort based on player location.
-                    let systems = &galaxy.systems_ordered(&Point::origin());
+                    let systems = &galaxy.systems();
                     draw_galaxy_table(self.selected_system, &systems, term, &chunks[0]);
                     draw_galaxy_map(self.selected_system, &systems, term, &chunks[1]);
                 }
