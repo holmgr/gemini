@@ -12,7 +12,7 @@ pub mod names;
 pub mod stars;
 pub mod planets;
 
-use utils::Point;
+use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
 use astronomicals::system::{System, SystemBuilder};
@@ -87,6 +87,16 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     name_gen_unwraped.train(&fetch_resource::<AstronomicalNamesResource>().unwrap());
     let name_gen = Arc::new(Mutex::new(name_gen_unwraped));
 
+    // Generate sectors
+    let sectors = into_sectors(
+        config,
+        name_gen.clone(),
+        locations
+            .iter()
+            .map(|point| HashablePoint::new(point.clone()))
+            .collect::<Vec<_>>(),
+    );
+
     // Create Star generator.
     let star_gen = stars::StarGen::new();
 
@@ -132,7 +142,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         debug!("{:#?}\n", system);
     }
 
-    Galaxy::new(into_sectors(config, name_gen, systems))
+    Galaxy::new(sectors, systems)
 }
 
 /// Generate a new star system using the given generators and a location as seed.
@@ -202,7 +212,7 @@ pub fn generate_system(
 fn into_sectors(
     config: &GameConfig,
     name_gen: Arc<Mutex<NameGen>>,
-    systems: Vec<System>,
+    system_locations: Vec<HashablePoint>,
 ) -> Vec<Sector> {
     // Measure time for generation.
     let now = Instant::now();
@@ -213,24 +223,25 @@ fn into_sectors(
 
     // Split data into two sets if using approximation
     let mut idx = 0;
-    let (cluster_set, rest): (Vec<System>, Vec<System>) = systems.into_iter().partition(|_| {
-        idx += 1;
-        idx < config.num_approximation_systems || !config.sector_approximation
-    });
+    let (cluster_set, rest): (Vec<HashablePoint>, Vec<HashablePoint>) =
+        system_locations.into_iter().partition(|_| {
+            idx += 1;
+            idx < config.num_approximation_systems || !config.sector_approximation
+        });
 
     // System to cluster_id mapping
     let mut cluster_map = cluster_set
         .into_par_iter()
         .fold(
-            || HashMap::<System, usize>::new(),
-            |mut partial_map: HashMap<System, usize>, system| {
+            || HashMap::<HashablePoint, usize>::new(),
+            |mut partial_map: HashMap<HashablePoint, usize>, system| {
                 // Generate system
                 partial_map.insert(system, 0);
                 partial_map
             },
         )
         .reduce(
-            || HashMap::<System, usize>::new(),
+            || HashMap::<HashablePoint, usize>::new(),
             |mut cluster_map, partial_map| {
                 cluster_map.extend(partial_map);
                 cluster_map
@@ -240,7 +251,7 @@ fn into_sectors(
     // Setup initial centroids
     let mut centroids = sample(&mut rng, cluster_map.iter(), config.number_of_sectors)
         .into_iter()
-        .map(|(system, _)| system.location.clone())
+        .map(|(system_location, _)| system_location.as_point().clone())
         .collect::<Vec<_>>();
 
     // Run K means until convergence, i.e until no reassignments
@@ -249,19 +260,22 @@ fn into_sectors(
         let wrapped_assigned = Mutex::new(false);
 
         // Assign to closest centroid
-        cluster_map.par_iter_mut().for_each(|(system, cluster_id)| {
-            let mut closest_cluster = *cluster_id;
-            let mut closest_distance = distance(&system.location, &centroids[*cluster_id]);
-            for i in 0..centroids.len() {
-                let distance = distance(&system.location, &centroids[i]);
-                if distance < closest_distance {
-                    *wrapped_assigned.lock().unwrap() = true;
-                    closest_cluster = i;
-                    closest_distance = distance;
+        cluster_map
+            .par_iter_mut()
+            .for_each(|(system_location, cluster_id)| {
+                let mut closest_cluster = *cluster_id;
+                let mut closest_distance =
+                    distance(system_location.as_point(), &centroids[*cluster_id]);
+                for i in 0..centroids.len() {
+                    let distance = distance(system_location.as_point(), &centroids[i]);
+                    if distance < closest_distance {
+                        *wrapped_assigned.lock().unwrap() = true;
+                        closest_cluster = i;
+                        closest_distance = distance;
+                    }
                 }
-            }
-            *cluster_id = closest_cluster;
-        });
+                *cluster_id = closest_cluster;
+            });
 
         has_assigned = *wrapped_assigned.lock().unwrap();
 
@@ -272,8 +286,8 @@ fn into_sectors(
             .for_each(|(id, centroid)| {
                 let mut count = 0.;
                 let mut new_centroid = Point::origin();
-                for (system, _) in cluster_map.iter().filter(|&(_, c_id)| *c_id == id) {
-                    new_centroid += system.location.coords;
+                for (system_location, _) in cluster_map.iter().filter(|&(_, c_id)| *c_id == id) {
+                    new_centroid += system_location.as_point().coords;
                     count += 1.;
                 }
                 new_centroid *= 1. / count;
@@ -283,28 +297,28 @@ fn into_sectors(
 
     // Setup cluster vectors
     let mut sector_vecs =
-        (0..config.number_of_sectors).fold(Vec::<Vec<System>>::new(), |mut sectors, _| {
+        (0..config.number_of_sectors).fold(Vec::<Vec<HashablePoint>>::new(), |mut sectors, _| {
             sectors.push(vec![]);
             sectors
         });
 
     // Map systems to final cluster
-    for (system, id) in cluster_map.into_iter() {
-        sector_vecs[id].push(system);
+    for (system_location, id) in cluster_map.into_iter() {
+        sector_vecs[id].push(system_location);
     }
 
     // Assign remaining systems to closest centroid if any left
-    rest.into_iter().for_each(|system| {
+    rest.into_iter().for_each(|system_location| {
         let mut closest_cluster = 0;
         let mut closest_distance = f64::MAX;
         for i in 0..centroids.len() {
-            let distance = distance(&system.location, &centroids[i]);
+            let distance = distance(system_location.as_point(), &centroids[i]);
             if distance < closest_distance {
                 closest_cluster = i;
                 closest_distance = distance;
             }
         }
-        sector_vecs[closest_cluster].push(system);
+        sector_vecs[closest_cluster].push(system_location);
     });
 
     // Unwrap and lock name generator as it is mutated by generation.
@@ -314,8 +328,11 @@ fn into_sectors(
     // Create sector for each cluster
     let sectors = sector_vecs
         .into_iter()
-        .map(|systems| Sector {
-            systems: systems,
+        .map(|system_locations| Sector {
+            system_locations: system_locations
+                .into_iter()
+                .map(|hashpoint| hashpoint.as_point().clone())
+                .collect::<Vec<_>>(),
             name: name_gen_unwraped
                 .generate()
                 .unwrap_or(String::from("Unnamed")) + " Sector",
@@ -330,16 +347,16 @@ fn into_sectors(
         sectors.len(),
         sectors
             .iter()
-            .fold(0, |acc, ref sec| acc + sec.systems.len()),
+            .fold(0, |acc, ref sec| acc + sec.system_locations.len()),
         sectors
             .iter()
-            .fold(0, |acc, ref sec| acc + sec.systems.len()) / sectors.len(),
+            .fold(0, |acc, ref sec| acc + sec.system_locations.len()) / sectors.len(),
         sectors
             .iter()
-            .fold(0, |acc, ref sec| acc.max(sec.systems.len())),
+            .fold(0, |acc, ref sec| acc.max(sec.system_locations.len())),
         sectors
             .iter()
-            .fold(MAX, |acc, ref sec| acc.min(sec.systems.len())),
+            .fold(MAX, |acc, ref sec| acc.min(sec.system_locations.len())),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64),
         sectors
             .iter()

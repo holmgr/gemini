@@ -2,8 +2,8 @@ use super::*;
 use std::collections::HashMap;
 use termion::event as keyevent;
 
+use utils::Point;
 use entities::Faction;
-use astronomicals::sector::Sector;
 use astronomicals::system::System;
 use tui::widgets::{Block, Borders, Row, Table, Widget};
 use tui::widgets::canvas::Canvas;
@@ -13,7 +13,6 @@ use tui::style::{Color, Style};
 /// Level of map display.
 enum Level {
     Galaxy,
-    Sector,
     System,
 }
 
@@ -39,8 +38,6 @@ lazy_static! {
 pub struct MapTab {
     state: Arc<Game>,
     level: Level,
-    selected_sector: usize,
-    max_selected_sector: usize,
     selected_system: usize,
     max_selected_system: usize,
     selected_astronomical: usize,
@@ -50,15 +47,13 @@ pub struct MapTab {
 impl Tab for MapTab {
     /// Creates a map tab.
     fn new(state: Arc<Game>) -> Box<Self> {
-        let max_selected_sector = state.galaxy.lock().unwrap().sectors.len();
+        let max_selected_system = state.galaxy.lock().unwrap().systems().len();
 
         Box::new(MapTab {
             state: state,
             level: Level::Galaxy,
-            selected_sector: 0,
-            max_selected_sector: max_selected_sector,
             selected_system: 0,
-            max_selected_system: 0,
+            max_selected_system: max_selected_system,
             selected_astronomical: 0,
             max_selected_astronomical: 0,
         })
@@ -76,9 +71,6 @@ impl Tab for MapTab {
                 // Move up item list.
                 keyevent::Key::Char('k') => match self.level {
                     Level::Galaxy => {
-                        self.selected_sector = (self.selected_sector as i32 - 1).max(0) as usize
-                    }
-                    Level::Sector => {
                         self.selected_system = (self.selected_system as i32 - 1).max(0) as usize
                     }
                     Level::System => {
@@ -90,10 +82,6 @@ impl Tab for MapTab {
                 // Move down item list.
                 keyevent::Key::Char('j') => match self.level {
                     Level::Galaxy => {
-                        self.selected_sector =
-                            (self.selected_sector + 1).min(self.max_selected_sector)
-                    }
-                    Level::Sector => {
                         self.selected_system =
                             (self.selected_system + 1).min(self.max_selected_system)
                     }
@@ -107,29 +95,19 @@ impl Tab for MapTab {
                 keyevent::Key::Char('l') => {
                     self.level = match self.level {
                         Level::Galaxy => {
-                            self.max_selected_system = self.state.galaxy.lock().unwrap().sectors
-                                [self.selected_sector]
-                                .systems
-                                .len();
-                            Level::Sector
-                        }
-                        Level::Sector => {
                             self.max_selected_astronomical =
-                                self.state.galaxy.lock().unwrap().sectors[self.selected_sector]
-                                    .systems[self.selected_system]
+                                self.state.galaxy.lock().unwrap().systems()[self.selected_system]
                                     .satelites
                                     .len();
                             Level::System
                         }
-                        _ => Level::Galaxy,
+                        _ => Level::System,
                     };
                 }
 
                 // Move out of item.
                 keyevent::Key::Char('h') => {
                     self.level = match self.level {
-                        Level::System => Level::Sector,
-                        Level::Sector => Level::Galaxy,
                         _ => Level::Galaxy,
                     };
                 }
@@ -140,37 +118,28 @@ impl Tab for MapTab {
 
         // Update sizes of lists
         let galaxy = &self.state.galaxy.lock().unwrap();
-        self.max_selected_sector = galaxy.sectors.len();
-        self.selected_sector = self.selected_sector.min(self.max_selected_sector - 1);
-        self.max_selected_system = galaxy.sectors[self.selected_sector].systems.len();
+        self.max_selected_system = galaxy.systems.len();
         self.selected_system = self.selected_system.min(self.max_selected_system - 1);
-        self.max_selected_astronomical = galaxy.sectors[self.selected_sector].systems
-            [self.selected_system]
-            .satelites
-            .len();
+        self.max_selected_astronomical = galaxy.systems()[self.selected_system].satelites.len();
         self.selected_astronomical = self.selected_astronomical
             .min(self.max_selected_astronomical - 1);
     }
 
     /// Draws the tab in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
+        let galaxy = self.state.galaxy.lock().unwrap();
         Group::default()
             .direction(Direction::Horizontal)
             .sizes(&[Size::Percent(30), Size::Percent(70)])
             .render(term, area, |term, chunks| match self.level {
                 Level::Galaxy => {
-                    let galaxy = self.state.galaxy.lock().unwrap();
-                    draw_galaxy_table(self.selected_sector, &galaxy.sectors, term, &chunks[0]);
-                    draw_galaxy_map(self.selected_sector, &galaxy.sectors, term, &chunks[1]);
-                }
-                Level::Sector => {
-                    let sector = &self.state.galaxy.lock().unwrap().sectors[self.selected_sector];
-                    draw_sector_table(self.selected_system, &sector, term, &chunks[0]);
-                    draw_sector_map(self.selected_system, &sector, term, &chunks[1]);
+                    // TODO: Sort based on player location.
+                    let systems = &galaxy.systems_ordered(&Point::origin());
+                    draw_galaxy_table(self.selected_system, &systems, term, &chunks[0]);
+                    draw_galaxy_map(self.selected_system, &systems, term, &chunks[1]);
                 }
                 Level::System => {
-                    let system = &self.state.galaxy.lock().unwrap().sectors[self.selected_sector]
-                        .systems[self.selected_system];
+                    let system = &galaxy.systems()[self.selected_system];
                     draw_system_table(self.selected_astronomical, &system, term, &chunks[0]);
                     draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
                 }
@@ -180,88 +149,13 @@ impl Tab for MapTab {
 
 fn draw_galaxy_table(
     selected: usize,
-    sectors: &Vec<Sector>,
-    term: &mut Terminal<MouseBackend>,
-    area: &Rect,
-) {
-    Table::new(
-        ["Sector", "Faction", "Systems"].into_iter(),
-        sectors
-            .iter()
-            .enumerate()
-            .map(|(idx, ref sector)| {
-                let style = match selected == idx {
-                    true => &SELECTED_STYLE,
-                    false => FACTION_STYLES.get(&sector.faction).unwrap(),
-                };
-                Row::StyledData(
-                    vec![
-                        sector.name.clone(),
-                        sector.faction.to_string(),
-                        (sector.systems.len() as u32).to_string(),
-                    ].into_iter(),
-                    style,
-                )
-            })
-            .skip(selected),
-    ).block(Block::default().title("Sectors").borders(Borders::ALL))
-        .header_style(Style::default().fg(Color::Yellow))
-        .widths(&[30, 15, 5])
-        .render(term, &area);
-}
-
-fn draw_galaxy_map(
-    selected: usize,
-    sectors: &Vec<Sector>,
-    term: &mut Terminal<MouseBackend>,
-    area: &Rect,
-) {
-    let (max_x, max_y) = sectors.iter().fold((0., 0.), |(x_max, y_max), s| {
-        let location = s.center();
-        (
-            location.coords.x.abs().max(x_max),
-            location.coords.y.abs().max(y_max),
-        )
-    });
-    let selected_loc = sectors[selected].center();
-    Canvas::default()
-        .block(Block::default().title("Galaxy").borders(Borders::ALL))
-        .paint(|ctx| {
-            for (idx, sector) in sectors.iter().enumerate() {
-                let color = match sector.faction {
-                    Faction::Empire => Color::Red,
-                    Faction::Federation => Color::Yellow,
-                    Faction::Cartel => Color::Magenta,
-                    Faction::Independent => Color::LightGreen,
-                };
-                let center = sector.center();
-                match idx == selected {
-                    true => ctx.print(center.coords.x, center.coords.y, "X", color),
-                    false => ctx.print(center.coords.x, center.coords.y, "*", color),
-                };
-            }
-        })
-        .x_bounds([
-            -max_x + selected_loc.coords.x,
-            selected_loc.coords.x + max_x,
-        ])
-        .y_bounds([
-            -max_y + selected_loc.coords.y,
-            selected_loc.coords.y + max_y,
-        ])
-        .render(term, area);
-}
-
-fn draw_sector_table(
-    selected: usize,
-    sector: &Sector,
+    systems: &Vec<&System>,
     term: &mut Terminal<MouseBackend>,
     area: &Rect,
 ) {
     Table::new(
         ["System", "Bodies"].into_iter(),
-        sector
-            .systems
+        systems
             .iter()
             .enumerate()
             .map(|(idx, ref system)| {
@@ -278,34 +172,31 @@ fn draw_sector_table(
                 )
             })
             .skip(selected),
-    ).block(Block::default().title(&sector.name).borders(Borders::ALL))
+    ).block(Block::default().title("System Map").borders(Borders::ALL))
         .header_style(Style::default().fg(Color::Yellow))
         .widths(&[30, 15, 5])
         .render(term, &area);
 }
 
-fn draw_sector_map(
+fn draw_galaxy_map(
     selected: usize,
-    sector: &Sector,
+    systems: &Vec<&System>,
     term: &mut Terminal<MouseBackend>,
     area: &Rect,
 ) {
-    let sector_center = sector.center();
-    let (max_x, max_y) = sector.systems.iter().fold((0., 0.), |(x_max, y_max), s| {
+    // Scale map to not overlap systems.
+    let map_scaling = 20.;
+    let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
         (
-            (sector_center.coords.x - s.location.coords.x)
-                .abs()
-                .max(x_max),
-            (sector_center.coords.y - s.location.coords.y)
-                .abs()
-                .max(y_max),
+            (s.location.coords.x / map_scaling).abs().max(x_max),
+            (s.location.coords.y / map_scaling).abs().max(y_max),
         )
     });
-    let selected_loc = sector.systems[selected].location;
+    let selected_loc = &systems[selected].location;
     Canvas::default()
-        .block(Block::default().title("Sector").borders(Borders::ALL))
+        .block(Block::default().title("Systems").borders(Borders::ALL))
         .paint(|ctx| {
-            for (idx, system) in sector.systems.iter().enumerate() {
+            for (idx, system) in systems.iter().enumerate() {
                 let color = Color::White;
                 match idx == selected {
                     true => ctx.print(

@@ -11,6 +11,9 @@ pub type Point = Point3<f64>;
 pub struct HashablePoint(Point);
 
 impl HashablePoint {
+    pub fn new(point: Point) -> HashablePoint {
+        HashablePoint { 0: point }
+    }
     pub fn as_point(&self) -> &Point {
         &self.0
     }
@@ -26,6 +29,8 @@ impl Hash for HashablePoint {
             .hash(state);
     }
 }
+
+impl Eq for HashablePoint {}
 
 impl PointN for HashablePoint {
     type Scalar = f64;

@@ -1,6 +1,5 @@
-use nalgebra::geometry::Point3 as Point;
+use utils::Point;
 
-use astronomicals::system::System;
 use entities::Faction;
 
 /// Represents a group of systems in close proximity within the same faction.
@@ -9,14 +8,16 @@ use entities::Faction;
 pub struct Sector {
     pub name: String,
     pub faction: Faction,
-    pub systems: Vec<System>,
+    pub system_locations: Vec<Point>,
 }
 
 impl Sector {
     /// Returns the point representing the centroid of the cluster.
-    pub fn center(&self) -> Point<f64> {
-        self.systems.iter().fold(Point::origin(), |center, system| {
-            center + (system.location.coords / (self.systems.len() as f64))
-        })
+    pub fn center(&self) -> Point {
+        self.system_locations
+            .iter()
+            .fold(Point::origin(), |center, system| {
+                center + (system.coords / (self.system_locations.len() as f64))
+            })
     }
 }

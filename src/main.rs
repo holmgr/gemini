@@ -15,6 +15,7 @@ extern crate serde_cbor;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate spade;
 extern crate statrs;
 extern crate termion;
 extern crate toml;
