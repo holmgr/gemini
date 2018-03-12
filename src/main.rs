@@ -34,6 +34,7 @@ mod gui;
 mod event;
 mod ship;
 mod utils;
+mod player;
 
 use generators::generate_galaxy;
 
@@ -63,6 +64,12 @@ fn main() {
                 .lock()
                 .unwrap()
                 .add_ships(resources::fetch_resource::<resources::ShipResource>().unwrap());
+
+            info!("Creating player...");
+            // TODO: Move starting credits to config file.
+            *game_state.player.lock().unwrap() =
+                player::Player::new(1000, game_state.shipyard.lock().unwrap().create_base_ship());
+
             game_state.save();
             game_state
         }

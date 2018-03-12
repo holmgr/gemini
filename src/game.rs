@@ -6,6 +6,7 @@ use serde_cbor::{from_reader, to_writer};
 
 use astronomicals::Galaxy;
 use ship::Shipyard;
+use player::Player;
 use resources::{fetch_resource, ShipResource};
 
 const SAVE_PATH: &str = "gemini/saves/";
@@ -14,6 +15,7 @@ const SAVE_PATH: &str = "gemini/saves/";
 pub struct Game {
     pub galaxy: Mutex<Galaxy>,
     pub shipyard: Mutex<Shipyard>,
+    pub player: Mutex<Player>,
 }
 
 impl Game {
@@ -22,6 +24,7 @@ impl Game {
         Arc::new(Game {
             galaxy: Mutex::new(Galaxy::new(vec![], vec![])),
             shipyard: Mutex::new(Shipyard::new()),
+            player: Mutex::new(Player::default()),
         })
     }
 
@@ -34,7 +37,11 @@ impl Game {
             .and_then(|_| File::create(base_path.join("galaxy.cbor").as_path()).ok())
             .and_then(|mut galaxy_file|
                 // Save galaxy
-                to_writer(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok());
+                to_writer(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
+            .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
+            .and_then(|mut player_file|
+                // Save galaxy
+                to_writer(&mut player_file, &(*self.player.lock().unwrap())).ok());
     }
 
     /// Attempts to load a quicksave of a game state.
@@ -45,13 +52,18 @@ impl Game {
             .ok()
             .and_then(|galaxy_file| from_reader(galaxy_file).ok());
 
+        let player: Option<Player> = File::open(base_path.join("player.cbor").as_path())
+            .ok()
+            .and_then(|player_file| from_reader(player_file).ok());
+
         let mut shipyard = Shipyard::new();
         shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());
 
-        match galaxy {
-            Some(g) => Some(Arc::new(Game {
+        match (galaxy, player) {
+            (Some(g), Some(p)) => Some(Arc::new(Game {
                 galaxy: Mutex::new(g),
                 shipyard: Mutex::new(shipyard),
+                player: Mutex::new(p),
             })),
             _ => None,
         }
