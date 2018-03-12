@@ -1,4 +1,5 @@
 use std::hash::{Hash, Hasher};
+use std::fmt;
 use utils::Point;
 use entities::Faction;
 use astronomicals::hash;
@@ -12,6 +13,7 @@ pub struct System {
     pub location: Point,
     pub name: String,
     pub faction: Faction,
+    pub state: SystemState,
     pub star: Star,
     pub satelites: Vec<Planet>,
 }
@@ -29,3 +31,30 @@ impl PartialEq for System {
 }
 
 impl Eq for System {}
+
+/// Represents the different states a system is in at a given point.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SystemState {
+    Contested,
+    CivilWar,
+    Boom,
+    Bust,
+    CivilUnrest,
+    Famine,
+    Outbreak,
+}
+
+impl fmt::Display for SystemState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let state_str = match self {
+            &SystemState::Contested => "Contested",
+            &SystemState::CivilWar => "Civil War",
+            &SystemState::Boom => "Boom",
+            &SystemState::Bust => "Bust",
+            &SystemState::CivilUnrest => "Civil Unrest",
+            &SystemState::Famine => "Famine",
+            &SystemState::Outbreak => "Outbreak",
+        };
+        write!(f, "{}", state_str)
+    }
+}
