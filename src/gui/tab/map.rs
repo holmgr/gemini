@@ -154,18 +154,19 @@ fn draw_galaxy_table(
     area: &Rect,
 ) {
     Table::new(
-        ["System", "Bodies"].into_iter(),
+        ["System", "Faction", "Bodies"].into_iter(),
         systems
             .iter()
             .enumerate()
             .map(|(idx, ref system)| {
-                let style: &Style = match selected == idx {
+                let style = match selected == idx {
                     true => &SELECTED_STYLE,
-                    false => &DEFAULT_STYLE,
+                    false => FACTION_STYLES.get(&system.faction).unwrap(),
                 };
                 Row::StyledData(
                     vec![
                         system.name.clone(),
+                        system.faction.to_string(),
                         (system.satelites.len() as u32).to_string(),
                     ].into_iter(),
                     &style,
@@ -197,7 +198,12 @@ fn draw_galaxy_map(
         .block(Block::default().title("Systems").borders(Borders::ALL))
         .paint(|ctx| {
             for (idx, system) in systems.iter().enumerate() {
-                let color = Color::White;
+                let color = match system.faction {
+                    Faction::Empire => Color::Red,
+                    Faction::Federation => Color::Yellow,
+                    Faction::Cartel => Color::Magenta,
+                    Faction::Independent => Color::LightGreen,
+                };
                 match idx == selected {
                     true => ctx.print(
                         system.location.coords.x,
