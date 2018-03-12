@@ -15,7 +15,7 @@ pub mod planets;
 use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
-use astronomicals::system::{System, SystemBuilder};
+use astronomicals::system::{System, SystemBuilder, SystemState};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
@@ -208,6 +208,7 @@ pub fn generate_system(
         .location(location)
         .name(name)
         .faction(faction)
+        .state(SystemState::Boom)
         .star(star)
         .satelites(satelites)
         .build()

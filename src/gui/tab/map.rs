@@ -154,7 +154,7 @@ fn draw_galaxy_table(
     area: &Rect,
 ) {
     Table::new(
-        ["System", "Faction", "Bodies"].into_iter(),
+        ["System", "Faction", "State", "Bodies"].into_iter(),
         systems
             .iter()
             .enumerate()
@@ -167,6 +167,7 @@ fn draw_galaxy_table(
                     vec![
                         system.name.clone(),
                         system.faction.to_string(),
+                        system.state.to_string(),
                         (system.satelites.len() as u32).to_string(),
                     ].into_iter(),
                     &style,
@@ -175,7 +176,7 @@ fn draw_galaxy_table(
             .skip(selected),
     ).block(Block::default().title("System Map").borders(Borders::ALL))
         .header_style(Style::default().fg(Color::Yellow))
-        .widths(&[30, 15, 5])
+        .widths(&[30, 15, 10, 5])
         .render(term, &area);
 }
 
