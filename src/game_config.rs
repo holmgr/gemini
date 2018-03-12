@@ -16,6 +16,7 @@ const PREFS_PATH: &str = "gemini/conf/";
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct GameConfig {
     pub map_seed: u32,
+    pub starting_credits: u32,
     pub number_of_systems: u64,
     pub system_spread: f64,
     pub number_of_sectors: usize,
@@ -104,6 +105,7 @@ impl Default for GameConfig {
     fn default() -> GameConfig {
         GameConfig {
             map_seed: 42,
+            starting_credits: 1000,
             number_of_systems: 100000,
             system_spread: 200.,
             number_of_sectors: 30,
