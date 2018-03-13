@@ -1,10 +1,11 @@
-use rand::{sample, Rng, SeedableRng, StdRng};
+use rand::{seq, ChaChaRng, Rng, SeedableRng};
 use std::time::Instant;
 use std::collections::HashMap;
 use rayon::prelude::*;
 use statrs::distribution::{Distribution, Gamma, Normal};
 use nalgebra::distance;
 use std::sync::{Arc, Mutex};
+use std::iter::FromIterator;
 use std::usize::MAX;
 use std::f64;
 
@@ -15,12 +16,12 @@ pub mod planets;
 use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
-use astronomicals::system::{System, SystemBuilder, SystemState};
+use astronomicals::system::{SystemBuilder, SystemState};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
 use generators::planets::PlanetGen;
-use astronomicals::planet::Planet;
+use astronomicals::planet::{Planet, PlanetBuilder};
 use astronomicals::sector::Sector;
 use entities::Faction;
 
@@ -61,8 +62,8 @@ pub trait Gen {
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.
 pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
-    let new_seed: &[_] = &[config.map_seed as usize];
-    let mut rng: StdRng = SeedableRng::from_seed(new_seed);
+    let new_seed: &[_] = &[config.map_seed as u32];
+    let mut rng: ChaChaRng = SeedableRng::from_seed(new_seed);
 
     // Measure time for generation.
     let now = Instant::now();
@@ -76,9 +77,9 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let mut locations = vec![];
     for _ in 0..config.number_of_systems {
         locations.push(Point::new(
-            loc_x.sample::<StdRng>(&mut rng),
-            loc_y.sample::<StdRng>(&mut rng),
-            loc_z.sample::<StdRng>(&mut rng),
+            loc_x.sample::<ChaChaRng>(&mut rng),
+            loc_y.sample::<ChaChaRng>(&mut rng),
+            loc_z.sample::<ChaChaRng>(&mut rng),
         ))
     }
 
@@ -106,17 +107,16 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     // Generate systems for each cluster in parallel.
     // Fold will generate one vector per thread (per cluster), reduce will
     // combine them to the final result.
-    let systems = sectors
+    let builders = sectors
         .par_iter()
         .fold(
-            || Vec::<System>::new(),
-            |mut systems: Vec<System>, sector| {
+            || Vec::<(SystemBuilder, Vec<PlanetBuilder>)>::new(),
+            |mut systems: Vec<(SystemBuilder, Vec<PlanetBuilder>)>, sector| {
                 for location in &sector.system_locations {
                     // Generate system
                     systems.push(generate_system(
                         location.clone(),
                         sector.faction.clone(),
-                        name_gen.clone(),
                         &star_gen,
                         &planet_gen,
                     ));
@@ -125,12 +125,53 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             },
         )
         .reduce(
-            || Vec::<System>::new(),
+            || Vec::<(SystemBuilder, Vec<PlanetBuilder>)>::new(),
             |mut systems, subsystems| {
                 systems.extend(subsystems);
                 systems
             },
         );
+    let systems = builders
+        .into_iter()
+        .map(|(mut system_builder, planet_builders)| {
+            // Unwrap and lock name generator as it is mutated by generation.
+            let hash = hash(&system_builder.location.unwrap());
+            let seed: &[_] = &[hash as u32];
+            let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
+            let mut name_gen_unwraped = name_gen.lock().unwrap();
+            name_gen_unwraped.reseed(hash as u32);
+
+            let planets: Vec<Planet> = planet_builders
+                .into_iter()
+                .map(|mut builder| {
+                    builder
+                        .name(
+                            name_gen_unwraped
+                                .generate()
+                                .unwrap_or(String::from("Unnamed")),
+                        )
+                        .build()
+                        .unwrap()
+                })
+                .collect();
+
+            // System name is the same as one random planet.
+            // Fallback to: Unnamed System if it contains no planets and no name could
+            // be generated.
+            let name = match rng.choose(&planets) {
+                Some(planet) => planet.name.clone(),
+                None => name_gen_unwraped
+                    .generate()
+                    .unwrap_or(String::from("Unnamed")),
+            } + " System";
+
+            system_builder
+                .name(name)
+                .satelites(planets)
+                .build()
+                .unwrap()
+        })
+        .collect::<Vec<_>>();
 
     info!(
         "Generated new galaxy containing: {} systems and {} planets taking {} ms",
@@ -140,10 +181,6 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
         ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
     );
-    debug!("Generated System examples:");
-    for system in systems.iter().take(10) {
-        debug!("{:#?}\n", system);
-    }
 
     Galaxy::new(sectors, systems)
 }
@@ -152,67 +189,44 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 pub fn generate_system(
     location: Point,
     faction: Faction,
-    name_gen: Arc<Mutex<NameGen>>,
     star_gen: &StarGen,
     planet_gen: &PlanetGen,
-) -> System {
+) -> (SystemBuilder, Vec<PlanetBuilder>) {
     // Calculate hash.
     let hash = hash(&location);
-    let seed: &[_] = &[hash as usize];
-    let mut rng: StdRng = SeedableRng::from_seed(seed);
+    let seed: &[_] = &[hash as u32];
+    let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
 
     let star = star_gen.generate(&mut rng).unwrap();
-
-    // Unwrap and lock name generator as it is mutated by generation.
-    let mut name_gen_unwraped = name_gen.lock().unwrap();
-    name_gen_unwraped.reseed(hash as u32);
 
     // TODO: Replace constant in config.
     let num_planets = (Gamma::new(3.5, 1.)
         .unwrap()
-        .sample::<StdRng>(&mut rng)
+        .sample::<ChaChaRng>(&mut rng)
         .round() as u32)
         .max(1);
 
     // Fallback to planet name: Unnamed if no name could be generated.
-    let satelites: Vec<Planet> = (0..num_planets)
+    let satelites: Vec<PlanetBuilder> = (0..num_planets)
         .map(|_| {
             let mut builder = planet_gen.generate(&mut rng).unwrap();
             let mass = builder.mass.unwrap();
             let surface_temperature =
                 Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
             builder
-                .name(
-                    name_gen_unwraped
-                        .generate()
-                        .unwrap_or(String::from("Unnamed")),
-                )
                 .surface_temperature(surface_temperature)
-                .planet_type(Planet::predict_type(surface_temperature, mass))
-                .build()
-                .unwrap()
+                .planet_type(Planet::predict_type(surface_temperature, mass));
+            builder
         })
         .collect();
 
-    // System name is the same as one random planet.
-    // Fallback to: Unnamed System if it contains no planets and no name could
-    // be generated.
-    let name = match rng.choose(&satelites) {
-        Some(planet) => planet.name.clone(),
-        None => name_gen_unwraped
-            .generate()
-            .unwrap_or(String::from("Unnamed")),
-    } + " System";
-
-    SystemBuilder::default()
+    let mut system = SystemBuilder::default();
+    system
         .location(location)
-        .name(name)
         .faction(faction)
         .state(SystemState::Boom)
-        .star(star)
-        .satelites(satelites)
-        .build()
-        .unwrap()
+        .star(star);
+    (system, satelites)
 }
 
 /// Split the systems in to a set number of clusters using K-means.
@@ -225,8 +239,16 @@ fn into_sectors(
     let now = Instant::now();
 
     info!("Simulating expansion for initial sectors...");
-    let seed: &[_] = &[hash as usize];
-    let mut rng: StdRng = SeedableRng::from_seed(seed);
+    let seed: &[_] = &[config.map_seed as u32];
+    let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
+
+    // Setup initial centroids
+    let mut centroids =
+        seq::sample_iter(&mut rng, system_locations.iter(), config.number_of_sectors)
+            .unwrap()
+            .into_iter()
+            .map(|system_location| system_location.as_point().clone())
+            .collect::<Vec<_>>();
 
     // Split data into two sets if using approximation
     let mut idx = 0;
@@ -237,29 +259,10 @@ fn into_sectors(
         });
 
     // System to cluster_id mapping
-    let mut cluster_map = cluster_set
-        .into_par_iter()
-        .fold(
-            || HashMap::<HashablePoint, usize>::new(),
-            |mut partial_map: HashMap<HashablePoint, usize>, system| {
-                // Generate system
-                partial_map.insert(system, 0);
-                partial_map
-            },
-        )
-        .reduce(
-            || HashMap::<HashablePoint, usize>::new(),
-            |mut cluster_map, partial_map| {
-                cluster_map.extend(partial_map);
-                cluster_map
-            },
-        );
+    let mut cluster_map: HashMap<HashablePoint, usize> =
+        HashMap::from_iter(cluster_set.into_iter().map(|point| (point, 0)));
 
-    // Setup initial centroids
-    let mut centroids = sample(&mut rng, cluster_map.iter(), config.number_of_sectors)
-        .into_iter()
-        .map(|(system_location, _)| system_location.as_point().clone())
-        .collect::<Vec<_>>();
+    debug!("Initial centroids: {:#?}", centroids);
 
     // Run K means until convergence, i.e until no reassignments
     let mut has_assigned = true;
@@ -288,7 +291,8 @@ fn into_sectors(
 
         // Calculate new centroids
         centroids
-            .par_iter_mut()
+            //.par_iter_mut()
+            .iter_mut()
             .enumerate()
             .for_each(|(id, centroid)| {
                 let mut count = 0.;
@@ -330,20 +334,24 @@ fn into_sectors(
 
     // Unwrap and lock name generator as it is mutated by generation.
     let mut name_gen_unwraped = name_gen.lock().unwrap();
-    name_gen_unwraped.reseed(config.number_of_sectors as u32);
 
     // Create sector for each cluster
     let sectors = sector_vecs
         .into_iter()
-        .map(|system_locations| Sector {
-            system_locations: system_locations
-                .into_iter()
-                .map(|hashpoint| hashpoint.as_point().clone())
-                .collect::<Vec<_>>(),
-            name: name_gen_unwraped
-                .generate()
-                .unwrap_or(String::from("Unnamed")) + " Sector",
-            faction: Faction::random_faction(&mut rng),
+        .map(|system_locations| {
+            let sector_seed: &[_] = &[system_locations.len() as u32];
+            let mut faction_rng: ChaChaRng = SeedableRng::from_seed(sector_seed);
+            name_gen_unwraped.reseed(*sector_seed.first().unwrap());
+            Sector {
+                system_locations: system_locations
+                    .into_iter()
+                    .map(|hashpoint| hashpoint.as_point().clone())
+                    .collect::<Vec<_>>(),
+                name: name_gen_unwraped
+                    .generate()
+                    .unwrap_or(String::from("Unnamed")) + " Sector",
+                faction: Faction::random_faction(&mut faction_rng),
+            }
         })
         .collect::<Vec<Sector>>();
 

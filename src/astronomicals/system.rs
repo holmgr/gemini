@@ -7,6 +7,7 @@ use astronomicals::star::Star;
 use astronomicals::planet::Planet;
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
+#[builder(field(public))]
 /// Represets a single star system with at a given location with the given
 /// star and planets.
 pub struct System {
