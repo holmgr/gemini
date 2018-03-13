@@ -17,6 +17,21 @@ impl Ship {
             base: model,
         }
     }
+
+    /// Returns a reference to the ship's current integrity.
+    pub fn integrity(&self) -> &u32 {
+        &self.integrity
+    }
+
+    /// Returns a reference to the ship's current fuel.
+    pub fn fuel(&self) -> &f32 {
+        &self.fuel
+    }
+
+    /// Returns a reference to the ship's characteristics.
+    pub fn characteristics(&self) -> &ShipCharacteristics {
+        &self.base
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
