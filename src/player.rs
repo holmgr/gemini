@@ -15,6 +15,16 @@ impl Player {
             ship: Some(ship),
         }
     }
+
+    /// Returns the player's current balance.
+    pub fn balance(&self) -> u32 {
+        self.credits
+    }
+
+    /// Returns an reference to the player's active ship.
+    pub fn ship(&self) -> &Option<Ship> {
+        &self.ship
+    }
 }
 
 impl Default for Player {
