@@ -77,6 +77,13 @@ impl Galaxy {
             .map(|hashpoint| hashpoint.as_point())
             .collect::<Vec<_>>()
     }
+
+    /// Returns the nearest system location to the given point.
+    pub fn nearest(&self, location: &Point) -> Option<&Point> {
+        self.map
+            .nearest_neighbor(&HashablePoint::new(location.clone()))
+            .map(|p| p.as_point())
+    }
 }
 
 /// Hash based on location, algorithm used is presented in the paper:
