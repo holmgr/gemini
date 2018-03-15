@@ -32,18 +32,33 @@ const MIN_SNAP_DIST: f64 = 0.9;
 /// Displays the map tab.
 pub struct MapTab {
     state: Arc<Game>,
+    sender: Sender<Event>,
     selected: Option<Point>,
     cursor: Point,
     map_scale: f64,
 }
 
+impl MapTab {
+    /// Moves the player's location to the selected system.
+    fn travel_to_selected(&self) {
+        self.state
+            .player
+            .lock()
+            .unwrap()
+            .set_location(&self.selected.unwrap());
+        self.sender.send(Event::Travel);
+    }
+}
+
 impl Tab for MapTab {
     /// Creates a map tab.
-    fn new(state: Arc<Game>) -> Box<Self> {
+    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
+        let cursor = state.player.lock().unwrap().location().clone();
         Box::new(MapTab {
             state: state,
-            selected: None,
-            cursor: Point::origin(),
+            sender: send_handle,
+            selected: Some(cursor.clone()),
+            cursor: cursor,
             map_scale: 1.,
         })
     }
@@ -57,6 +72,13 @@ impl Tab for MapTab {
     fn handle_event(&mut self, event: Event) {
         match event {
             Event::Input(input) => {
+                match input {
+                    keyevent::Key::Char(' ') if self.selected.is_some() => {
+                        self.travel_to_selected()
+                    }
+                    _ => {}
+                };
+
                 self.map_scale *= match input {
                     // Zoom out.
                     keyevent::Key::Char('u') => 0.5,

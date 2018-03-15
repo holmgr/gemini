@@ -7,12 +7,16 @@ use tui::style::{Color, Style};
 /// Displays the status tab.
 pub struct StatusTab {
     state: Arc<Game>,
+    sender: Sender<Event>,
 }
 
 impl Tab for StatusTab {
     /// Creates a status tab.
-    fn new(state: Arc<Game>) -> Box<Self> {
-        Box::new(StatusTab { state: state })
+    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
+        Box::new(StatusTab {
+            state: state,
+            sender: send_handle,
+        })
     }
 
     /// Returns the title string describing the tab.
@@ -30,16 +34,28 @@ impl Tab for StatusTab {
             .sizes(&[Size::Fixed(38), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 let player = &self.state.player.lock().unwrap();
-                draw_player_info(&player, term, &chunks[0]);
+                draw_player_info(&player, &self.state, term, &chunks[0]);
             });
     }
 }
 
 /// Draw detailed player information.
-fn draw_player_info(player: &Player, term: &mut Terminal<MouseBackend>, area: &Rect) {
+fn draw_player_info(
+    player: &Player,
+    state: &Arc<Game>,
+    term: &mut Terminal<MouseBackend>,
+    area: &Rect,
+) {
     // Data fields to be displayed in a table like format.
     let ship = player.ship();
     let player_data = vec![
+        format!(
+            "Location:  {}",
+            match state.galaxy.lock().unwrap().system(player.location()) {
+                Some(system) => system.name.clone(),
+                None => String::from("None"),
+            }
+        ),
         format!("Balance:   {} CR", player.balance().to_string()),
         format!(
             "Ship:      {}",
