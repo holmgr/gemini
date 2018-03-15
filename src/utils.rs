@@ -1,10 +1,10 @@
 use std::hash::{Hash, Hasher};
 
-use nalgebra::geometry::Point3;
+use nalgebra::geometry::Point2;
 use spade::PointN;
 
 /// Alias for 3D Point from nalgebra.
-pub type Point = Point3<f64>;
+pub type Point = Point2<f64>;
 
 /// Wrapper type implementing hashing for Point etc.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -23,7 +23,7 @@ impl Hash for HashablePoint {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0
             .iter()
-            .zip(&[73856093f64, 19349663f64, 83492791f64])
+            .zip(&[73856093f64, 19349663f64])
             .map(|(&a, &b)| (a * b) as u64)
             .fold(0, |acc, val| acc ^ val)
             .hash(state);
@@ -36,7 +36,7 @@ impl PointN for HashablePoint {
     type Scalar = f64;
 
     fn dimensions() -> usize {
-        3
+        2
     }
 
     fn nth(&self, index: usize) -> &Self::Scalar {
@@ -48,7 +48,7 @@ impl PointN for HashablePoint {
 
     fn from_value(value: Self::Scalar) -> HashablePoint {
         HashablePoint {
-            0: Point::new(value, value, value),
+            0: Point::new(value, value),
         }
     }
 }

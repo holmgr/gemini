@@ -71,7 +71,6 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     // Clusters are spaced uniformly, systems gaussian.
     let loc_x = Normal::new(0., config.system_spread).unwrap();
     let loc_y = Normal::new(0., config.system_spread).unwrap();
-    let loc_z = Normal::new(0., config.system_spread / 10.).unwrap();
 
     // Generate system locations.
     let mut locations = vec![];
@@ -79,7 +78,6 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         locations.push(Point::new(
             loc_x.sample::<ChaChaRng>(&mut rng),
             loc_y.sample::<ChaChaRng>(&mut rng),
-            loc_z.sample::<ChaChaRng>(&mut rng),
         ))
     }
 
