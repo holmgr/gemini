@@ -10,17 +10,19 @@ use ship::ShipCharacteristics;
 /// Displays the shipyard tab.
 pub struct ShipyardTab {
     state: Arc<Game>,
+    sender: Sender<Event>,
     selected: usize,
     max_selected: usize,
 }
 
 impl Tab for ShipyardTab {
     /// Creates a shipyard tab.
-    fn new(state: Arc<Game>) -> Box<Self> {
+    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
         let max_selected = &state.shipyard.lock().unwrap().get_available().len();
 
         Box::new(ShipyardTab {
             state: state,
+            sender: send_handle,
             selected: 0,
             max_selected: *max_selected - 1,
         })

@@ -11,7 +11,7 @@ use tui::style::{Color, Style};
 mod tab;
 
 use game::Game;
-use event::{add_keyboard_handler, Event, HANDLER};
+use event::{add_autosave_handler, add_keyboard_handler, Event, HANDLER};
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
@@ -23,6 +23,11 @@ pub struct Gui {
 impl Gui {
     /// Creates a new GUI
     pub fn new(game: Arc<Game>) -> Self {
+        // TODO: Make a bit more elegant
+        add_keyboard_handler();
+        // TODO: Move to some where more reasonable.
+        add_autosave_handler(game.clone());
+
         Gui {
             size: Rect::default(),
             tabs: tab::create_tabs(game),
@@ -34,9 +39,6 @@ impl Gui {
     pub fn start(&mut self) {
         // Get handle for the user events.
         let rx = HANDLER.recv_handle();
-
-        // TODO: Make a bit more elegant
-        add_keyboard_handler();
 
         // Setup terminal interace.
         let backend = MouseBackend::new().unwrap();

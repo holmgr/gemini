@@ -29,7 +29,7 @@ impl Game {
     }
 
     /// Creates and stores a quicksave of the current game.
-    pub fn save(&self) {
+    pub fn save_all(&self) {
         let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
 
         create_dir_all(base_path.as_path())
@@ -38,6 +38,18 @@ impl Game {
             .and_then(|mut galaxy_file|
                 // Save galaxy
                 to_writer(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
+            .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
+            .and_then(|mut player_file|
+                // Save galaxy
+                to_writer(&mut player_file, &(*self.player.lock().unwrap())).ok());
+    }
+
+    /// Creates and stores a quicksave of the player data.
+    pub fn save_player(&self) {
+        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
+
+        create_dir_all(base_path.as_path())
+            .ok()
             .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
             .and_then(|mut player_file|
                 // Save galaxy
