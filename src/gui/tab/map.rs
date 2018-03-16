@@ -48,6 +48,106 @@ impl MapTab {
             .set_location(&self.selected.unwrap());
         self.sender.send(Event::Travel);
     }
+
+    /// Draw system ship information for the selected system, if any.
+    fn draw_system_info(
+        &self,
+        player_loc: &Point,
+        selected_system: Option<&System>,
+        term: &mut Terminal<MouseBackend>,
+        area: &Rect,
+    ) {
+        // Do not draw anything if no system is selected.
+        if selected_system.is_none() {
+            return;
+        }
+        let system = selected_system.unwrap();
+
+        let system_data = vec![
+            format!("Faction:   {}", system.faction.to_string()),
+            format!("State:     {}", system.state.to_string()),
+            format!(
+                "Distance:  {:.1} ly",
+                distance(player_loc, &system.location)
+            ),
+            format!("Star mass: {:.1} M", system.star.mass),
+            format!("Bodies:    {}", system.satelites.len()),
+        ];
+
+        Group::default()
+            .direction(Direction::Vertical)
+            .sizes(&[Size::Fixed(8), Size::Min(1)])
+            .render(term, area, |term, chunks| {
+                SelectableList::default()
+                    .items(&system_data)
+                    .block(Block::default().title(system.name.clone().as_str()))
+                    .style(Style::default().fg(Color::Yellow))
+                    .render(term, &chunks[0]);
+                Table::new(
+                    // Prepending empty character to get alignment with list above.
+                    [" Planet", "Mass", "Temperature", "Type"].into_iter(),
+                    system.satelites.iter().map(|ref planet| {
+                        let style: &Style = &DEFAULT_STYLE;
+                        Row::StyledData(
+                            vec![
+                                format!(" {}", planet.name.clone()),
+                                format!("{:.1}", planet.mass),
+                                format!("{:.1}", planet.surface_temperature),
+                                planet.planet_type.to_string(),
+                            ].into_iter(),
+                            &style,
+                        )
+                    }),
+                ).block(Block::default().title("Planets"))
+                    .header_style(Style::default().fg(Color::Yellow))
+                    .widths(&[15, 5, 15, 15, 5])
+                    .render(term, &chunks[1]);
+            });
+    }
+
+    /// Draw the galaxy map.
+    fn draw_galaxy_map(
+        &self,
+        player_loc: &Point,
+        systems: &Vec<&System>,
+        term: &mut Terminal<MouseBackend>,
+        area: &Rect,
+    ) {
+        // Scale map to not overlap systems.
+        let map_scaling = 20. * self.map_scale;
+        let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
+            (
+                (s.location.coords.x / map_scaling).abs().max(x_max),
+                (s.location.coords.y / map_scaling).abs().max(y_max),
+            )
+        });
+        Canvas::default()
+            .block(Block::default().title("Systems").borders(Borders::ALL))
+            .paint(|ctx| {
+                for system in systems.iter() {
+                    let color = FACTION_COLORS.get(&system.faction).unwrap().clone();
+                    ctx.print(
+                        system.location.coords.x,
+                        system.location.coords.y,
+                        ".",
+                        color,
+                    );
+                }
+                // Draw player location.
+                ctx.print(player_loc.coords.x, player_loc.coords.y, "X", Color::White);
+
+                // Draw the cursor.
+                ctx.print(
+                    self.cursor.coords.x,
+                    self.cursor.coords.y,
+                    "*",
+                    Color::Yellow,
+                );
+            })
+            .x_bounds([self.cursor.coords.x - max_x, self.cursor.coords.x + max_x])
+            .y_bounds([self.cursor.coords.y - max_y, self.cursor.coords.y + max_y])
+            .render(term, &area);
+    }
 }
 
 impl Tab for MapTab {
@@ -136,115 +236,13 @@ impl Tab for MapTab {
                 // TODO: Draw system detailed information.
                 let systems = &galaxy.systems();
                 let player_loc = &self.state.player.lock().unwrap().location().clone();
-                draw_system_info(
+                self.draw_system_info(
                     &player_loc,
                     self.selected.map(|point| galaxy.system(&point).unwrap()),
                     term,
                     &chunks[0],
                 );
-                draw_galaxy_map(
-                    &player_loc,
-                    &self.cursor,
-                    &systems,
-                    &self.map_scale,
-                    term,
-                    &chunks[1],
-                );
+                self.draw_galaxy_map(&player_loc, &systems, term, &chunks[1]);
             });
     }
-}
-
-/// Draw system ship information for the selected system, if any.
-fn draw_system_info(
-    player_loc: &Point,
-    selected_system: Option<&System>,
-    term: &mut Terminal<MouseBackend>,
-    area: &Rect,
-) {
-
-    // Do not draw anything if no system is selected.
-    if selected_system.is_none() {
-        return;
-    }
-    let system = selected_system.unwrap();
-
-    let system_data = vec![
-        format!("Faction:   {}", system.faction.to_string()),
-        format!("State:     {}", system.state.to_string()),
-        format!(
-            "Distance:  {:.1} ly",
-            distance(player_loc, &system.location)
-        ),
-        format!("Star mass: {:.1} M", system.star.mass),
-        format!("Bodies:    {}", system.satelites.len()),
-    ];
-
-    Group::default()
-        .direction(Direction::Vertical)
-        .sizes(&[Size::Fixed(8), Size::Min(1)])
-        .render(term, area, |term, chunks| {
-            SelectableList::default()
-                .items(&system_data)
-                .block(Block::default().title(system.name.clone().as_str()))
-                .style(Style::default().fg(Color::Yellow))
-                .render(term, &chunks[0]);
-            Table::new(
-                // Prepending empty character to get alignment with list above.
-                [" Planet", "Mass", "Temperature", "Type"].into_iter(),
-                system.satelites.iter().map(|ref planet| {
-                    let style: &Style = &DEFAULT_STYLE;
-                    Row::StyledData(
-                        vec![
-                            format!(" {}", planet.name.clone()),
-                            format!("{:.1}", planet.mass),
-                            format!("{:.1}", planet.surface_temperature),
-                            planet.planet_type.to_string(),
-                        ].into_iter(),
-                        &style,
-                    )
-                }),
-            ).block(Block::default().title("Planets"))
-                .header_style(Style::default().fg(Color::Yellow))
-                .widths(&[15, 5, 15, 15, 5])
-                .render(term, &chunks[1]);
-        });
-}
-
-fn draw_galaxy_map(
-    player_loc: &Point,
-    cursor: &Point,
-    systems: &Vec<&System>,
-    map_scale: &f64,
-    term: &mut Terminal<MouseBackend>,
-    area: &Rect,
-) {
-    // Scale map to not overlap systems.
-    let map_scaling = 20. * map_scale;
-    let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
-        (
-            (s.location.coords.x / map_scaling).abs().max(x_max),
-            (s.location.coords.y / map_scaling).abs().max(y_max),
-        )
-    });
-    Canvas::default()
-        .block(Block::default().title("Systems").borders(Borders::ALL))
-        .paint(|ctx| {
-            for system in systems.iter() {
-                let color = FACTION_COLORS.get(&system.faction).unwrap().clone();
-                ctx.print(
-                    system.location.coords.x,
-                    system.location.coords.y,
-                    ".",
-                    color,
-                );
-            }
-            // Draw player location.
-            ctx.print(player_loc.coords.x, player_loc.coords.y, "X", Color::White);
-
-            // Draw the cursor.
-            ctx.print(cursor.coords.x, cursor.coords.y, "*", Color::Yellow);
-        })
-        .x_bounds([cursor.coords.x - max_x, cursor.coords.x + max_x])
-        .y_bounds([cursor.coords.y - max_y, cursor.coords.y + max_y])
-        .render(term, &area);
 }
