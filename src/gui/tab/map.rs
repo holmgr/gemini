@@ -1,7 +1,6 @@
 use super::*;
 use std::collections::HashMap;
 use termion::event as keyevent;
-
 use nalgebra::{distance, Vector2};
 use utils::Point;
 use entities::Faction;
@@ -34,19 +33,46 @@ pub struct MapTab {
     state: Arc<Game>,
     sender: Sender<Event>,
     selected: Option<Point>,
+    route: Option<Vec<Point>>,
     cursor: Point,
     map_scale: f64,
 }
 
 impl MapTab {
+    /// Attempts to find a route to the selected system.
+    fn find_route(&mut self) {
+        let galaxy = &self.state.galaxy.lock().unwrap();
+        let player = &mut self.state.player.lock().unwrap();
+        let range = match player.ship() {
+            &Some(ref ship) => ship.characteristics().range,
+            &None => 0.,
+        };
+
+        // Plan route if possible.
+        self.route = match galaxy.route(&player.location(), &self.selected.unwrap(), range) {
+            Some((_, route)) => Some(route),
+            None => None,
+        };
+    }
+
     /// Moves the player's location to the selected system.
-    fn travel_to_selected(&self) {
-        self.state
-            .player
-            .lock()
-            .unwrap()
-            .set_location(&self.selected.unwrap());
-        self.sender.send(Event::Travel);
+    fn travel_to_selected(&mut self) {
+        let player = &mut self.state.player.lock().unwrap();
+
+        // Only travel if the selected system is the same as the cursor and
+        // and the final destination for the route.
+        if let Some(ref route) = self.route {
+            if self.selected.is_some() && self.selected.unwrap() == self.cursor
+                && self.selected.unwrap() == *route.last().unwrap()
+            {
+                // TODO: Call player to reduce fuel etc.
+                player.set_location(&self.selected.unwrap());
+                self.sender.send(Event::Travel);
+            }
+        }
+
+        // Reset route.
+        self.route = None;
     }
 
     /// Draw system ship information for the selected system, if any.
@@ -143,6 +169,20 @@ impl MapTab {
                     "*",
                     Color::Yellow,
                 );
+
+                // Draw route if available.
+                if let Some(ref route) = self.route {
+                    for system in route {
+                        ctx.print(system.coords.x, system.coords.y, "X", Color::Yellow);
+                    }
+                    ctx.print(player_loc.coords.x, player_loc.coords.y, "S", Color::Yellow);
+                    ctx.print(
+                        route.last().unwrap().coords.x,
+                        route.last().unwrap().coords.y,
+                        "G",
+                        Color::Yellow,
+                    );
+                }
             })
             .x_bounds([self.cursor.coords.x - max_x, self.cursor.coords.x + max_x])
             .y_bounds([self.cursor.coords.y - max_y, self.cursor.coords.y + max_y])
@@ -158,6 +198,7 @@ impl Tab for MapTab {
             state: state,
             sender: send_handle,
             selected: Some(cursor.clone()),
+            route: None,
             cursor: cursor,
             map_scale: 1.,
         })
@@ -174,7 +215,10 @@ impl Tab for MapTab {
             Event::Input(input) => {
                 match input {
                     keyevent::Key::Char(' ') if self.selected.is_some() => {
-                        self.travel_to_selected()
+                        match self.route {
+                            Some(_) => self.travel_to_selected(),
+                            None => self.find_route(),
+                        };
                     }
                     _ => {}
                 };
