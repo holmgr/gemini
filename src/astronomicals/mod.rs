@@ -1,8 +1,9 @@
-use std::collections::HashMap;
+use std::collections::{BinaryHeap, HashMap};
 use spade::rtree::RTree;
 use nalgebra::distance;
+use std::f64::MAX;
 
-use utils::{HashablePoint, Point};
+use utils::{HashablePoint, OrdPoint, Point};
 
 pub mod star;
 pub mod planet;
@@ -72,7 +73,7 @@ impl Galaxy {
     /// Returns all system locations reachable from the given location within the given radius.
     pub fn reachable(&self, location: &Point, max_distance: f64) -> Vec<&Point> {
         self.map
-            .lookup_in_circle(&HashablePoint::new(location.clone()), &max_distance.sqrt())
+            .lookup_in_circle(&HashablePoint::new(location.clone()), &max_distance.powi(2))
             .iter()
             .map(|hashpoint| hashpoint.as_point())
             .collect::<Vec<_>>()
@@ -83,6 +84,70 @@ impl Galaxy {
         self.map
             .nearest_neighbor(&HashablePoint::new(location.clone()))
             .map(|p| p.as_point())
+    }
+
+    /// Finds the shortest path from start to goal with at most range distance using AStar.
+    pub fn route(&self, start: &Point, goal: &Point, range: f64) -> Option<(f64, Vec<Point>)> {
+        let mut dist = HashMap::<HashablePoint, f64>::new();
+        let mut frontier = BinaryHeap::new();
+        let mut previous = HashMap::<HashablePoint, HashablePoint>::new();
+
+        // We're at `start`, with a zero cost
+        dist.insert(HashablePoint::new(start.clone()), 0.);
+        frontier.push(OrdPoint {
+            weight: 0.,
+            point: start.clone(),
+        });
+
+        let mut cost = None;
+        // Examine the frontier with lower cost nodes first (min-heap)
+        while let Some(OrdPoint { point, weight }) = frontier.pop() {
+            // Alternatively we could have continued to find all shortest paths
+            if point == *goal {
+                cost = Some(weight);
+                break;
+            }
+
+            // Important as we may have already found a better way
+            if weight > *dist.get(&HashablePoint::new(point.clone())).unwrap_or(&MAX) {
+                continue;
+            }
+
+            // For each node we can reach, see if we can find a way with
+            // a lower cost going through this node
+            for neighbor in self.reachable(&point, (range).max(0.)) {
+                let next = OrdPoint {
+                    weight: weight + distance(&point, &neighbor) + distance(&point, &goal),
+                    point: neighbor.clone(),
+                };
+
+                // If so, add it to the frontier and continue
+                if next.weight
+                    < *dist.get(&HashablePoint::new(next.point.clone()))
+                        .unwrap_or(&MAX)
+                {
+                    frontier.push(next.clone());
+                    // Relaxation, we have now found a better way
+                    dist.insert(HashablePoint::new(next.point), next.weight);
+                    previous.insert(HashablePoint::new(next.point), HashablePoint::new(point));
+                }
+            }
+        }
+
+        match cost {
+            Some(cost) => {
+                let mut path = vec![];
+                let mut current = HashablePoint::new(goal.clone());
+                while current.as_point() != start {
+                    path.push(current.as_point().clone());
+                    current = previous.remove(&current).unwrap();
+                }
+                path.push(start.clone());
+                path.reverse();
+                Some((cost, path))
+            }
+            None => None,
+        }
     }
 }
 
