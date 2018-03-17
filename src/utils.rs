@@ -1,10 +1,44 @@
 use std::hash::{Hash, Hasher};
+use std::cmp::Ordering;
 
 use nalgebra::geometry::Point2;
 use spade::PointN;
 
 /// Alias for 3D Point from nalgebra.
 pub type Point = Point2<f64>;
+
+/// Point with weight associated so that it can be ordered.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct OrdPoint {
+    pub point: Point,
+    pub weight: f64,
+}
+
+impl OrdPoint {
+    pub fn new(point: Point, weight: f64) -> Self {
+        OrdPoint { point, weight }
+    }
+}
+
+impl Ord for OrdPoint {
+    fn cmp(&self, other: &OrdPoint) -> Ordering {
+        other.weight.partial_cmp(&self.weight).unwrap()
+    }
+}
+
+impl PartialOrd for OrdPoint {
+    fn partial_cmp(&self, other: &OrdPoint) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for OrdPoint {
+    fn eq(&self, other: &OrdPoint) -> bool {
+        self.weight == other.weight
+    }
+}
+
+impl Eq for OrdPoint {}
 
 /// Wrapper type implementing hashing for Point etc.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
