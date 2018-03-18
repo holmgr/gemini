@@ -21,6 +21,7 @@
         {
         "name" : "Shamshir",
         "manufacturer" : "Lèon de la Serre",
+        "faction": "Empire",
         "kind" : "Corvette",
         "description" : "The Shamshir is a classic Lèon design which have survived the centuries, with the first production vessel being constructed in 7128. This ship offers great jump range and cargo space in a discrete, well rounded package.",
         "integrity" : 320,
@@ -39,6 +40,7 @@
         {
         "name" : "Dao",
         "manufacturer" : "Lèon de la Serre",
+        "faction": "Empire",
         "kind" : "Corvette",
         "description" : "The Dao is the pride of Lèon de La Serre's shipyards. Originally designed by Lèon himself, the Dao represents his life's work. However, the first vessel was only produce the last century due to technological limits of the time. It represents the pinnacle of imperial might and technology with its incredible cargo space and jump range, while at the same time packing a punch.",
         "integrity" : 840,

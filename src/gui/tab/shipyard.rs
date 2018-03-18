@@ -13,18 +13,32 @@ pub struct ShipyardTab {
     sender: Sender<Event>,
     selected: usize,
     max_selected: usize,
+    available_ships: Vec<ShipCharacteristics>,
 }
 
 impl Tab for ShipyardTab {
     /// Creates a shipyard tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
-        let max_selected = &state.shipyard.lock().unwrap().get_available().len();
+        // Find all ships available at the current system.
+        // If player is not at a system something is very wrong.
+        // TODO: Feels bad to clone the arc just to avoid borrower here.
+        let dup_state = state.clone();
+        let galaxy = dup_state.galaxy.lock().unwrap();
+        let player_system = galaxy
+            .system(dup_state.player.lock().unwrap().location())
+            .unwrap();
+        let available_ships = dup_state
+            .shipyard
+            .lock()
+            .unwrap()
+            .get_available(player_system);
 
         Box::new(ShipyardTab {
             state: state,
             sender: send_handle,
             selected: 0,
-            max_selected: *max_selected - 1,
+            max_selected: available_ships.len() - 1,
+            available_ships: available_ships,
         })
     }
 
@@ -48,12 +62,24 @@ impl Tab for ShipyardTab {
 
                 _ => {}
             },
+            Event::Travel => {
+                // Find all ships available at the current system.
+                // If player is not at a system something is very wrong.
+                let galaxy = self.state.galaxy.lock().unwrap();
+                let player_system = galaxy
+                    .system(self.state.player.lock().unwrap().location())
+                    .unwrap();
+                self.available_ships = self.state
+                    .shipyard
+                    .lock()
+                    .unwrap()
+                    .get_available(player_system);
+                self.max_selected = self.available_ships.len() - 1;
+                // Guard against the number of ships being reduced.
+                self.selected = self.selected.min(self.max_selected);
+            }
             _ => {}
         };
-
-        // Update sizes of lists
-        let shipyard = &self.state.shipyard.lock().unwrap();
-        self.max_selected = shipyard.get_available().len() - 1;
     }
 
     /// Draws the tab in the given terminal and area.
@@ -63,9 +89,8 @@ impl Tab for ShipyardTab {
             //.sizes(&[Size::Percent(10), Size::Percent(90)])
             .sizes(&[Size::Fixed(15), Size::Min(1)])
             .render(term, area, |term, chunks| {
-                let ships = &self.state.shipyard.lock().unwrap().get_available().clone();
-                draw_ship_list(self.selected, ships, term, &chunks[0]);
-                draw_ship_info(&ships[self.selected], term, &chunks[1]);
+                draw_ship_list(self.selected, &self.available_ships, term, &chunks[0]);
+                draw_ship_info(&self.available_ships[self.selected], term, &chunks[1]);
             });
     }
 }

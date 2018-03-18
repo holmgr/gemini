@@ -1,5 +1,7 @@
 use std::fmt;
 use resources::ShipResource;
+use entities::Faction;
+use astronomicals::system::System;
 
 /// Ship currently owned by the player.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -39,6 +41,7 @@ impl Ship {
 pub struct ShipCharacteristics {
     pub name: String,
     pub manufacturer: String,
+    pub faction: Option<Faction>,
     pub kind: ShipType,
     pub description: String,
     pub integrity: u32,
@@ -105,9 +108,18 @@ impl Shipyard {
     }
 
     /// Get all available ships.
-    pub fn get_available(&self) -> &Vec<ShipCharacteristics> {
-        // TODO: Base the return value on the caller, i.e the faction, system etc.
-        &self.ships
+    pub fn get_available(&self, system: &System) -> Vec<ShipCharacteristics> {
+        self.ships
+            .iter()
+            .cloned()
+            .filter(|ref ship| {
+                // Only return if the faction matches, if any faction is specified.
+                if let Some(ref faction) = ship.faction {
+                    return *faction == system.faction;
+                }
+                true
+            })
+            .collect::<Vec<_>>()
     }
 
     /// Create a new starting ship.
