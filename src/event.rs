@@ -1,4 +1,5 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
 use std::io;
 use std::thread;
 use std::sync::Mutex;
@@ -6,11 +7,16 @@ use std::sync::Mutex;
 use termion::event;
 use termion::input::TermRead;
 
+use game::Game;
+
 /// User and system events.
 #[derive(Clone)]
 pub enum Event {
     Input(event::Key),
     Update,
+    Travel,
+    AutosaveStarted,
+    AutosaveCompleted,
 }
 
 lazy_static! {
@@ -69,6 +75,26 @@ pub fn add_keyboard_handler() {
             if evt == event::Key::Char('q') {
                 break;
             }
+        }
+    });
+}
+
+/// Start listener for events that should trigger an autosave.
+pub fn add_autosave_handler(state: Arc<Game>) {
+    let rx = HANDLER.recv_handle();
+    let sx = HANDLER.send_handle();
+    thread::spawn(move || {
+        loop {
+            let evt = rx.recv().unwrap();
+            match evt {
+                Event::Travel => {
+                    sx.send(Event::AutosaveStarted);
+                    // Only need to save player.
+                    state.save_player();
+                    sx.send(Event::AutosaveCompleted);
+                }
+                _ => {}
+            };
         }
     });
 }

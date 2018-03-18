@@ -1,3 +1,4 @@
+use utils::Point;
 use ship::Ship;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -5,14 +6,16 @@ use ship::Ship;
 pub struct Player {
     credits: u32,
     ship: Option<Ship>,
+    location: Point,
 }
 
 impl Player {
     /// Create a new player.
-    pub fn new(credits: u32, ship: Ship) -> Self {
+    pub fn new(credits: u32, ship: Ship, location: &Point) -> Self {
         Player {
             credits,
             ship: Some(ship),
+            location: location.clone(),
         }
     }
 
@@ -25,6 +28,16 @@ impl Player {
     pub fn ship(&self) -> &Option<Ship> {
         &self.ship
     }
+
+    /// Get the current player location.
+    pub fn location(&self) -> &Point {
+        &self.location
+    }
+
+    /// Sets the player location.
+    pub fn set_location(&mut self, location: &Point) {
+        self.location = location.clone();
+    }
 }
 
 impl Default for Player {
@@ -32,6 +45,7 @@ impl Default for Player {
         Player {
             credits: 0,
             ship: None,
+            location: Point::origin(),
         }
     }
 }

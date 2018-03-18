@@ -9,24 +9,32 @@ use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
 mod tab;
+mod eventbox;
 
 use game::Game;
-use event::{add_keyboard_handler, Event, HANDLER};
+use event::{add_autosave_handler, add_keyboard_handler, Event, HANDLER};
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
     size: Rect,
     tabs: Vec<Box<tab::Tab>>,
+    messagebox: eventbox::EventBox,
     selected_tab: usize,
 }
 
 impl Gui {
     /// Creates a new GUI
     pub fn new(game: Arc<Game>) -> Self {
+        // TODO: Make a bit more elegant
+        add_keyboard_handler();
+        // TODO: Move to some where more reasonable.
+        add_autosave_handler(game.clone());
+
         Gui {
             size: Rect::default(),
             tabs: tab::create_tabs(game),
             selected_tab: 0,
+            messagebox: eventbox::EventBox::new(),
         }
     }
 
@@ -34,9 +42,6 @@ impl Gui {
     pub fn start(&mut self) {
         // Get handle for the user events.
         let rx = HANDLER.recv_handle();
-
-        // TODO: Make a bit more elegant
-        add_keyboard_handler();
 
         // Setup terminal interace.
         let backend = MouseBackend::new().unwrap();
@@ -55,6 +60,10 @@ impl Gui {
 
             // Await the next event.
             let evt = rx.recv().unwrap();
+
+            // Send event to message box.
+            self.messagebox.handle_event(evt.clone());
+
             match evt {
                 Event::Input(input) => match input {
                     keyevent::Key::Char('q') => {
@@ -83,7 +92,7 @@ impl Gui {
     fn draw(&self, term: &mut Terminal<MouseBackend>) -> Result<(), io::Error> {
         Group::default()
             .direction(Direction::Vertical)
-            .sizes(&[Size::Fixed(3), Size::Min(0)])
+            .sizes(&[Size::Fixed(3), Size::Min(0), Size::Fixed(3)])
             .render(term, &self.size, |term, chunks| {
                 Tabs::default()
                     .block(Block::default().borders(Borders::ALL).title("Tabs"))
@@ -93,6 +102,7 @@ impl Gui {
                     .select(self.selected_tab)
                     .render(term, &chunks[0]);
                 self.tabs[self.selected_tab].draw(term, &chunks[1]);
+                self.messagebox.draw(term, &chunks[2]);
             });
         try!(term.draw());
         Ok(())

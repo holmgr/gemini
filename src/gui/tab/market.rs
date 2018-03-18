@@ -3,12 +3,16 @@ use super::*;
 /// Displays the market tab.
 pub struct MarketTab {
     state: Arc<Game>,
+    sender: Sender<Event>,
 }
 
 impl Tab for MarketTab {
     /// Creates a market tab.
-    fn new(state: Arc<Game>) -> Box<Self> {
-        Box::new(MarketTab { state: state })
+    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
+        Box::new(MarketTab {
+            state: state,
+            sender: send_handle,
+        })
     }
 
     /// Returns the title string describing the tab.

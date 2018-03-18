@@ -5,7 +5,7 @@ use resources::ShipResource;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Ship {
     integrity: u32,
-    fuel: f32,
+    fuel: f64,
     base: ShipCharacteristics,
 }
 
@@ -24,7 +24,7 @@ impl Ship {
     }
 
     /// Returns a reference to the ship's current fuel.
-    pub fn fuel(&self) -> &f32 {
+    pub fn fuel(&self) -> &f64 {
         &self.fuel
     }
 
@@ -46,8 +46,8 @@ pub struct ShipCharacteristics {
     pub mass: u32,
     pub slots: u32,
     pub cost: u32,
-    pub range: f32,
-    pub fuel: f32,
+    pub range: f64,
+    pub fuel: f64,
     pub cargo: u32,
     pub detectability: u32,
     pub maneuverability: u32,
@@ -77,9 +77,9 @@ impl fmt::Display for ShipType {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// The size of a ship.
 pub struct Dimensions {
-    length: f32,
-    width: f32,
-    height: f32,
+    length: f64,
+    width: f64,
+    height: f64,
 }
 
 impl fmt::Display for Dimensions {

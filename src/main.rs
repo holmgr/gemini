@@ -69,9 +69,16 @@ fn main() {
             *game_state.player.lock().unwrap() = player::Player::new(
                 config.starting_credits,
                 game_state.shipyard.lock().unwrap().create_base_ship(),
+                // TODO: Replace starting point in config.
+                game_state
+                    .galaxy
+                    .lock()
+                    .unwrap()
+                    .nearest(&utils::Point::origin())
+                    .unwrap(),
             );
 
-            game_state.save();
+            game_state.save_all();
             game_state
         }
     };
