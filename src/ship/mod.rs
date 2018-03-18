@@ -1,5 +1,6 @@
 use std::fmt;
 use resources::ShipResource;
+use entities::Faction;
 
 /// Ship currently owned by the player.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -39,6 +40,7 @@ impl Ship {
 pub struct ShipCharacteristics {
     pub name: String,
     pub manufacturer: String,
+    pub faction: Option<Faction>,
     pub kind: ShipType,
     pub description: String,
     pub integrity: u32,
