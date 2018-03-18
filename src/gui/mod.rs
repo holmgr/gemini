@@ -81,7 +81,12 @@ impl Gui {
                         self.tabs[self.selected_tab].handle_event(evt);
                     }
                 },
-                _ => {}
+                _ => {
+                    // Forward all general events to all tabs.
+                    self.tabs
+                        .iter_mut()
+                        .for_each(|tab| tab.handle_event(evt.clone()));
+                }
             }
         }
         term.show_cursor().unwrap();
