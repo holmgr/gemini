@@ -29,6 +29,11 @@ impl Player {
         &self.ship
     }
 
+    /// Returns an reference to the player's active ship.
+    pub fn ship_mut(&mut self) -> &mut Option<Ship> {
+        &mut self.ship
+    }
+
     /// Get the current player location.
     pub fn location(&self) -> &Point {
         &self.location
