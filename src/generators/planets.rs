@@ -17,7 +17,7 @@ impl PlanetGen {
 
     /// Create a new Planet generator which loads the star resources needed.
     pub fn new() -> Self {
-        let mass_gen = Exponential::new(1.432).unwrap();
+        let mass_gen = Exponential::new(1. / 3.).unwrap();
         let orbit_dist_gen = Gamma::new(0.28, 0.17).unwrap();
         PlanetGen {
             mass_gen,
