@@ -92,6 +92,7 @@ impl MapTab {
         let system_data = vec![
             format!("Faction:   {}", system.faction.to_string()),
             format!("State:     {}", system.state.to_string()),
+            format!("Security:  {}", system.security.to_string()),
             format!(
                 "Distance:  {:.1} ly",
                 distance(player_loc, &system.location)

@@ -16,7 +16,7 @@ pub mod planets;
 use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
-use astronomicals::system::{SystemBuilder, SystemState};
+use astronomicals::system::{SystemBuilder, SystemSecurity, SystemState};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
@@ -218,10 +218,26 @@ pub fn generate_system(
         })
         .collect();
 
+    // Set the security level based on faction and a probability.
+    let random_val: f64 = rng.gen();
+    let security_level = match faction {
+        Faction::Empire if random_val < 0.5 => SystemSecurity::High,
+        Faction::Empire if random_val >= 0.5 => SystemSecurity::Medium,
+        Faction::Federation if random_val < 0.4 => SystemSecurity::Low,
+        Faction::Federation if random_val < 0.8 => SystemSecurity::Medium,
+        Faction::Federation if random_val >= 0.8 => SystemSecurity::High,
+        Faction::Cartel if random_val < 0.5 => SystemSecurity::Medium,
+        Faction::Cartel if random_val >= 0.5 => SystemSecurity::Anarchy,
+        Faction::Independent if random_val < 0.5 => SystemSecurity::Anarchy,
+        Faction::Independent if random_val >= 0.5 => SystemSecurity::Low,
+        _ => SystemSecurity::Low,
+    };
+
     let mut system = SystemBuilder::default();
     system
         .location(location)
         .faction(faction)
+        .security(security_level)
         .state(SystemState::Boom)
         .star(star);
     (system, satelites)

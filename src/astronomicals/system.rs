@@ -14,6 +14,7 @@ pub struct System {
     pub location: Point,
     pub name: String,
     pub faction: Faction,
+    pub security: SystemSecurity,
     pub state: SystemState,
     pub star: Star,
     pub satelites: Vec<Planet>,
@@ -32,6 +33,27 @@ impl PartialEq for System {
 }
 
 impl Eq for System {}
+
+/// Represents the different security levels a system is in at a given point.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SystemSecurity {
+    Anarchy,
+    Low,
+    Medium,
+    High,
+}
+
+impl fmt::Display for SystemSecurity {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let security_str = match self {
+            &SystemSecurity::Anarchy => "Anarchy",
+            &SystemSecurity::Low => "Low",
+            &SystemSecurity::Medium => "Medium",
+            &SystemSecurity::High => "High",
+        };
+        write!(f, "{}", security_str)
+    }
+}
 
 /// Represents the different states a system is in at a given point.
 #[derive(Serialize, Deserialize, Debug, Clone)]
