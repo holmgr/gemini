@@ -213,7 +213,7 @@ pub fn generate_system(
                 Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
             builder
                 .surface_temperature(surface_temperature)
-                .planet_type(Planet::predict_type(surface_temperature, mass));
+                .planet_type(Planet::predict_type(&mut rng, surface_temperature, mass));
             builder
         })
         .collect();

@@ -1,3 +1,6 @@
+use rand::Rng;
+use statrs::distribution::{Distribution, Exponential, Gamma};
+use generators::Gen;
 use std::f64::consts::PI;
 use std::fmt;
 
@@ -28,7 +31,14 @@ pub enum PlanetType {
 
 impl fmt::Display for PlanetType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        let security_str = match self {
+            &PlanetType::Metal => "Metal",
+            &PlanetType::Icy => "Icy",
+            &PlanetType::Rocky => "Rocky",
+            &PlanetType::GasGiant => "Gas Giant",
+            &PlanetType::Earth => "Earth",
+        };
+        write!(f, "{}", security_str)
     }
 }
 
@@ -42,16 +52,16 @@ impl Planet {
     }
 
     /// Predict the planet type based on surface_temperature and mass.
-    pub fn predict_type(surface_temperature: f64, mass: f64) -> PlanetType {
+    pub fn predict_type<R: Rng>(rng: &mut R, surface_temperature: f64, mass: f64) -> PlanetType {
         // Based on trained decision tree with modifications to allow for
         // Earth-like planets at a higher rate.
-        // TODO: Rocky seems very unlikely
+        let random_val: f64 = rng.gen();
         match (surface_temperature, mass) {
-            (x, y) if x < 124.5 && y >= 8.185 => PlanetType::GasGiant,
-            (x, y) if x < 124.5 && y < 8.185 => PlanetType::Icy,
-            (x, y) if x > 280. && x < 300. && y <= 2. => PlanetType::Earth,
-            (x, y) if x >= 124.5 && y < 0.02032 => PlanetType::Rocky,
-            (x, y) if x >= 124.5 && y >= 0.02032 => PlanetType::Metal,
+            (x, y) if x < 124.5 && y >= 5.185 => PlanetType::GasGiant,
+            (x, y) if x < 124.5 && y < 5.185 => PlanetType::Icy,
+            (x, _) if x > 280. && x < 310. => PlanetType::Earth,
+            (x, _) if x >= 124.5 && random_val < 0.8 => PlanetType::Rocky,
+            (x, _) if x >= 124.5 && random_val >= 0.8 => PlanetType::Metal,
             _ => PlanetType::Rocky,
         }
     }

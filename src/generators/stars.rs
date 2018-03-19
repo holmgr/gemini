@@ -11,7 +11,7 @@ pub struct StarGen {
 impl StarGen {
     /// Create a new Star generator which loads the star resources needed.
     pub fn new() -> Self {
-        let mass_gen = Gamma::new(0.862, 0.855).unwrap();
+        let mass_gen = Gamma::new(2., 1.).unwrap();
         StarGen { mass_gen }
     }
 }
