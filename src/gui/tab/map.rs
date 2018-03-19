@@ -33,7 +33,7 @@ pub struct MapTab {
     state: Arc<Game>,
     sender: Sender<Event>,
     selected: Option<Point>,
-    route: Option<Vec<Point>>,
+    route: Option<(u32, Vec<Point>)>,
     cursor: Point,
     map_scale: f64,
 }
@@ -44,15 +44,20 @@ impl MapTab {
         let galaxy = &self.state.galaxy.lock().unwrap();
         let player = &mut self.state.player.lock().unwrap();
         let range = match player.ship() {
-            &Some(ref ship) => ship.characteristics().range,
+            &Some(ref ship) => ship.range(),
             &None => 0.,
         };
-
-        // Plan route if possible.
-        self.route = match galaxy.route(&player.location(), &self.selected.unwrap(), range) {
-            Some((_, route)) => Some(route),
-            None => None,
+        let max_jumps = match player.ship() {
+            &Some(ref ship) => ship.fuel(),
+            &None => 0,
         };
+        // Plan route if possible.
+        self.route = galaxy.route(
+            &player.location(),
+            &self.selected.unwrap(),
+            range,
+            max_jumps,
+        );
     }
 
     /// Moves the player's location to the selected system.
@@ -61,12 +66,17 @@ impl MapTab {
 
         // Only travel if the selected system is the same as the cursor and
         // and the final destination for the route.
-        if let Some(ref route) = self.route {
+        if let Some((ref jumps, ref route)) = self.route {
             if self.selected.is_some() && self.selected.unwrap() == self.cursor
                 && self.selected.unwrap() == *route.last().unwrap()
             {
                 // TODO: Call player to reduce fuel etc.
                 player.set_location(&self.selected.unwrap());
+                if let &mut Some(ref mut ship) = player.ship_mut() {
+                    // TODO: Should we always reduce fuel with 1 per jump?
+                    let new_fuel = ship.fuel() - jumps;
+                    ship.set_fuel(new_fuel);
+                }
                 self.sender.send(Event::Travel);
             }
         }
@@ -172,7 +182,7 @@ impl MapTab {
                 );
 
                 // Draw route if available.
-                if let Some(ref route) = self.route {
+                if let Some((_, ref route)) = self.route {
                     for system in route {
                         ctx.print(system.coords.x, system.coords.y, "X", Color::Yellow);
                     }

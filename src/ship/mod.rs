@@ -7,7 +7,7 @@ use astronomicals::system::System;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Ship {
     integrity: u32,
-    fuel: f64,
+    fuel: u32,
     base: ShipCharacteristics,
 }
 
@@ -25,9 +25,19 @@ impl Ship {
         &self.integrity
     }
 
-    /// Returns a reference to the ship's current fuel.
-    pub fn fuel(&self) -> &f64 {
-        &self.fuel
+    /// Returns maximum jump range.
+    pub fn range(&self) -> f64 {
+        self.base.range
+    }
+
+    /// Returns the ship's current fuel.
+    pub fn fuel(&self) -> u32 {
+        self.fuel
+    }
+
+    /// Update the fuel level.
+    pub fn set_fuel(&mut self, fuel: u32) {
+        self.fuel = fuel;
     }
 
     /// Returns a reference to the ship's characteristics.
@@ -50,7 +60,7 @@ pub struct ShipCharacteristics {
     pub slots: u32,
     pub cost: u32,
     pub range: f64,
-    pub fuel: f64,
+    pub fuel: u32,
     pub cargo: u32,
     pub detectability: u32,
     pub maneuverability: u32,

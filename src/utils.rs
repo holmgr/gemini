@@ -11,11 +11,11 @@ pub type Point = Point2<f64>;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct OrdPoint {
     pub point: Point,
-    pub weight: f64,
+    pub weight: u32,
 }
 
 impl OrdPoint {
-    pub fn new(point: Point, weight: f64) -> Self {
+    pub fn new(point: Point, weight: u32) -> Self {
         OrdPoint { point, weight }
     }
 }

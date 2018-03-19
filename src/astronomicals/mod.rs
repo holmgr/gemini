@@ -1,7 +1,7 @@
 use std::collections::{BinaryHeap, HashMap};
 use spade::rtree::RTree;
 use nalgebra::distance;
-use std::f64::MAX;
+use std::u32::MAX;
 
 use utils::{HashablePoint, OrdPoint, Point};
 
@@ -86,16 +86,24 @@ impl Galaxy {
             .map(|p| p.as_point())
     }
 
-    /// Finds the shortest path from start to goal with at most range distance using AStar.
-    pub fn route(&self, start: &Point, goal: &Point, range: f64) -> Option<(f64, Vec<Point>)> {
-        let mut dist = HashMap::<HashablePoint, f64>::new();
+    /// Finds the shortest path from start to goal with at most range along
+    /// any edge and a maximum max_steps number of nodes visited.
+    pub fn route(
+        &self,
+        start: &Point,
+        goal: &Point,
+        range: f64,
+        max_steps: u32,
+    ) -> Option<(u32, Vec<Point>)> {
+        // Node -> steps, cost mapping.
+        let mut dist = HashMap::<HashablePoint, u32>::new();
         let mut frontier = BinaryHeap::new();
         let mut previous = HashMap::<HashablePoint, HashablePoint>::new();
 
         // We're at `start`, with a zero cost
-        dist.insert(HashablePoint::new(start.clone()), 0.);
+        dist.insert(HashablePoint::new(start.clone()), 0);
         frontier.push(OrdPoint {
-            weight: 0.,
+            weight: 0,
             point: start.clone(),
         });
 
@@ -117,14 +125,15 @@ impl Galaxy {
             // a lower cost going through this node
             for neighbor in self.reachable(&point, (range).max(0.)) {
                 let next = OrdPoint {
-                    weight: weight + distance(&point, &neighbor) + distance(&point, &goal),
+                    weight: weight + 1,
                     point: neighbor.clone(),
                 };
 
                 // If so, add it to the frontier and continue
-                if next.weight
-                    < *dist.get(&HashablePoint::new(next.point.clone()))
-                        .unwrap_or(&MAX)
+                if next.weight <= max_steps
+                    && next.weight
+                        < *dist.get(&HashablePoint::new(next.point.clone()))
+                            .unwrap_or(&MAX)
                 {
                     frontier.push(next.clone());
                     // Relaxation, we have now found a better way
