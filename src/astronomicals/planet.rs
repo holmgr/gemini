@@ -28,7 +28,14 @@ pub enum PlanetType {
 
 impl fmt::Display for PlanetType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        let security_str = match self {
+            &PlanetType::Metal => "Metal",
+            &PlanetType::Icy => "Icy",
+            &PlanetType::Rocky => "Rocky",
+            &PlanetType::GasGiant => "Gas Giant",
+            &PlanetType::Earth => "Earth",
+        };
+        write!(f, "{}", security_str)
     }
 }
 
