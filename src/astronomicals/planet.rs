@@ -1,6 +1,5 @@
 use rand::Rng;
-use statrs::distribution::{Distribution, Exponential, Gamma};
-use generators::Gen;
+use statrs::distribution::{Continuous, Gamma};
 use std::f64::consts::PI;
 use std::fmt;
 
@@ -13,6 +12,7 @@ pub struct Planet {
     pub name: String,
     pub mass: f64,
     pub gravity: f64,
+    pub population: f64,
     pub orbit_distance: f64,
     pub surface_temperature: f64,
     pub planet_type: PlanetType,
@@ -43,6 +43,19 @@ impl fmt::Display for PlanetType {
 }
 
 impl Planet {
+    /// Calculates the initial planet population based on mass and planet type.
+    pub fn initial_population(mass: f64, kind: &PlanetType) -> f64 {
+        let mass_factor = Gamma::new(7., 5.).unwrap();
+        let type_factor: f64 = match kind {
+            &PlanetType::Metal => 150.,
+            &PlanetType::Earth => 800.0,
+            &PlanetType::Rocky => 1.,
+            &PlanetType::Icy => 0.5,
+            &PlanetType::GasGiant => 0.,
+        };
+        mass_factor.pdf(mass) * type_factor * 6.
+    }
+
     /// Calculate planet surface temperature from star luminosity and distance
     /// to it. Uses the Bond albedo for the Earth.
     pub fn calculate_surface_temperature(orbit_distance: f64, star: &Star) -> f64 {
@@ -57,7 +70,7 @@ impl Planet {
         // Earth-like planets at a higher rate.
         let random_val: f64 = rng.gen();
         match (surface_temperature, mass) {
-            (x, y) if x < 124.5 && y >= 5.185 => PlanetType::GasGiant,
+            (_, y) if y >= 5.185 => PlanetType::GasGiant,
             (x, y) if x < 124.5 && y < 5.185 => PlanetType::Icy,
             (x, _) if x > 280. && x < 310. => PlanetType::Earth,
             (x, _) if x >= 124.5 && random_val < 0.8 => PlanetType::Rocky,
