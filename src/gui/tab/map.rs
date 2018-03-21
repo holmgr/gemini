@@ -108,12 +108,13 @@ impl MapTab {
                 distance(player_loc, &system.location)
             ),
             format!("Star mass: {:.1} M", system.star.mass),
+            format!("Star type: {}", system.star.startype.to_string()),
             format!("Bodies:    {}", system.satelites.len()),
         ];
 
         Group::default()
             .direction(Direction::Vertical)
-            .sizes(&[Size::Fixed(8), Size::Min(1)])
+            .sizes(&[Size::Fixed(9), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 SelectableList::default()
                     .items(&system_data)
