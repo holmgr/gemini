@@ -2,7 +2,7 @@ use rand::{seq, ChaChaRng, Rng, SeedableRng};
 use std::time::Instant;
 use std::collections::HashMap;
 use rayon::prelude::*;
-use statrs::distribution::{Distribution, Gamma, Normal};
+use statrs::distribution::{Distribution, Normal, Poisson};
 use nalgebra::distance;
 use std::sync::{Arc, Mutex};
 use std::iter::FromIterator;
@@ -198,7 +198,7 @@ pub fn generate_system(
     let star = star_gen.generate(&mut rng).unwrap();
 
     // TODO: Replace constant in config.
-    let num_planets = (Gamma::new(3.5, 1.)
+    let num_planets = (Poisson::new(3.)
         .unwrap()
         .sample::<ChaChaRng>(&mut rng)
         .round() as u32)
