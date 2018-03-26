@@ -1,5 +1,6 @@
 use std::hash::{Hash, Hasher};
-use std::cmp::Ordering;
+use std::cmp::{min, Ordering};
+use std::mem::swap;
 
 use nalgebra::geometry::Point2;
 use spade::PointN;
@@ -84,5 +85,61 @@ impl PointN for HashablePoint {
         HashablePoint {
             0: Point::new(value, value),
         }
+    }
+}
+
+/// Returns the edit distance between strings `a` and `b` using Levenshtein
+/// distance.
+/// The runtime complexity is `O(m*n)`, where `m` and `n` are the
+/// strings' lengths.
+pub fn edit_distance(a: &str, b: &str) -> i32 {
+    // Handle zero length case.
+    if a.len() == 0 {
+        return b.chars().count() as i32;
+    } else if b.len() == 0 {
+        return a.chars().count() as i32;
+    }
+
+    let len_b = b.chars().count() + 1;
+
+    let mut pre = vec![0; len_b];
+    let mut cur = vec![0; len_b];
+
+    // Initialize string b.
+    for i in 1..len_b {
+        pre[i] = i as i32;
+    }
+
+    // Calculate edit distance.
+    for (i, ca) in a.chars().enumerate() {
+        // Get first column for this row.
+        cur[0] = (i as i32) + 1;
+        for (j, cb) in b.chars().enumerate() {
+            cur[j + 1] = min(
+                // Deletion.
+                pre[j + 1] + 1,
+                min(
+                    // Insertion.
+                    cur[j] + 1,
+                    // Match or substitution.
+                    pre[j] + if ca == cb { 0 } else { 1 },
+                ),
+            );
+        }
+        swap(&mut cur, &mut pre);
+    }
+
+    pre[len_b - 1]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_edit_distance() {
+        assert_eq!(edit_distance("foo", "foobar"), 3);
+        assert_eq!(edit_distance("foo", "bar"), 3);
+        assert_eq!(edit_distance("bar", "baz"), 1);
     }
 }
