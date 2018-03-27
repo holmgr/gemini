@@ -161,7 +161,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                 None => name_gen_unwraped
                     .generate()
                     .unwrap_or(String::from("Unnamed")),
-            } + " System";
+            };
 
             system_builder
                 .name(name)
@@ -365,7 +365,7 @@ fn into_sectors(
                     .collect::<Vec<_>>(),
                 name: name_gen_unwraped
                     .generate()
-                    .unwrap_or(String::from("Unnamed")) + " Sector",
+                    .unwrap_or(String::from("Unnamed")),
                 faction: Faction::random_faction(&mut faction_rng),
             }
         })

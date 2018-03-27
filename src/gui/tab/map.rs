@@ -133,7 +133,7 @@ impl MapTab {
             .render(term, area, |term, chunks| {
                 SelectableList::default()
                     .items(&system_data)
-                    .block(Block::default().title(system.name.clone().as_str()))
+                    .block(Block::default().title(&format!("{} System", system.name)))
                     .style(Style::default().fg(Color::Yellow))
                     .render(term, &chunks[0]);
                 Table::new(

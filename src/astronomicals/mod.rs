@@ -73,16 +73,9 @@ impl Galaxy {
 
     /// Finds the system with the closest matching name.
     pub fn search_name(&self, query: &String) -> Option<&system::System> {
-        let (_, sys) = self.systems
+        self.systems
             .values()
-            .fold((MAX, None), |(cost, best_sys), sys| {
-                let dist = edit_distance(query, &sys.name).abs() as u32;
-                match dist.cmp(&cost) {
-                    Ordering::Less => (dist, Some(sys)),
-                    _ => (cost, best_sys),
-                }
-            });
-        sys
+            .min_by_key(|sys| edit_distance(query, &sys.name).abs())
     }
 
     /// Returns all system locations reachable from the given location within the given radius.
