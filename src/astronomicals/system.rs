@@ -16,6 +16,7 @@ pub struct System {
     pub faction: Faction,
     pub security: SystemSecurity,
     pub state: SystemState,
+    pub reputation: Reputation,
     pub star: Star,
     pub satelites: Vec<Planet>,
 }
@@ -33,6 +34,30 @@ impl PartialEq for System {
 }
 
 impl Eq for System {}
+
+/// Represents the current player level of reputation with the system.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Reputation(i32);
+
+impl Default for Reputation {
+    fn default() -> Reputation {
+        Reputation { 0: 0 }
+    }
+}
+
+impl fmt::Display for Reputation {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let out_str = match self.0 {
+            -1000...-300 => "Hostile",
+            -300...-100 => "Unfriendly",
+            -100...100 => "Neutral",
+            100...300 => "Friendly",
+            300...1000 => "Allied",
+            _ => "Neutral",
+        };
+        write!(f, "{}", out_str)
+    }
+}
 
 /// Represents the different security levels a system is in at a given point.
 #[derive(Serialize, Deserialize, Debug, Clone)]

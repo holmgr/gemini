@@ -16,7 +16,7 @@ pub mod planets;
 use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy};
-use astronomicals::system::{SystemBuilder, SystemSecurity, SystemState};
+use astronomicals::system::{Reputation, SystemBuilder, SystemSecurity, SystemState};
 use game_config::GameConfig;
 use generators::stars::StarGen;
 use generators::names::NameGen;
@@ -241,6 +241,7 @@ pub fn generate_system(
         .faction(faction)
         .security(security_level)
         .state(SystemState::Boom)
+        .reputation(Reputation::default())
         .star(star);
     (system, satelites)
 }
