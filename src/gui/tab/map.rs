@@ -115,16 +115,17 @@ impl MapTab {
         let system = selected_system.unwrap();
 
         let system_data = vec![
-            format!("Faction:   {}", system.faction.to_string()),
-            format!("State:     {}", system.state.to_string()),
-            format!("Security:  {}", system.security.to_string()),
+            format!("Faction:       {}", system.faction.to_string()),
+            format!("State:         {}", system.state.to_string()),
+            format!("Security:      {}", system.security.to_string()),
+            format!("Reputation:    {}", system.reputation.to_string()),
             format!(
-                "Distance:  {:.1} ly",
+                "Distance:      {:.1} ly",
                 distance(player_loc, &system.location)
             ),
-            format!("Star mass: {:.1} M", system.star.mass),
-            format!("Star type: {}", system.star.startype.to_string()),
-            format!("Bodies:    {}", system.satelites.len()),
+            format!("Star mass:     {:.1} M", system.star.mass),
+            format!("Star type:     {}", system.star.startype.to_string()),
+            format!("Bodies:        {}", system.satelites.len()),
         ];
 
         Group::default()
