@@ -5,7 +5,7 @@ use nalgebra::{distance, Vector2};
 use utils::Point;
 use entities::Faction;
 use astronomicals::system::System;
-use tui::widgets::{Block, Borders, Row, SelectableList, Table, Widget};
+use tui::widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Widget};
 use tui::widgets::canvas::Canvas;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
@@ -32,6 +32,8 @@ const MIN_SNAP_DIST: f64 = 0.9;
 pub struct MapTab {
     state: Arc<Game>,
     sender: Sender<Event>,
+    search_mode: bool,
+    search_str: String,
     selected: Option<Point>,
     route: Option<(u32, Vec<Point>)>,
     cursor: Point,
@@ -83,6 +85,19 @@ impl MapTab {
 
         // Reset route.
         self.route = None;
+    }
+
+    /// Draws the event box in the given terminal and area.
+    pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
+        let draw_str = match self.search_mode {
+            true => self.search_str.as_str(),
+            false => "Press '/' to search for a system",
+        };
+        Paragraph::default()
+            .block(Block::default().borders(Borders::ALL))
+            .style(Style::default().fg(Color::Yellow))
+            .text(draw_str)
+            .render(term, &area);
     }
 
     /// Draw system ship information for the selected system, if any.
@@ -211,6 +226,8 @@ impl Tab for MapTab {
             state: state,
             sender: send_handle,
             selected: Some(cursor.clone()),
+            search_mode: false,
+            search_str: String::new(),
             route: None,
             cursor: cursor,
             map_scale: 1.,
@@ -233,15 +250,53 @@ impl Tab for MapTab {
                             None => self.find_route(),
                         };
                     }
+                    // Start search mode.
+                    keyevent::Key::Char('/') => {
+                        self.search_mode = true;
+                        return;
+                    }
+                    // Quit search mode.
+                    keyevent::Key::Esc => {
+                        self.search_str.clear();
+                        self.search_mode = false;
+                        return;
+                    }
                     _ => {}
                 };
+
+                if self.search_mode {
+                    match input {
+                        keyevent::Key::Char('\n') => {
+                            let galaxy = self.state.galaxy.lock().unwrap();
+
+                            // Set cursor to the closest matching system if
+                            // possible.
+                            match galaxy.search_name(&self.search_str) {
+                                Some(system) => self.cursor = system.location.clone(),
+                                None => {}
+                            };
+
+                            // Clear input.
+                            self.search_str.clear();
+                            self.search_mode = false;
+                        }
+                        keyevent::Key::Char(e) => {
+                            self.search_str.push(e);
+                            // Early exit.
+                            return;
+                        }
+                        keyevent::Key::Backspace => {
+                            self.search_str.pop();
+                        }
+                        _ => {}
+                    };
+                }
 
                 self.map_scale *= match input {
                     // Zoom out.
                     keyevent::Key::Char('u') => 0.5,
                     // Zoom in.
                     keyevent::Key::Char('i') => 2.,
-
                     // No zooming.
                     _ => 1.,
                 };
@@ -293,12 +348,19 @@ impl Tab for MapTab {
                 // TODO: Draw system detailed information.
                 let systems = &galaxy.systems();
                 let player_loc = &self.state.player.lock().unwrap().location().clone();
-                self.draw_system_info(
-                    &player_loc,
-                    self.selected.map(|point| galaxy.system(&point).unwrap()),
-                    term,
-                    &chunks[0],
-                );
+                // Draw sidebar.
+                Group::default()
+                    .direction(Direction::Vertical)
+                    .sizes(&[Size::Min(1), Size::Fixed(3)])
+                    .render(term, &chunks[0], |term, sidebar_chunk| {
+                        self.draw_system_info(
+                            &player_loc,
+                            self.selected.map(|point| galaxy.system(&point).unwrap()),
+                            term,
+                            &sidebar_chunk[0],
+                        );
+                        self.draw_search(term, &sidebar_chunk[1]);
+                    });
                 self.draw_galaxy_map(&player_loc, &systems, term, &chunks[1]);
             });
     }
