@@ -52,7 +52,7 @@ fn draw_player_info(
         format!(
             "Location:  {}",
             match state.galaxy.lock().unwrap().system(player.location()) {
-                Some(system) => system.name.clone(),
+                Some(system) => system.name.clone() + " System",
                 None => String::from("None"),
             }
         ),
