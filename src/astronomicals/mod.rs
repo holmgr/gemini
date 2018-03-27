@@ -2,8 +2,9 @@ use std::collections::{BinaryHeap, HashMap};
 use spade::rtree::RTree;
 use nalgebra::distance;
 use std::u32::MAX;
+use std::cmp::Ordering;
 
-use utils::{HashablePoint, OrdPoint, Point};
+use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 
 pub mod star;
 pub mod planet;
@@ -68,6 +69,20 @@ impl Galaxy {
     /// Returns mutable references to all systems.
     pub fn systems_mut(&mut self) -> Vec<&mut system::System> {
         self.systems.values_mut().collect::<Vec<_>>()
+    }
+
+    /// Finds the system with the closest matching name.
+    pub fn search_name(&self, query: &String) -> Option<&system::System> {
+        let (_, sys) = self.systems
+            .values()
+            .fold((MAX, None), |(cost, best_sys), sys| {
+                let dist = edit_distance(query, &sys.name).abs() as u32;
+                match dist.cmp(&cost) {
+                    Ordering::Less => (dist, Some(sys)),
+                    _ => (cost, best_sys),
+                }
+            });
+        sys
     }
 
     /// Returns all system locations reachable from the given location within the given radius.
