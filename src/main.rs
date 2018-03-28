@@ -18,6 +18,7 @@ extern crate serde_json;
 extern crate spade;
 extern crate statrs;
 extern crate termion;
+extern crate textwrap;
 extern crate toml;
 extern crate tui;
 

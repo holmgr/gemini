@@ -4,6 +4,7 @@ use termion::event as keyevent;
 use tui::widgets::{Block, Borders, Paragraph, SelectableList, Widget};
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
+use textwrap::fill;
 
 use ship::ShipCharacteristics;
 
@@ -120,7 +121,10 @@ fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>,
         ("Name", ship.name.clone()),
         ("Manufacturer", ship.manufacturer.clone()),
         ("Kind", ship.kind.to_string()),
-        ("Description", ship.description.clone()),
+        (
+            "Description",
+            fill(ship.description.as_str(), area.width as usize - 30),
+        ),
         ("Cost", ship.cost.to_string()),
         ("Integrity", ship.integrity.to_string()),
         ("Size", ship.size.to_string()),
