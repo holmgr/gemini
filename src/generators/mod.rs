@@ -202,11 +202,11 @@ pub fn generate_system(
             let mut builder = planet_gen.generate(&mut rng).unwrap();
             let mass = builder.mass.unwrap();
             let surface_temperature =
-                Planet::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
-            let planet_type = Planet::predict_type(&mut rng, surface_temperature, mass);
+                PlanetGen::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
+            let planet_type = PlanetGen::predict_type(&mut rng, surface_temperature, mass);
             builder
                 .surface_temperature(surface_temperature)
-                .population(Planet::initial_population(mass, &planet_type))
+                .population(PlanetGen::initial_population(mass, &planet_type))
                 .planet_type(planet_type);
             builder
         })

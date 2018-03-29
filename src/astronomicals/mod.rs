@@ -53,17 +53,6 @@ impl Galaxy {
         self.systems.values().collect::<Vec<_>>()
     }
 
-    /// Returns references to all systems ordered by distance to the given point.
-    pub fn systems_ordered(&self, location: &Point) -> Vec<&system::System> {
-        let mut systems = self.systems.values().collect::<Vec<_>>();
-        systems.sort_unstable_by(|a, b| {
-            distance(location, &a.location)
-                .partial_cmp(&distance(location, &b.location))
-                .unwrap()
-        });
-        systems
-    }
-
     /// Returns mutable references to all systems.
     pub fn systems_mut(&mut self) -> Vec<&mut system::System> {
         self.systems.values_mut().collect::<Vec<_>>()
