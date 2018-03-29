@@ -1,7 +1,6 @@
 use rand::Rng;
 use statrs::distribution::{Continuous, Gamma};
-use std::f64::consts::PI;
-use std::fmt;
+use std::{fmt, f64::consts::PI};
 
 use astronomicals::star::Star;
 

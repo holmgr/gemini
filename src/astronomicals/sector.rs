@@ -1,5 +1,4 @@
 use utils::Point;
-
 use entities::Faction;
 
 /// Represents a group of systems in close proximity within the same faction.

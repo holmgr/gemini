@@ -1,9 +1,5 @@
-use std::sync::Arc;
-use std::sync::mpsc::Sender;
-
-use tui::Terminal;
-use tui::backend::MouseBackend;
-use tui::layout::Rect;
+use std::sync::{Arc, mpsc::Sender};
+use tui::{Terminal, backend::MouseBackend, layout::Rect};
 
 use game::Game;
 use event::{Event, HANDLER};

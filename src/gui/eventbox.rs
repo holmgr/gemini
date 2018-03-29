@@ -1,8 +1,5 @@
-use tui::Terminal;
-use tui::backend::MouseBackend;
-use tui::widgets::{Block, Borders, Paragraph, Widget};
-use tui::layout::Rect;
-use tui::style::{Color, Style};
+use tui::{Terminal, backend::MouseBackend, layout::Rect, style::{Color, Style},
+          widgets::{Block, Borders, Paragraph, Widget}};
 use std::time::Instant;
 
 use event::Event;

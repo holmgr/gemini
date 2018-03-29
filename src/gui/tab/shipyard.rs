@@ -1,9 +1,8 @@
 use super::*;
 use std::iter;
 use termion::event as keyevent;
-use tui::widgets::{Block, Borders, Paragraph, SelectableList, Widget};
-use tui::layout::{Direction, Group, Rect, Size};
-use tui::style::{Color, Style};
+use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+          widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
 use textwrap::fill;
 
 use ship::ShipCharacteristics;

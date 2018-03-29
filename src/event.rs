@@ -1,12 +1,5 @@
-use std::sync::mpsc::{channel, Receiver, Sender};
-use std::sync::Arc;
-use std::io;
-use std::thread;
-use std::sync::Mutex;
-
-use termion::event;
-use termion::input::TermRead;
-
+use std::{io, thread, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}}};
+use termion::{event, input::TermRead};
 use game::Game;
 
 /// User and system events.

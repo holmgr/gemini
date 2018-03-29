@@ -1,9 +1,7 @@
+use std::{cmp::max, collections::{BTreeSet, HashSet}};
 use rand::{IsaacRng, Rng, SeedableRng};
-use std::cmp::max;
-use std::collections::{BTreeSet, HashSet};
 use inflector::Inflector;
-use petgraph::Graph;
-use petgraph::prelude::NodeIndex;
+use petgraph::{Graph, prelude::NodeIndex};
 use generators::{MutGen, SeedableGenerator, TrainableGenerator};
 use resources::AstronomicalNamesResource;
 

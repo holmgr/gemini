@@ -1,10 +1,7 @@
-use std::hash::{Hash, Hasher};
-use std::fmt;
+use std::{fmt, hash::{Hash, Hasher}};
 use utils::Point;
 use entities::Faction;
-use astronomicals::hash;
-use astronomicals::star::Star;
-use astronomicals::planet::Planet;
+use astronomicals::{hash, planet::Planet, star::Star};
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]

@@ -1,29 +1,21 @@
+use std::{collections::HashMap, f64, iter::FromIterator, sync::{Arc, Mutex}, time::Instant,
+          usize::MAX};
 use rand::{seq, ChaChaRng, Rng, SeedableRng};
-use std::time::Instant;
-use std::collections::HashMap;
 use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal, Poisson};
 use nalgebra::distance;
-use std::sync::{Arc, Mutex};
-use std::iter::FromIterator;
-use std::usize::MAX;
-use std::f64;
+
+use utils::{HashablePoint, Point};
+use resources::{fetch_resource, AstronomicalNamesResource};
+use astronomicals::{hash, Galaxy, planet::{Planet, PlanetBuilder}, sector::Sector,
+                    system::{Reputation, SystemBuilder, SystemSecurity, SystemState}};
+use generators::{names::NameGen, planets::PlanetGen, stars::StarGen};
+use game_config::GameConfig;
+use entities::Faction;
 
 pub mod names;
 pub mod stars;
 pub mod planets;
-
-use utils::{HashablePoint, Point};
-use resources::{fetch_resource, AstronomicalNamesResource};
-use astronomicals::{hash, Galaxy};
-use astronomicals::system::{Reputation, SystemBuilder, SystemSecurity, SystemState};
-use game_config::GameConfig;
-use generators::stars::StarGen;
-use generators::names::NameGen;
-use generators::planets::PlanetGen;
-use astronomicals::planet::{Planet, PlanetBuilder};
-use astronomicals::sector::Sector;
-use entities::Faction;
 
 /// A generator that can be explicitly seeded in order to the produce the same
 /// stream of psuedo randomness each time.

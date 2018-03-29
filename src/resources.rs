@@ -1,7 +1,6 @@
-use std::str;
+use std::{str, collections::HashMap};
 use serde_json;
 use serde::de::Deserialize;
-use std::collections::HashMap;
 
 use ship::ShipCharacteristics;
 

@@ -1,11 +1,8 @@
+use std::{fs::{create_dir_all, File}, io::{Read, Write}, sync::mpsc::{channel, RecvError},
+          time::Duration};
 use preferences::prefs_base_dir;
 use notify::{watcher, RecursiveMode, Watcher};
-use std::sync::mpsc::{channel, RecvError};
-use std::time::Duration;
-use std::fs::{create_dir_all, File};
-use std::io::{Read, Write};
-use toml::ser::to_string_pretty;
-use toml::de::from_str;
+use toml::{de::from_str, ser::to_string_pretty};
 
 const PREFS_PATH: &str = "gemini/conf/";
 

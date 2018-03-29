@@ -1,8 +1,8 @@
 use super::*;
+use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+          widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
+
 use player::Player;
-use tui::widgets::{Block, Borders, Paragraph, SelectableList, Widget};
-use tui::layout::{Direction, Group, Rect, Size};
-use tui::style::{Color, Style};
 
 /// Displays the status tab.
 pub struct StatusTab {

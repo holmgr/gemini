@@ -1,8 +1,6 @@
-use std::collections::{BinaryHeap, HashMap};
+use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 use spade::rtree::RTree;
 use nalgebra::distance;
-use std::u32::MAX;
-use std::cmp::Ordering;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 
