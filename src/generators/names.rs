@@ -1,10 +1,7 @@
+use std::{cmp::max, collections::{BTreeSet, HashSet}};
 use rand::{IsaacRng, Rng, SeedableRng};
-use std::cmp::max;
-use std::collections::{BTreeSet, HashSet};
 use inflector::Inflector;
-use petgraph::Graph;
-use petgraph::prelude::NodeIndex;
-use generators::{MutGen, SeedableGenerator, TrainableGenerator};
+use petgraph::{Graph, prelude::NodeIndex};
 use resources::AstronomicalNamesResource;
 
 /// Basic non deterministic name generator for generating random strings which
@@ -18,9 +15,9 @@ pub struct NameGen {
     suffixes: Vec<String>,
 }
 
-impl SeedableGenerator for NameGen {
+impl NameGen {
     /// Creates a new NameGen with the given seed.
-    fn from_seed(seed: u32) -> NameGen {
+    pub fn from_seed(seed: u32) -> NameGen {
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
         let rng: IsaacRng = SeedableRng::from_seed(new_seed);
@@ -41,19 +38,15 @@ impl SeedableGenerator for NameGen {
     }
 
     /// Creates a new NameGen with the given seed.
-    fn reseed(&mut self, seed: u32) {
+    pub fn reseed(&mut self, seed: u32) {
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
         let rng: IsaacRng = SeedableRng::from_seed(new_seed);
         self.rng = rng;
     }
-}
-
-impl TrainableGenerator for NameGen {
-    type TrainRes = AstronomicalNamesResource;
 
     /// Trains the underlying model using the given AstronomicalNamesResource.
-    fn train(&mut self, data: &AstronomicalNamesResource) {
+    pub fn train(&mut self, data: &AstronomicalNamesResource) {
         let depth = data.names.iter().fold(0, |acc, ref s| max(acc, s.len()));
 
         // Instansiate layers, number of layers is equal to the longest training
@@ -96,17 +89,13 @@ impl TrainableGenerator for NameGen {
         self.suffixes.extend_from_slice(&data.greek[..]);
         self.suffixes.extend_from_slice(&data.decorators[..]);
     }
-}
-
-impl MutGen for NameGen {
-    type GenItem = String;
 
     /// Attempts to generate a new name from the model.
     /// This name is guaranteed to exist in the training set or to have been
     /// previously generated.
     /// Attempts N number of tries, if no unique name could be found it will
     /// return None.
-    fn generate(&mut self) -> Option<String> {
+    pub fn generate(&mut self) -> Option<String> {
         // Non deterministicly generate a new string from the model.
         // Note: This may produce an exisiting string in the training set or
         // previously generated set.

@@ -1,8 +1,6 @@
-use std::collections::{BinaryHeap, HashMap};
+use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 use spade::rtree::RTree;
 use nalgebra::distance;
-use std::u32::MAX;
-use std::cmp::Ordering;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 
@@ -53,17 +51,6 @@ impl Galaxy {
     /// Returns references to all systems.
     pub fn systems(&self) -> Vec<&system::System> {
         self.systems.values().collect::<Vec<_>>()
-    }
-
-    /// Returns references to all systems ordered by distance to the given point.
-    pub fn systems_ordered(&self, location: &Point) -> Vec<&system::System> {
-        let mut systems = self.systems.values().collect::<Vec<_>>();
-        systems.sort_unstable_by(|a, b| {
-            distance(location, &a.location)
-                .partial_cmp(&distance(location, &b.location))
-                .unwrap()
-        });
-        systems
     }
 
     /// Returns mutable references to all systems.

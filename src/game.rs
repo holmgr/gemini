@@ -1,6 +1,4 @@
-use std::sync::Mutex;
-use std::sync::Arc;
-use std::fs::{create_dir_all, File};
+use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}};
 use preferences::prefs_base_dir;
 use serde_cbor::{from_reader, to_writer};
 

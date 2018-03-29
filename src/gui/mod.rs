@@ -1,18 +1,13 @@
-use std::io;
-use std::sync::Arc;
-
-use tui::Terminal;
-use tui::backend::MouseBackend;
+use std::{io, sync::Arc};
+use tui::{Terminal, backend::MouseBackend, layout::{Direction, Group, Rect, Size},
+          style::{Color, Style}, widgets::{Block, Borders, Tabs, Widget}};
 use termion::event as keyevent;
-use tui::widgets::{Block, Borders, Tabs, Widget};
-use tui::layout::{Direction, Group, Rect, Size};
-use tui::style::{Color, Style};
-
-mod tab;
-mod eventbox;
 
 use game::Game;
 use event::{add_autosave_handler, add_keyboard_handler, Event, HANDLER};
+
+mod tab;
+mod eventbox;
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
