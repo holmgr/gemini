@@ -2,20 +2,21 @@ use std::{collections::HashMap, f64, iter::FromIterator, sync::{Arc, Mutex}, tim
           usize::MAX};
 use rand::{seq, ChaChaRng, Rng, SeedableRng};
 use rayon::prelude::*;
-use statrs::distribution::{Distribution, Normal, Poisson};
+use statrs::distribution::{Distribution, Normal};
 use nalgebra::distance;
 
 use utils::{HashablePoint, Point};
 use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy, planet::{Planet, PlanetBuilder}, sector::Sector,
-                    system::{Reputation, SystemBuilder, SystemSecurity, SystemState}};
-use generators::{names::NameGen, planets::PlanetGen, stars::StarGen};
+                    system::SystemBuilder};
+use generators::names::NameGen;
 use game_config::GameConfig;
 use entities::Faction;
 
 pub mod names;
 pub mod stars;
 pub mod planets;
+pub mod systems;
 
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.
@@ -53,12 +54,8 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             .map(|point| HashablePoint::new(point.clone()))
             .collect::<Vec<_>>(),
     );
-
-    // Create Star generator.
-    let star_gen = stars::StarGen::new();
-
-    // Create Planet generator.
-    let planet_gen = planets::PlanetGen::new();
+    // Create System generator.
+    let system_gen = systems::SystemGen::new();
 
     // Generate systems for each cluster in parallel.
     // Fold will generate one vector per thread (per cluster), reduce will
@@ -70,12 +67,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             |mut systems: Vec<(SystemBuilder, Vec<PlanetBuilder>)>, sector| {
                 for location in &sector.system_locations {
                     // Generate system
-                    systems.push(generate_system(
-                        location.clone(),
-                        sector.faction.clone(),
-                        &star_gen,
-                        &planet_gen,
-                    ));
+                    systems.push(system_gen.generate(location.clone(), sector.faction.clone()));
                 }
                 systems
             },
@@ -139,69 +131,6 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     );
 
     Galaxy::new(sectors, systems)
-}
-
-/// Generate a new star system using the given generators and a location as seed.
-pub fn generate_system(
-    location: Point,
-    faction: Faction,
-    star_gen: &StarGen,
-    planet_gen: &PlanetGen,
-) -> (SystemBuilder, Vec<PlanetBuilder>) {
-    // Calculate hash.
-    let hash = hash(&location);
-    let seed: &[_] = &[hash as u32];
-    let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
-
-    let star = star_gen.generate(&mut rng).unwrap();
-
-    // TODO: Replace constant in config.
-    let num_planets = (Poisson::new(3.)
-        .unwrap()
-        .sample::<ChaChaRng>(&mut rng)
-        .round() as u32)
-        .max(1);
-
-    // Fallback to planet name: Unnamed if no name could be generated.
-    let satelites: Vec<PlanetBuilder> = (0..num_planets)
-        .map(|_| {
-            let mut builder = planet_gen.generate(&mut rng).unwrap();
-            let mass = builder.mass.unwrap();
-            let surface_temperature =
-                PlanetGen::calculate_surface_temperature(builder.orbit_distance.unwrap(), &star);
-            let planet_type = PlanetGen::predict_type(&mut rng, surface_temperature, mass);
-            builder
-                .surface_temperature(surface_temperature)
-                .population(PlanetGen::initial_population(mass, &planet_type))
-                .planet_type(planet_type);
-            builder
-        })
-        .collect();
-
-    // Set the security level based on faction and a probability.
-    let random_val: f64 = rng.gen();
-    let security_level = match faction {
-        Faction::Empire if random_val < 0.5 => SystemSecurity::High,
-        Faction::Empire if random_val >= 0.5 => SystemSecurity::Medium,
-        Faction::Federation if random_val < 0.4 => SystemSecurity::Low,
-        Faction::Federation if random_val < 0.8 => SystemSecurity::Medium,
-        Faction::Federation if random_val >= 0.8 => SystemSecurity::High,
-        Faction::Cartel if random_val < 0.5 => SystemSecurity::Medium,
-        Faction::Cartel if random_val >= 0.5 => SystemSecurity::Anarchy,
-        Faction::Independent if random_val < 0.5 => SystemSecurity::Anarchy,
-        Faction::Independent if random_val >= 0.5 => SystemSecurity::Low,
-        _ => SystemSecurity::Low,
-    };
-
-    let mut system = SystemBuilder::default();
-    system
-        .location(location)
-        .faction(faction)
-        .security(security_level)
-        .state(SystemState::Boom)
-        .reputation(Reputation::default())
-        .star(star);
-    (system, satelites)
 }
 
 /// Split the systems in to a set number of clusters using K-means.
