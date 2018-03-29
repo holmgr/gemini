@@ -17,40 +17,6 @@ pub mod names;
 pub mod stars;
 pub mod planets;
 
-/// A generator that can be explicitly seeded in order to the produce the same
-/// stream of psuedo randomness each time.
-pub trait SeedableGenerator {
-    /// Reseed a generator with the given seed.
-    fn reseed(&mut self, seed: u32);
-
-    /// Create a new generator with the given seed.
-    fn from_seed(seed: u32) -> Self;
-}
-
-/// A generator which can be trained by provided some training resource.
-pub trait TrainableGenerator {
-    type TrainRes;
-
-    /// Train the generator with the given data.
-    fn train(&mut self, &Self::TrainRes);
-}
-
-/// Generic mutable Generator, may modify the generator after generating an item.
-pub trait MutGen: TrainableGenerator + SeedableGenerator {
-    type GenItem;
-
-    /// Generate a new item from the generator, can be None if the generator is empty etc.
-    fn generate(&mut self) -> Option<Self::GenItem>;
-}
-
-/// Generic Generator, does not modify the generator instead uses provided random number generator.
-pub trait Gen {
-    type GenItem;
-
-    /// Generate a new item from the generator, can be None if the generator is empty etc.
-    fn generate<R: Rng>(&self, gen: &mut R) -> Option<Self::GenItem>;
-}
-
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.
 pub fn generate_galaxy(config: &GameConfig) -> Galaxy {

@@ -2,7 +2,6 @@ use rand::Rng;
 use statrs::distribution::{Continuous, Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
-use generators::Gen;
 use astronomicals::{planet::{PlanetBuilder, PlanetType}, star::Star};
 
 /// Basic non deterministic name generator for generating new Planets which
@@ -62,14 +61,10 @@ impl PlanetGen {
             _ => PlanetType::Rocky,
         }
     }
-}
-
-impl Gen for PlanetGen {
-    type GenItem = PlanetBuilder;
 
     /// Generates a new PlanetBuilder from the _distribution_ using the provided random
     /// generator. Sets the fields which are independent on the context.
-    fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {
+    pub fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {
         let mass = self.mass_gen.sample(gen);
 
         // Magic constant, needed to scale back since scaling needed to fit gamma.
