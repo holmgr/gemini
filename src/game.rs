@@ -1,6 +1,6 @@
 use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}};
-use preferences::prefs_base_dir;
-use serde_cbor::{from_reader, to_writer};
+use app_dirs::{get_data_root, AppDataType};
+use bincode::{deserialize_from, serialize_into};
 
 use astronomicals::Galaxy;
 use ship::Shipyard;
@@ -28,43 +28,49 @@ impl Game {
 
     /// Creates and stores a quicksave of the current game.
     pub fn save_all(&self) {
-        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
+        let base_path = get_data_root(AppDataType::UserConfig)
+            .unwrap()
+            .join(SAVE_PATH);
 
         create_dir_all(base_path.as_path())
             .ok()
             .and_then(|_| File::create(base_path.join("galaxy.cbor").as_path()).ok())
             .and_then(|mut galaxy_file|
                 // Save galaxy
-                to_writer(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
+                serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
             .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
             .and_then(|mut player_file|
                 // Save galaxy
-                to_writer(&mut player_file, &(*self.player.lock().unwrap())).ok());
+                serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
     }
 
     /// Creates and stores a quicksave of the player data.
     pub fn save_player(&self) {
-        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
+        let base_path = get_data_root(AppDataType::UserConfig)
+            .unwrap()
+            .join(SAVE_PATH);
 
         create_dir_all(base_path.as_path())
             .ok()
             .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
             .and_then(|mut player_file|
                 // Save galaxy
-                to_writer(&mut player_file, &(*self.player.lock().unwrap())).ok());
+                serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
     }
 
     /// Attempts to load a quicksave of a game state.
     pub fn load() -> Option<Arc<Self>> {
-        let base_path = prefs_base_dir().unwrap().join(SAVE_PATH);
+        let base_path = get_data_root(AppDataType::UserConfig)
+            .unwrap()
+            .join(SAVE_PATH);
 
         let galaxy: Option<Galaxy> = File::open(base_path.join("galaxy.cbor").as_path())
             .ok()
-            .and_then(|galaxy_file| from_reader(galaxy_file).ok());
+            .and_then(|galaxy_file| deserialize_from(galaxy_file).ok());
 
         let player: Option<Player> = File::open(base_path.join("player.cbor").as_path())
             .ok()
-            .and_then(|player_file| from_reader(player_file).ok());
+            .and_then(|player_file| deserialize_from(player_file).ok());
 
         let mut shipyard = Shipyard::new();
         shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());

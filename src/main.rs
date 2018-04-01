@@ -1,3 +1,5 @@
+extern crate app_dirs;
+extern crate bincode;
 #[macro_use]
 extern crate derive_builder;
 extern crate env_logger;
@@ -7,11 +9,9 @@ extern crate lazy_static;
 extern crate nalgebra;
 extern crate notify;
 extern crate petgraph;
-extern crate preferences;
 extern crate rand;
 extern crate rayon;
 extern crate serde;
-extern crate serde_cbor;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
