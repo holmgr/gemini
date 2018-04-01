@@ -4,6 +4,8 @@
 
 Science fiction space trading/smuggling simulation game using procedural generation.
 
+![screenshot](https://i.imgur.com/GsKwE3t.png)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
