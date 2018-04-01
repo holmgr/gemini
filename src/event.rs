@@ -1,4 +1,5 @@
-use std::{io, thread, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}}};
+use std::{io, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}},
+          thread::{park_timeout, spawn}, time::{Duration, Instant}};
 use termion::{event, input::TermRead};
 use game::Game;
 
@@ -36,7 +37,7 @@ impl EventHandler {
 
     /// Start the global event handler.
     pub fn start() {
-        thread::spawn(|| loop {
+        spawn(|| loop {
             let evt = HANDLER.receiver.lock().unwrap().recv().unwrap();
             for listener in HANDLER.listeners.lock().unwrap().iter() {
                 listener.send(evt.clone()).unwrap();
@@ -60,7 +61,7 @@ impl EventHandler {
 /// Start listener for keyboard events and forward to event handler.
 pub fn add_keyboard_handler() {
     let send_handle = HANDLER.send_handle();
-    thread::spawn(move || {
+    spawn(move || {
         let stdin = io::stdin();
         for c in stdin.keys() {
             let evt = c.unwrap();
@@ -76,7 +77,7 @@ pub fn add_keyboard_handler() {
 pub fn add_autosave_handler(state: Arc<Game>) {
     let rx = HANDLER.recv_handle();
     let sx = HANDLER.send_handle();
-    thread::spawn(move || {
+    spawn(move || {
         loop {
             let evt = rx.recv().unwrap();
             match evt {
@@ -88,6 +89,33 @@ pub fn add_autosave_handler(state: Arc<Game>) {
                 }
                 _ => {}
             };
+        }
+    });
+}
+
+/// Start listener for events that should run an update on the game state.
+pub fn add_update_handler(state: Arc<Game>) {
+    let sx = HANDLER.send_handle();
+    let timeout_freq = Duration::from_secs(10);
+    let mut beginning_park = Instant::now();
+    let mut timeout_remaining = timeout_freq;
+    spawn(move || {
+        // Update right away first time.
+        state.update();
+        sx.send(Event::Update);
+        loop {
+            // Wait uptil 10s, must check.
+            park_timeout(timeout_remaining);
+            let elapsed = beginning_park.elapsed();
+            // If timeout reached, send event and reset timer.
+            if elapsed >= timeout_freq {
+                state.update();
+                sx.send(Event::Update);
+                timeout_remaining = timeout_freq;
+                beginning_park = Instant::now();
+            } else {
+                timeout_remaining = timeout_freq - elapsed;
+            }
         }
     });
 }

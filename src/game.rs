@@ -26,6 +26,11 @@ impl Game {
         })
     }
 
+    /// Update Game information, does **not** advance time.
+    pub fn update(&self) {
+        self.player.lock().unwrap().update();
+    }
+
     /// Creates and stores a quicksave of the current game.
     pub fn save_all(&self) {
         let base_path = get_data_root(AppDataType::UserConfig)
