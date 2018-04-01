@@ -8,6 +8,7 @@ use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
 use utils::Point;
 use astronomicals::system::System;
 use entities::Faction;
+use player::Player;
 
 lazy_static! {
     /// Color mapping for each faction.
@@ -71,13 +72,7 @@ impl MapTab {
             if self.selected.is_some() && self.selected.unwrap() == self.cursor
                 && self.selected.unwrap() == *route.last().unwrap()
             {
-                // TODO: Call player to reduce fuel etc.
-                player.set_location(&self.selected.unwrap());
-                if let &mut Some(ref mut ship) = player.ship_mut() {
-                    // TODO: Should we always reduce fuel with 1 per jump?
-                    let new_fuel = ship.fuel() - jumps;
-                    ship.set_fuel(new_fuel);
-                }
+                player.set_route(route.clone());
                 self.sender.send(Event::Travel);
             }
         }
@@ -162,11 +157,12 @@ impl MapTab {
     /// Draw the galaxy map.
     fn draw_galaxy_map(
         &self,
-        player_loc: &Point,
+        player: &Player,
         systems: &Vec<&System>,
         term: &mut Terminal<MouseBackend>,
         area: &Rect,
     ) {
+        let player_loc = player.location();
         // Scale map to not overlap systems.
         let map_scaling = 20. * self.map_scale;
         let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
@@ -209,6 +205,19 @@ impl MapTab {
                         route.last().unwrap().coords.y,
                         "G",
                         Color::Yellow,
+                    );
+                }
+                // Draw currently travelling route if available.
+                if let Some(ref route) = player.route() {
+                    for system in route {
+                        ctx.print(system.coords.x, system.coords.y, "X", Color::White);
+                    }
+                    ctx.print(player_loc.coords.x, player_loc.coords.y, "S", Color::White);
+                    ctx.print(
+                        route.last().unwrap().coords.x,
+                        route.last().unwrap().coords.y,
+                        "G",
+                        Color::White,
                     );
                 }
             })
@@ -347,21 +356,22 @@ impl Tab for MapTab {
             .render(term, area, |term, chunks| {
                 // TODO: Draw system detailed information.
                 let systems = &galaxy.systems();
-                let player_loc = &self.state.player.lock().unwrap().location().clone();
+                let player = &self.state.player.lock().unwrap();
+                //let player_loc = &self.state.player.lock().unwrap().location().clone();
                 // Draw sidebar.
                 Group::default()
                     .direction(Direction::Vertical)
                     .sizes(&[Size::Min(1), Size::Fixed(3)])
                     .render(term, &chunks[0], |term, sidebar_chunk| {
                         self.draw_system_info(
-                            &player_loc,
+                            &player.location(),
                             self.selected.map(|point| galaxy.system(&point).unwrap()),
                             term,
                             &sidebar_chunk[0],
                         );
                         self.draw_search(term, &sidebar_chunk[1]);
                     });
-                self.draw_galaxy_map(&player_loc, &systems, term, &chunks[1]);
+                self.draw_galaxy_map(player, &systems, term, &chunks[1]);
             });
     }
 }

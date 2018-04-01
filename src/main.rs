@@ -1,5 +1,6 @@
 extern crate app_dirs;
 extern crate bincode;
+extern crate chrono;
 #[macro_use]
 extern crate derive_builder;
 extern crate env_logger;

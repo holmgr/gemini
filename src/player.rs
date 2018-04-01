@@ -1,3 +1,6 @@
+use chrono::{DateTime, Duration, Local, TimeZone, Utc};
+use nalgebra::distance;
+
 use utils::Point;
 use ship::Ship;
 
@@ -7,21 +10,73 @@ pub struct Player {
     credits: u32,
     ship: Option<Ship>,
     location: Point,
+    state: PlayerState,
 }
 
 impl Player {
+    /// Travling speed between systems, ly/ms.
+    const TRAVEL_SPEED: f64 = 10. / 60000.;
+
     /// Create a new player.
     pub fn new(credits: u32, ship: Ship, location: &Point) -> Self {
         Player {
             credits,
             ship: Some(ship),
             location: location.clone(),
+            state: PlayerState::Stationary,
         }
     }
 
     /// Update the player state.
     pub fn update(&mut self) {
-        // TODO: Update position if traveling etc.
+        // Should we continue to update?
+        let mut repeat = true;
+        while repeat {
+            repeat = false;
+            self.state = match self.state {
+                PlayerState::Stationary => PlayerState::Stationary,
+                PlayerState::Traveling {
+                    ref start,
+                    ref route,
+                } => {
+                    match route.split_first() {
+                        // Arrived at next system in route?
+                        Some((next, rest))
+                            if distance(&self.location, &route[0])
+                                <= Utc::now().signed_duration_since(*start).num_milliseconds()
+                                    as f64
+                                    * Player::TRAVEL_SPEED =>
+                        {
+                            let new_start = *start
+                                + Duration::milliseconds(
+                                    (&distance(&self.location, &next) / Player::TRAVEL_SPEED)
+                                        as i64,
+                                );
+                            self.location = *next;
+                            // TODO: Reduce fuel level.
+
+                            // Maybe we can move one step more already.
+                            repeat = true;
+                            PlayerState::Traveling {
+                                start: new_start,
+                                route: rest.to_vec(),
+                            }
+                        }
+                        // Not yet arrived?
+                        Some((next, rest)) => {
+                            let mut combined = vec![next];
+                            combined.extend(rest);
+                            PlayerState::Traveling {
+                                start: *start,
+                                route: route.to_vec(),
+                            }
+                        }
+                        // No route left.
+                        None => PlayerState::Stationary,
+                    }
+                }
+            };
+        }
     }
 
     /// Returns the player's current balance.
@@ -44,9 +99,43 @@ impl Player {
         &self.location
     }
 
-    /// Sets the player location.
-    pub fn set_location(&mut self, location: &Point) {
-        self.location = location.clone();
+    /// Sets the route for the player.
+    pub fn set_route(&mut self, route: Vec<Point>) {
+        self.state = PlayerState::Traveling {
+            start: Utc::now(),
+            route: route,
+        };
+    }
+
+    /// Get the player's currrent route, if available.
+    pub fn route(&self) -> Option<Vec<&Point>> {
+        match self.state {
+            PlayerState::Traveling { ref route, .. } => Some(route.iter().collect::<Vec<_>>()),
+            _ => None,
+        }
+    }
+
+    /// Get the estimated time of arrival (local time) and the destination of the current route.
+    pub fn eta(&self) -> Option<(String, Point)> {
+        match self.state {
+            PlayerState::Traveling {
+                ref start,
+                ref route,
+            } => {
+                let (dist, destination) = route
+                    .iter()
+                    .fold((0., &self.location), |(dist, prev), curr| {
+                        (dist + distance(prev, curr), curr)
+                    });
+                let eta = Local.from_utc_datetime(
+                    &(*start + Duration::milliseconds((dist / Player::TRAVEL_SPEED) as i64))
+                        .naive_utc(),
+                );
+                // Format in HH:MM:SS and AM/PM.
+                Some((eta.format("%r").to_string(), destination.clone()))
+            }
+            _ => None,
+        }
     }
 }
 
@@ -56,6 +145,17 @@ impl Default for Player {
             credits: 0,
             ship: None,
             location: Point::origin(),
+            state: PlayerState::Stationary,
         }
     }
+}
+
+/// Holds the current state of the player which affects the options of interaction.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+enum PlayerState {
+    Stationary,
+    Traveling {
+        start: DateTime<Utc>,
+        route: Vec<Point>,
+    },
 }

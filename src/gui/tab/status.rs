@@ -31,7 +31,7 @@ impl Tab for StatusTab {
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
         Group::default()
             .direction(Direction::Horizontal)
-            .sizes(&[Size::Fixed(38), Size::Min(1)])
+            .sizes(&[Size::Fixed(70), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 let player = &self.state.player.lock().unwrap();
                 draw_player_info(&player, &self.state, term, &chunks[0]);
@@ -48,12 +48,28 @@ fn draw_player_info(
 ) {
     // Data fields to be displayed in a table like format.
     let ship = player.ship();
+    let galaxy = state.galaxy.lock().unwrap();
     let player_data = vec![
         format!(
             "Location:  {}",
-            match state.galaxy.lock().unwrap().system(player.location()) {
+            match galaxy.system(player.location()) {
                 Some(system) => system.name.clone() + " System",
                 None => String::from("None"),
+            }
+        ),
+        format!(
+            "Status:    {}",
+            match player.eta() {
+                Some((eta, system_loc)) => {
+                    match galaxy.system(&system_loc) {
+                        Some(system) => {
+                            format!("Traveling to {} System, ETA: {}", system.name.clone(), eta)
+                        }
+                        None => String::from("Bad destination"),
+                    }
+                    //format!("System loc {}", system_loc)
+                }
+                None => String::from("Stationary"),
             }
         ),
         format!("Balance:   {} CR", player.balance().to_string()),

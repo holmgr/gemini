@@ -100,6 +100,9 @@ pub fn add_update_handler(state: Arc<Game>) {
     let mut beginning_park = Instant::now();
     let mut timeout_remaining = timeout_freq;
     spawn(move || {
+        // Update right away first time.
+        state.update();
+        sx.send(Event::Update);
         loop {
             // Wait uptil 10s, must check.
             park_timeout(timeout_remaining);
