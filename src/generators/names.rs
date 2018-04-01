@@ -136,7 +136,8 @@ impl NameGen {
         // Check if a name is valid according to constraints.
         // TODO: Extract this to a seperate method, should also probably be
         // based on configuration entries.
-        let is_valid_name = |name: &String| name.contains(" ") || name.len() < 9;
+        let is_valid_name =
+            |name: &String| (name.contains(" ") && name.len() < 11) || name.len() < 9;
 
         // Attempt N number of attempts retuning none if no unique string was
         // generated which fullfils the criteria.
