@@ -146,7 +146,6 @@ impl Galaxy {
                     path.push(current.as_point().clone());
                     current = previous.remove(&current).unwrap();
                 }
-                path.push(start.clone());
                 path.reverse();
                 Some((cost, path))
             }
