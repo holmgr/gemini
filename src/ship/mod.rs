@@ -35,9 +35,9 @@ impl Ship {
         self.fuel
     }
 
-    /// Update the fuel level.
-    pub fn set_fuel(&mut self, fuel: u32) {
-        self.fuel = fuel;
+    /// Decrements the fuel level.
+    pub fn reduce_fuel(&mut self) {
+        self.fuel -= 1;
     }
 
     /// Returns a reference to the ship's characteristics.

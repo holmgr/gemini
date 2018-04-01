@@ -52,8 +52,12 @@ impl Player {
                                     (&distance(&self.location, &next) / Player::TRAVEL_SPEED)
                                         as i64,
                                 );
+
+                            // Update position and reduce fuel.
                             self.location = *next;
-                            // TODO: Reduce fuel level.
+                            if let Some(ref mut ship) = self.ship {
+                                ship.reduce_fuel();
+                            }
 
                             // Maybe we can move one step more already.
                             repeat = true;
