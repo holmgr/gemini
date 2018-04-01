@@ -1,8 +1,8 @@
 use std::{fs::{create_dir_all, File}, io::{Read, Write}, sync::mpsc::{channel, RecvError},
           time::Duration};
-use preferences::prefs_base_dir;
 use notify::{watcher, RecursiveMode, Watcher};
 use toml::{de::from_str, ser::to_string_pretty};
+use app_dirs::{get_data_root, AppDataType};
 
 const PREFS_PATH: &str = "gemini/conf/";
 
@@ -29,7 +29,7 @@ impl GameConfig {
     /// exist, a new default GameConfig object is created, stored and returned.
     pub fn retrieve() -> GameConfig {
         let config: Option<GameConfig> = File::open(
-            prefs_base_dir()
+            get_data_root(AppDataType::UserConfig)
                 .unwrap()
                 .join(PREFS_PATH)
                 .join("general.toml")
@@ -59,7 +59,9 @@ impl GameConfig {
     /// Attempts to store the GameConfig on disk at the default preference
     /// location.
     pub fn store(&self) {
-        let base_path = prefs_base_dir().unwrap().join(PREFS_PATH);
+        let base_path = get_data_root(AppDataType::UserConfig)
+            .unwrap()
+            .join(PREFS_PATH);
 
         create_dir_all(base_path.as_path())
             .ok()
@@ -86,7 +88,9 @@ impl GameConfig {
 
         // Add a path to be watched. All files and directories at that path and
         // below will be monitored for changes.
-        let config_path = prefs_base_dir().unwrap().join(PREFS_PATH);
+        let config_path = get_data_root(AppDataType::UserConfig)
+            .unwrap()
+            .join(PREFS_PATH);
         watcher
             .watch(config_path, RecursiveMode::Recursive)
             .unwrap();
