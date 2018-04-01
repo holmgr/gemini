@@ -4,7 +4,7 @@ use tui::{Terminal, backend::MouseBackend, layout::{Direction, Group, Rect, Size
 use termion::event as keyevent;
 
 use game::Game;
-use event::{add_autosave_handler, add_keyboard_handler, Event, HANDLER};
+use event::{add_autosave_handler, add_keyboard_handler, add_update_handler, Event, HANDLER};
 
 mod tab;
 mod eventbox;
@@ -24,6 +24,8 @@ impl Gui {
         add_keyboard_handler();
         // TODO: Move to some where more reasonable.
         add_autosave_handler(game.clone());
+        // TODO: Move to some where more reasonable.
+        add_update_handler(game.clone());
 
         Gui {
             size: Rect::default(),

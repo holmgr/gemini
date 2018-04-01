@@ -19,6 +19,11 @@ impl Player {
         }
     }
 
+    /// Update the player state.
+    pub fn update(&mut self) {
+        // TODO: Update position if traveling etc.
+    }
+
     /// Returns the player's current balance.
     pub fn balance(&self) -> u32 {
         self.credits
