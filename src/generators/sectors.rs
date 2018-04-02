@@ -53,8 +53,6 @@ impl SectorGen {
         let mut cluster_map: HashMap<HashablePoint, usize> =
             HashMap::from_iter(cluster_set.into_iter().map(|point| (point, 0)));
 
-        debug!("Initial centroids: {:#?}", centroids);
-
         // Run K means until convergence, i.e until no reassignments
         let mut has_assigned = true;
         while has_assigned {
