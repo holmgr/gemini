@@ -162,13 +162,13 @@ impl NameGen {
 #[cfg(test)]
 mod names_test {
     use super::*;
-    extern crate env_logger;
+    use setup_logger;
     use resources::{fetch_resource, AstronomicalNamesResource};
 
     #[test]
     // All genrated names must be unique.
     fn test_generate_unique() {
-        let _ = env_logger::init();
+        setup_logger();
 
         let mut gen = NameGen::from_seed(0);
         let res = fetch_resource::<AstronomicalNamesResource>().unwrap();

@@ -3,10 +3,12 @@ extern crate bincode;
 extern crate chrono;
 #[macro_use]
 extern crate derive_builder;
-extern crate env_logger;
+extern crate fern;
 extern crate inflector;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate log;
 extern crate nalgebra;
 extern crate notify;
 extern crate petgraph;
@@ -23,9 +25,6 @@ extern crate textwrap;
 extern crate toml;
 extern crate tui;
 
-#[macro_use(info, debug, log)]
-extern crate log;
-
 mod game_config;
 mod resources;
 mod generators;
@@ -38,11 +37,33 @@ mod ship;
 mod utils;
 mod player;
 
+use app_dirs::{get_data_root, AppDataType};
 use generators::generate_galaxy;
+
+/// Setup logging to file in user data dir.
+pub fn setup_logger() -> Result<(), fern::InitError> {
+    let output_path = get_data_root(AppDataType::UserConfig)
+        .unwrap()
+        .join("gemini/debug.log");
+    fern::Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{}[{}][{}] {}",
+                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Debug)
+        .chain(fern::log_file(output_path)?)
+        .apply()?;
+    Ok(())
+}
 
 fn main() {
     // Init logger
-    let _ = env_logger::init();
+    setup_logger();
 
     // Load GameConfig from disk
     let config = game_config::GameConfig::retrieve();
