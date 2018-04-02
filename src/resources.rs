@@ -62,12 +62,12 @@ impl Resource for ShipResource {
 #[cfg(test)]
 mod tests {
     use super::*;
-    extern crate env_logger;
+    use setup_logger;
 
     #[test]
     fn test_fetch_resource() {
         // Init logger
-        let _ = env_logger::init();
+        setup_logger();
 
         let res = fetch_resource::<AstronomicalNamesResource>().unwrap();
         assert!(res.names.len() > 0);
