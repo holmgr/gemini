@@ -37,6 +37,7 @@ mod ship;
 mod utils;
 mod player;
 
+use log::LevelFilter;
 use app_dirs::{get_data_root, AppDataType};
 use generators::generate_galaxy;
 
@@ -55,7 +56,8 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .level(log::LevelFilter::Debug)
+        .level(log::LevelFilter::Off)
+        .level_for("gemini", LevelFilter::Trace)
         .chain(fern::log_file(output_path)?)
         .apply()?;
     Ok(())
