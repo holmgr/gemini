@@ -253,7 +253,29 @@ impl Tab for MapTab {
         match event {
             Event::Input(input) => {
                 match input {
-                    keyevent::Key::Char(' ') if self.selected.is_some() => {
+                    keyevent::Key::Char('\n') if self.search_mode => {
+                        let galaxy = self.state.galaxy.lock().unwrap();
+
+                        // Set cursor to the closest matching system if
+                        // possible.
+                        match galaxy.search_name(&self.search_str) {
+                            Some(system) => self.cursor = system.location.clone(),
+                            None => {}
+                        };
+
+                        // Clear input.
+                        self.search_str.clear();
+                        self.search_mode = false;
+                    }
+                    keyevent::Key::Char(e) if self.search_mode => {
+                        self.search_str.push(e);
+                        // Early exit.
+                        return;
+                    }
+                    keyevent::Key::Backspace if self.search_mode => {
+                        self.search_str.pop();
+                    }
+                    keyevent::Key::Char('\n') if self.selected.is_some() => {
                         match self.route {
                             Some(_) => self.travel_to_selected(),
                             None => self.find_route(),
@@ -272,34 +294,6 @@ impl Tab for MapTab {
                     }
                     _ => {}
                 };
-
-                if self.search_mode {
-                    match input {
-                        keyevent::Key::Char('\n') => {
-                            let galaxy = self.state.galaxy.lock().unwrap();
-
-                            // Set cursor to the closest matching system if
-                            // possible.
-                            match galaxy.search_name(&self.search_str) {
-                                Some(system) => self.cursor = system.location.clone(),
-                                None => {}
-                            };
-
-                            // Clear input.
-                            self.search_str.clear();
-                            self.search_mode = false;
-                        }
-                        keyevent::Key::Char(e) => {
-                            self.search_str.push(e);
-                            // Early exit.
-                            return;
-                        }
-                        keyevent::Key::Backspace => {
-                            self.search_str.pop();
-                        }
-                        _ => {}
-                    };
-                }
 
                 self.map_scale *= match input {
                     // Zoom out.
