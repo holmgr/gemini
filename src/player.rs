@@ -28,7 +28,7 @@ impl Player {
     }
 
     /// Update the player state.
-    pub fn update(&mut self) {
+    pub fn update_state(&mut self) {
         // Should we continue to update?
         let mut repeat = true;
         while repeat {

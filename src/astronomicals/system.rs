@@ -2,6 +2,7 @@ use std::{fmt, hash::{Hash, Hasher}};
 use utils::Point;
 use entities::Faction;
 use astronomicals::{hash, planet::Planet, star::Star};
+use game::Updatable;
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]
@@ -16,6 +17,14 @@ pub struct System {
     pub reputation: Reputation,
     pub star: Star,
     pub satelites: Vec<Planet>,
+}
+
+impl Updatable for System {
+    /// Updates the system one time step.
+    fn update(&mut self) {
+        // Update repuation levels.
+        self.reputation.update();
+    }
 }
 
 impl Hash for System {
@@ -35,6 +44,18 @@ impl Eq for System {}
 /// Represents the current player level of reputation with the system.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Reputation(i32);
+
+impl Updatable for Reputation {
+    /// Updates the reputation level, one time step.
+    fn update(&mut self) {
+        // "Extreme" repuation levels converges towards lower levels.
+        self.0 += match self.0 {
+            -1000...-300 => 5,
+            300...1000 => -5,
+            _ => 0,
+        }
+    }
+}
 
 impl Default for Reputation {
     fn default() -> Reputation {

@@ -1,8 +1,10 @@
 use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 use spade::rtree::RTree;
 use nalgebra::distance;
+use rayon::prelude::*;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
+use game::Updatable;
 
 pub mod star;
 pub mod planet;
@@ -151,6 +153,15 @@ impl Galaxy {
             }
             None => None,
         }
+    }
+}
+
+impl Updatable for Galaxy {
+    /// Advances time and updates all systems etc.
+    fn update(&mut self) {
+        self.systems.par_iter_mut().for_each(|(_, system)| {
+            system.update();
+        });
     }
 }
 
