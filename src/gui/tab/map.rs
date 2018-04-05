@@ -84,13 +84,13 @@ impl MapTab {
     /// Draws the event box in the given terminal and area.
     pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
         let draw_str = match self.search_mode {
-            true => self.search_str.as_str(),
-            false => "Press '/' to search for a system",
+            true => format!("{}{}", self.search_str, "{mod=bold |}"),
+            false => String::from("Press '/' to search for a system"),
         };
         Paragraph::default()
             .block(Block::default().borders(Borders::ALL))
             .style(Style::default().fg(Color::Yellow))
-            .text(draw_str)
+            .text(draw_str.as_str())
             .render(term, &area);
     }
 
@@ -280,6 +280,12 @@ impl Tab for MapTab {
                             Some(_) => self.travel_to_selected(),
                             None => self.find_route(),
                         };
+                    }
+                    // Center map around player
+                    keyevent::Key::Char(' ') => {
+                        if let Ok(player) = self.state.player.lock() {
+                            self.cursor = player.location().clone();
+                        }
                     }
                     // Start search mode.
                     keyevent::Key::Char('/') => {
