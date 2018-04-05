@@ -281,6 +281,12 @@ impl Tab for MapTab {
                             None => self.find_route(),
                         };
                     }
+                    // Center map around player
+                    keyevent::Key::Char(' ') => {
+                        if let Ok(player) = self.state.player.lock() {
+                            self.cursor = player.location().clone();
+                        }
+                    }
                     // Start search mode.
                     keyevent::Key::Char('/') => {
                         self.search_mode = true;
