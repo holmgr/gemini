@@ -36,7 +36,8 @@ impl Game {
             self.save_all();
         }
 
-        self.player.lock().unwrap().update();
+        // Update player location etc.
+        self.player.lock().unwrap().update_state();
     }
 
     /// Attemps to advance time returning the number of days advanced if any.
