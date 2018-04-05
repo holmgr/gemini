@@ -138,3 +138,9 @@ impl Game {
         }
     }
 }
+
+/// All game types which should be updated when time is advanced.
+pub trait Updatable {
+    /// Performs an update for one time step.
+    fn update(&mut self);
+}

@@ -4,6 +4,7 @@ use nalgebra::distance;
 use rayon::prelude::*;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
+use game::Updatable;
 
 pub mod star;
 pub mod planet;
@@ -37,13 +38,6 @@ impl Galaxy {
             map,
             systems: systems_map,
         }
-    }
-
-    /// Advances time and updates all systems etc.
-    pub fn update(&mut self) {
-        self.systems.par_iter_mut().for_each(|(_, system)| {
-            system.update();
-        });
     }
 
     /// Returns a reference system at the given location if it exists.
@@ -159,6 +153,15 @@ impl Galaxy {
             }
             None => None,
         }
+    }
+}
+
+impl Updatable for Galaxy {
+    /// Advances time and updates all systems etc.
+    fn update(&mut self) {
+        self.systems.par_iter_mut().for_each(|(_, system)| {
+            system.update();
+        });
     }
 }
 
