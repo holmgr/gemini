@@ -1,6 +1,7 @@
 use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 use spade::rtree::RTree;
 use nalgebra::distance;
+use rayon::prelude::*;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 
@@ -36,6 +37,13 @@ impl Galaxy {
             map,
             systems: systems_map,
         }
+    }
+
+    /// Advances time and updates all systems etc.
+    pub fn update(&mut self) {
+        self.systems.par_iter_mut().for_each(|(_, system)| {
+            system.update();
+        });
     }
 
     /// Returns a reference system at the given location if it exists.

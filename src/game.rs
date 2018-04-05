@@ -1,6 +1,7 @@
-use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}};
+use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant};
 use app_dirs::{get_data_root, AppDataType};
 use bincode::{deserialize_from, serialize_into};
+use chrono::{DateTime, Duration, TimeZone, Utc};
 
 use astronomicals::Galaxy;
 use ship::Shipyard;
@@ -14,6 +15,7 @@ pub struct Game {
     pub galaxy: Mutex<Galaxy>,
     pub shipyard: Mutex<Shipyard>,
     pub player: Mutex<Player>,
+    updated: Mutex<DateTime<Utc>>,
 }
 
 impl Game {
@@ -23,12 +25,50 @@ impl Game {
             galaxy: Mutex::new(Galaxy::new(vec![], vec![])),
             shipyard: Mutex::new(Shipyard::new()),
             player: Mutex::new(Player::default()),
+            updated: Mutex::new(Utc.ymd(2018, 1, 1).and_hms(0, 0, 0)), // Start time
         })
     }
 
-    /// Update Game information, does **not** advance time.
+    /// Update Game information, may advance time.
     pub fn update(&self) {
+        // If we have advanced time some steps.
+        if let Some(_) = self.attempt_advance_time() {
+            self.save_all();
+        }
+
         self.player.lock().unwrap().update();
+    }
+
+    /// Attemps to advance time returning the number of days advanced if any.
+    fn attempt_advance_time(&self) -> Option<i64> {
+        let updated: &mut DateTime<Utc> = &mut self.updated.lock().unwrap();
+        // Check if we need to advance time.
+        let days_passed = Utc::now().signed_duration_since(*updated).num_days();
+        match days_passed > 0 {
+            true => {
+                // Measure time for generation.
+                let now = Instant::now();
+                debug!("Advancing time: {} steps", days_passed);
+
+                // Update state iterativly.
+                for _ in 0..days_passed {
+                    self.galaxy.lock().unwrap().update();
+                }
+
+                // Update last update timer.
+                *updated = updated
+                    .checked_add_signed(Duration::days(days_passed))
+                    .unwrap();
+                //self.save_all();
+                debug!(
+                    "Time advancement finished, took {} ms",
+                    ((now.elapsed().as_secs() * 1_000)
+                        + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
+                );
+                Some(days_passed)
+            }
+            false => None,
+        }
     }
 
     /// Creates and stores a quicksave of the current game.
@@ -41,12 +81,16 @@ impl Game {
             .ok()
             .and_then(|_| File::create(base_path.join("galaxy.cbor").as_path()).ok())
             .and_then(|mut galaxy_file|
-                // Save galaxy
-                serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
+                      // Save galaxy
+                      serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
             .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
             .and_then(|mut player_file|
-                // Save galaxy
-                serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
+                      // Save galaxy
+                      serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok())
+            .and_then(|_| File::create(base_path.join("updated.cbor").as_path()).ok())
+            .and_then(|mut update_file|
+                      // Save galaxy
+                      serialize_into(&mut update_file, &(*self.updated.lock().unwrap())).ok());
     }
 
     /// Creates and stores a quicksave of the player data.
@@ -59,8 +103,8 @@ impl Game {
             .ok()
             .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
             .and_then(|mut player_file|
-                // Save galaxy
-                serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
+                      // Save galaxy
+                      serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
     }
 
     /// Attempts to load a quicksave of a game state.
@@ -76,15 +120,19 @@ impl Game {
         let player: Option<Player> = File::open(base_path.join("player.cbor").as_path())
             .ok()
             .and_then(|player_file| deserialize_from(player_file).ok());
+        let updated: Option<DateTime<Utc>> = File::open(base_path.join("updated.cbor").as_path())
+            .ok()
+            .and_then(|updated_file| deserialize_from(updated_file).ok());
 
         let mut shipyard = Shipyard::new();
         shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());
 
-        match (galaxy, player) {
-            (Some(g), Some(p)) => Some(Arc::new(Game {
+        match (galaxy, player, updated) {
+            (Some(g), Some(p), Some(u)) => Some(Arc::new(Game {
                 galaxy: Mutex::new(g),
                 shipyard: Mutex::new(shipyard),
                 player: Mutex::new(p),
+                updated: Mutex::new(u),
             })),
             _ => None,
         }

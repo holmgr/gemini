@@ -18,6 +18,14 @@ pub struct System {
     pub satelites: Vec<Planet>,
 }
 
+impl System {
+    /// Updates the system one time step.
+    pub fn update(&mut self) {
+        // Update repuation levels.
+        self.reputation.update();
+    }
+}
+
 impl Hash for System {
     fn hash<H: Hasher>(&self, state: &mut H) {
         hash(&self.location).hash(state);
@@ -35,6 +43,18 @@ impl Eq for System {}
 /// Represents the current player level of reputation with the system.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Reputation(i32);
+
+impl Reputation {
+    /// Updates the reputation level, one time step.
+    pub fn update(&mut self) {
+        // "Extreme" repuation levels converges towards lower levels.
+        self.0 += match self.0 {
+            -1000...-300 => 5,
+            300...1000 => -5,
+            _ => 0,
+        }
+    }
+}
 
 impl Default for Reputation {
     fn default() -> Reputation {
