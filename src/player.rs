@@ -103,6 +103,11 @@ impl Player {
         &self.location
     }
 
+    /// Returns the player state.
+    pub fn state(&self) -> PlayerState {
+        self.state.clone()
+    }
+
     /// Sets the route for the player.
     pub fn set_route(&mut self, route: Vec<Point>) {
         self.state = PlayerState::Traveling {
@@ -156,7 +161,7 @@ impl Default for Player {
 
 /// Holds the current state of the player which affects the options of interaction.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-enum PlayerState {
+pub enum PlayerState {
     Stationary,
     Traveling {
         start: DateTime<Utc>,
