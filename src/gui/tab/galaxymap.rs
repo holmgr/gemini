@@ -28,8 +28,8 @@ lazy_static! {
 /// The minimum distance within which the gui will snap to the closest system.
 const MIN_SNAP_DIST: f64 = 0.9;
 
-/// Displays the map tab.
-pub struct MapTab {
+/// Displays the galaxy map tab.
+pub struct GalaxyMapTab {
     state: Arc<Game>,
     sender: Sender<Event>,
     search_mode: bool,
@@ -40,7 +40,7 @@ pub struct MapTab {
     map_scale: f64,
 }
 
-impl MapTab {
+impl GalaxyMapTab {
     /// Attempts to find a route to the selected system.
     fn find_route(&mut self) {
         let galaxy = &self.state.galaxy.lock().unwrap();
@@ -227,11 +227,11 @@ impl MapTab {
     }
 }
 
-impl Tab for MapTab {
+impl Tab for GalaxyMapTab {
     /// Creates a map tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
         let cursor = state.player.lock().unwrap().location().clone();
-        Box::new(MapTab {
+        Box::new(GalaxyMapTab {
             state: state,
             sender: send_handle,
             selected: Some(cursor.clone()),
