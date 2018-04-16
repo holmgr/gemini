@@ -7,6 +7,7 @@ use game::Game;
 use event::{add_autosave_handler, add_keyboard_handler, add_update_handler, Event, HANDLER};
 
 mod tab;
+pub mod dialog;
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
