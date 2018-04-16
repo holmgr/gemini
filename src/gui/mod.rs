@@ -7,13 +7,11 @@ use game::Game;
 use event::{add_autosave_handler, add_keyboard_handler, add_update_handler, Event, HANDLER};
 
 mod tab;
-mod eventbox;
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {
     size: Rect,
     tabs: Vec<Box<tab::Tab>>,
-    messagebox: eventbox::EventBox,
     selected_tab: usize,
 }
 
@@ -31,7 +29,6 @@ impl Gui {
             size: Rect::default(),
             tabs: tab::create_tabs(game),
             selected_tab: 0,
-            messagebox: eventbox::EventBox::new(),
         }
     }
 
@@ -57,9 +54,6 @@ impl Gui {
 
             // Await the next event.
             let evt = rx.recv().unwrap();
-
-            // Send event to message box.
-            self.messagebox.handle_event(evt.clone());
 
             match evt {
                 Event::Input(input) => match input {
@@ -104,7 +98,6 @@ impl Gui {
                     .select(self.selected_tab)
                     .render(term, &chunks[0]);
                 self.tabs[self.selected_tab].draw(term, &chunks[1]);
-                self.messagebox.draw(term, &chunks[2]);
             });
         try!(term.draw());
         Ok(())
