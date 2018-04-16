@@ -14,6 +14,7 @@ pub struct Gui {
     size: Rect,
     tabs: Vec<Box<tab::Tab>>,
     selected_tab: usize,
+    dialog: Option<Box<dialog::Dialog>>,
 }
 
 impl Gui {
@@ -30,6 +31,7 @@ impl Gui {
             size: Rect::default(),
             tabs: tab::create_tabs(game),
             selected_tab: 0,
+            dialog: None,
         }
     }
 
@@ -69,10 +71,19 @@ impl Gui {
                         self.selected_tab = (self.selected_tab + 1) % self.tabs.len();
                     }
                     _ => {
-                        // Forward event to current tab
-                        self.tabs[self.selected_tab].handle_event(evt);
+                        // Forward event to current tab or dialog if open.
+                        match self.dialog {
+                            Some(ref mut dialog) => dialog.handle_event(evt),
+                            _ => self.tabs[self.selected_tab].handle_event(evt),
+                        };
                     }
                 },
+                Event::OpenDialog(dialog) => {
+                    self.dialog = Some(dialog);
+                }
+                Event::CloseDialog => {
+                    self.dialog = None;
+                }
                 _ => {
                     // Forward all general events to all tabs.
                     self.tabs
@@ -89,7 +100,7 @@ impl Gui {
     fn draw(&self, term: &mut Terminal<MouseBackend>) -> Result<(), io::Error> {
         Group::default()
             .direction(Direction::Vertical)
-            .sizes(&[Size::Fixed(3), Size::Min(0), Size::Fixed(3)])
+            .sizes(&[Size::Fixed(3), Size::Min(0)])
             .render(term, &self.size, |term, chunks| {
                 Tabs::default()
                     .block(Block::default().borders(Borders::ALL).title("Tabs"))
@@ -99,6 +110,11 @@ impl Gui {
                     .select(self.selected_tab)
                     .render(term, &chunks[0]);
                 self.tabs[self.selected_tab].draw(term, &chunks[1]);
+                // Draw dialog or current tab.
+                match self.dialog {
+                    Some(ref dialog) => dialog.draw(term, &chunks[1]),
+                    None => self.tabs[self.selected_tab].draw(term, &chunks[1]),
+                }
             });
         try!(term.draw());
         Ok(())
