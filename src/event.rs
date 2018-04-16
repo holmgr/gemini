@@ -3,6 +3,8 @@ use std::{io, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}},
 use termion::{event, input::TermRead};
 use game::Game;
 
+use gui::dialog::Dialog;
+
 /// User and system events.
 #[derive(Clone)]
 pub enum Event {
@@ -11,6 +13,8 @@ pub enum Event {
     Travel,
     AutosaveStarted,
     AutosaveCompleted,
+    OpenDialog(Box<Dialog>),
+    CloseDialog,
 }
 
 lazy_static! {
