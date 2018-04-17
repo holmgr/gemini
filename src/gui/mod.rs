@@ -109,7 +109,6 @@ impl Gui {
                     .highlight_style(Style::default().fg(Color::Yellow))
                     .select(self.selected_tab)
                     .render(term, &chunks[0]);
-                self.tabs[self.selected_tab].draw(term, &chunks[1]);
                 // Draw dialog or current tab.
                 match self.dialog {
                     Some(ref dialog) => dialog.draw(term, &chunks[1]),
