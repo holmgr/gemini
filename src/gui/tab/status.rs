@@ -2,7 +2,7 @@ use super::*;
 use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
           widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
 
-use player::Player;
+use player::{Player, PlayerState};
 
 /// Displays the status tab.
 pub struct StatusTab {
@@ -52,24 +52,33 @@ fn draw_player_info(
     let player_data = vec![
         format!(
             "Location:  {}",
-            match galaxy.system(player.location()) {
-                Some(system) => system.name.clone() + " System",
-                None => String::from("None"),
+            match player.state() {
+                PlayerState::InSystem => {
+                    galaxy.system(player.location()).unwrap().name.clone() + " System"
+                }
+                PlayerState::Docked(planet_id) => {
+                    let system = galaxy.system(player.location()).unwrap();
+                    let system_name = &system.name;
+                    let planet_name = &system.satelites[planet_id].name;
+                    format!("{}, {} System", planet_name, system_name)
+                }
+                _ => String::from("-"),
             }
         ),
         format!(
             "Status:    {}",
-            match player.eta() {
-                Some((eta, system_loc)) => {
-                    match galaxy.system(&system_loc) {
+            match player.state() {
+                PlayerState::Traveling { .. } => match player.eta() {
+                    Some((eta, system_loc)) => match galaxy.system(&system_loc) {
                         Some(system) => {
                             format!("Traveling to {} System, ETA: {}", system.name.clone(), eta)
                         }
                         None => String::from("Bad destination"),
-                    }
-                    //format!("System loc {}", system_loc)
-                }
-                None => String::from("Stationary"),
+                    },
+                    None => String::from("Stationary"),
+                },
+                PlayerState::InSystem => String::from("In system"),
+                PlayerState::Docked(_) => String::from("Docked"),
             }
         ),
         format!("Balance:   {} CR", player.balance().to_string()),
