@@ -16,7 +16,7 @@ pub enum Event {
     Undock(usize),
     AutosaveStarted,
     AutosaveCompleted,
-    OpenDialog(Box<Dialog>),
+    OpenDialog(Arc<Mutex<Dialog>>),
     CloseDialog,
 }
 

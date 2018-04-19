@@ -1,4 +1,4 @@
-use std::{io, sync::Arc};
+use std::{io, sync::{Arc, Mutex}};
 use tui::{Terminal, backend::MouseBackend, layout::{Direction, Group, Rect, Size},
           style::{Color, Style}, widgets::{Block, Borders, Tabs, Widget}};
 use termion::event as keyevent;
@@ -14,7 +14,7 @@ pub struct Gui {
     size: Rect,
     tabs: Vec<Box<tab::Tab>>,
     selected_tab: usize,
-    dialog: Option<Box<dialog::Dialog>>,
+    dialog: Option<Arc<Mutex<dialog::Dialog>>>,
 }
 
 impl Gui {
@@ -73,7 +73,7 @@ impl Gui {
                     _ => {
                         // Forward event to current tab or dialog if open.
                         match self.dialog {
-                            Some(ref mut dialog) => dialog.handle_event(evt),
+                            Some(ref dialog) => dialog.lock().unwrap().handle_event(evt),
                             _ => self.tabs[self.selected_tab].handle_event(evt),
                         };
                     }
@@ -111,7 +111,7 @@ impl Gui {
                     .render(term, &chunks[0]);
                 // Draw dialog or current tab.
                 match self.dialog {
-                    Some(ref dialog) => dialog.draw(term, &chunks[1]),
+                    Some(ref dialog) => dialog.lock().unwrap().draw(term, &chunks[1]),
                     None => self.tabs[self.selected_tab].draw(term, &chunks[1]),
                 }
             });

@@ -1,11 +1,11 @@
 use super::*;
+use std::sync::Mutex;
 use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
           widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
 
 use player::PlayerState;
 
 /// Dialog window representing options available when interacting with a planet.
-#[derive(Clone)]
 pub struct PlanetDialog {
     sender: Sender<Event>,
     planetid: usize,
@@ -16,19 +16,19 @@ pub struct PlanetDialog {
 
 impl PlanetDialog {
     /// Create a new PlanetDialog.
-    pub fn new(planetid: usize, is_landed: bool, title: String) -> Box<Self> {
+    pub fn new(planetid: usize, is_landed: bool, title: String) -> Arc<Mutex<Self>> {
         let buttons = match is_landed {
             true => vec!["Refuel", "Undock"],
             false => vec!["Dock"],
         };
 
-        Box::new(PlanetDialog {
+        Arc::new(Mutex::new(PlanetDialog {
             sender: HANDLER.send_handle(),
             planetid,
             title,
             selected: 0,
             buttons,
-        })
+        }))
     }
 }
 
@@ -99,10 +99,5 @@ impl Dialog for PlanetDialog {
                     .highlight_style(Style::default().fg(Color::Yellow).bg(Color::Gray))
                     .render(term, &chunks[0]);
             });
-    }
-
-    /// Returns a deep clone.
-    fn box_clone(&self) -> Box<Dialog> {
-        Box::new((*self).clone())
     }
 }

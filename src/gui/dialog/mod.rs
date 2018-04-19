@@ -18,13 +18,4 @@ pub trait Dialog: Send {
 
     /// Draws the dialog in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect);
-
-    /// Returns a deep clone as box.
-    fn box_clone(&self) -> Box<Dialog>;
-}
-
-impl Clone for Box<Dialog> {
-    fn clone(&self) -> Box<Dialog> {
-        self.box_clone()
-    }
 }
