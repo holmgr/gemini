@@ -5,7 +5,8 @@ use game::Game;
 use event::{Event, HANDLER};
 
 mod status;
-mod map;
+mod galaxymap;
+mod systemmap;
 mod market;
 mod mission;
 mod shipyard;
@@ -31,7 +32,8 @@ pub trait Tab {
 pub fn create_tabs(state: Arc<Game>) -> Vec<Box<Tab>> {
     vec![
         status::StatusTab::new(state.clone(), HANDLER.send_handle()),
-        map::MapTab::new(state.clone(), HANDLER.send_handle()),
+        galaxymap::GalaxyMapTab::new(state.clone(), HANDLER.send_handle()),
+        systemmap::SystemMapTab::new(state.clone(), HANDLER.send_handle()),
         market::MarketTab::new(state.clone(), HANDLER.send_handle()),
         mission::MissionTab::new(state.clone(), HANDLER.send_handle()),
         shipyard::ShipyardTab::new(state.clone(), HANDLER.send_handle()),
