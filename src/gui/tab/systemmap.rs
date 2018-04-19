@@ -8,9 +8,14 @@ use tui::widgets::canvas::Canvas;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
+use gui::dialog::PlanetDialog;
+
 lazy_static! {
     /// Styling for selected item.
     static ref SELECTED_STYLE: Style = Style::default().fg(Color::Yellow);
+
+    /// Styling for selected item.
+    static ref DOCKED_STYLE: Style = Style::default().fg(Color::Green);
 
     /// Styling for unselected item.
     static ref DEFAULT_STYLE: Style = Style::default();
@@ -29,7 +34,7 @@ impl SystemMapTab {
     fn num_astronomicals(state: &Arc<Game>) -> usize {
         let player = state.player.lock().unwrap();
         match player.state() {
-            PlayerState::Stationary => {
+            PlayerState::InSystem | PlayerState::Docked(_) => {
                 let galaxy = state.galaxy.lock().unwrap();
                 galaxy.system(player.location()).unwrap().satelites.len() - 1
             }
@@ -60,6 +65,33 @@ impl Tab for SystemMapTab {
     fn handle_event(&mut self, event: Event) {
         match event {
             Event::Input(input) => {
+                match input {
+                    keyevent::Key::Char('\n') => {
+                        let player = self.state.player.lock().unwrap();
+                        match player.state() {
+                            PlayerState::InSystem => {
+                                let galaxy = self.state.galaxy.lock().unwrap();
+                                let system = galaxy.system(player.location()).unwrap();
+                                self.send_handle.send(Event::OpenDialog(PlanetDialog::new(
+                                    self.selected_astronomical,
+                                    false,
+                                    system.satelites[self.selected_astronomical].name.clone(),
+                                )));
+                            }
+                            PlayerState::Docked(id) if id == self.selected_astronomical => {
+                                let galaxy = self.state.galaxy.lock().unwrap();
+                                let system = galaxy.system(player.location()).unwrap();
+                                self.send_handle.send(Event::OpenDialog(PlanetDialog::new(
+                                    self.selected_astronomical,
+                                    true,
+                                    system.satelites[self.selected_astronomical].name.clone(),
+                                )));
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                };
                 self.selected_astronomical = match input {
                     // Move up.
                     keyevent::Key::Char('k') => self.selected_astronomical.max(1) - 1,
@@ -86,10 +118,28 @@ impl Tab for SystemMapTab {
             .render(term, area, |term, chunks| {
                 let player = self.state.player.lock().unwrap();
                 match player.state() {
-                    PlayerState::Stationary => {
+                    PlayerState::InSystem => {
                         let galaxy = self.state.galaxy.lock().unwrap();
                         let system = galaxy.system(player.location()).unwrap();
-                        draw_system_table(self.selected_astronomical, &system, term, &chunks[0]);
+                        draw_system_table(
+                            self.selected_astronomical,
+                            None,
+                            &system,
+                            term,
+                            &chunks[0],
+                        );
+                        draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
+                    }
+                    PlayerState::Docked(id) => {
+                        let galaxy = self.state.galaxy.lock().unwrap();
+                        let system = galaxy.system(player.location()).unwrap();
+                        draw_system_table(
+                            self.selected_astronomical,
+                            Some(id),
+                            &system,
+                            term,
+                            &chunks[0],
+                        );
                         draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
                     }
                     _ => {}
@@ -100,6 +150,7 @@ impl Tab for SystemMapTab {
 
 fn draw_system_table(
     selected: usize,
+    docked_at: Option<usize>,
     system: &System,
     term: &mut Terminal<MouseBackend>,
     area: &Rect,
@@ -112,9 +163,10 @@ fn draw_system_table(
             .iter()
             .enumerate()
             .map(|(idx, ref planet)| {
-                let style: &Style = match selected == idx {
-                    true => &SELECTED_STYLE,
-                    false => &DEFAULT_STYLE,
+                let style: &Style = match docked_at {
+                    _ if idx == selected => &SELECTED_STYLE,
+                    Some(id) if idx == id => &DOCKED_STYLE,
+                    _ => &DEFAULT_STYLE,
                 };
                 Row::StyledData(
                     vec![

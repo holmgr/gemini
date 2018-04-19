@@ -11,6 +11,9 @@ pub enum Event {
     Input(event::Key),
     Update,
     Travel,
+    Refuel,
+    Dock(usize),
+    Undock(usize),
     AutosaveStarted,
     AutosaveCompleted,
     OpenDialog(Box<Dialog>),
@@ -77,8 +80,8 @@ pub fn add_keyboard_handler() {
     });
 }
 
-/// Start listener for events that should trigger an autosave.
-pub fn add_autosave_handler(state: Arc<Game>) {
+/// Start listener for events that should update player state.
+pub fn add_player_handler(state: Arc<Game>) {
     let rx = HANDLER.recv_handle();
     let sx = HANDLER.send_handle();
     spawn(move || {
@@ -86,6 +89,33 @@ pub fn add_autosave_handler(state: Arc<Game>) {
             let evt = rx.recv().unwrap();
             match evt {
                 Event::Travel => {
+                    sx.send(Event::AutosaveStarted);
+                    // Only need to save player.
+                    state.save_player();
+                    sx.send(Event::AutosaveCompleted);
+                }
+                Event::Dock(planet_id) => {
+                    if let Ok(mut player) = state.player.lock() {
+                        player.dock(planet_id);
+                    }
+                    sx.send(Event::AutosaveStarted);
+                    // Only need to save player.
+                    state.save_player();
+                    sx.send(Event::AutosaveCompleted);
+                }
+                Event::Undock(planet_id) => {
+                    if let Ok(mut player) = state.player.lock() {
+                        player.undock();
+                    }
+                    sx.send(Event::AutosaveStarted);
+                    // Only need to save player.
+                    state.save_player();
+                    sx.send(Event::AutosaveCompleted);
+                }
+                Event::Refuel => {
+                    if let Ok(mut player) = state.player.lock() {
+                        player.refuel();
+                    }
                     sx.send(Event::AutosaveStarted);
                     // Only need to save player.
                     state.save_player();

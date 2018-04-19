@@ -23,7 +23,7 @@ impl Player {
             credits,
             ship: Some(ship),
             location: location.clone(),
-            state: PlayerState::Stationary,
+            state: PlayerState::InSystem,
         }
     }
 
@@ -34,7 +34,8 @@ impl Player {
         while repeat {
             repeat = false;
             self.state = match self.state {
-                PlayerState::Stationary => PlayerState::Stationary,
+                PlayerState::Docked(planetid) => PlayerState::Docked(planetid),
+                PlayerState::InSystem => PlayerState::InSystem,
                 PlayerState::Traveling {
                     ref start,
                     ref route,
@@ -76,7 +77,7 @@ impl Player {
                             }
                         }
                         // No route left.
-                        None => PlayerState::Stationary,
+                        None => PlayerState::InSystem,
                     }
                 }
             };
@@ -106,6 +107,26 @@ impl Player {
     /// Returns the player state.
     pub fn state(&self) -> PlayerState {
         self.state.clone()
+    }
+
+    /// Docks the player to the planet with the given id.
+    pub fn dock(&mut self, planet_id: usize) {
+        self.state = PlayerState::Docked(planet_id);
+    }
+
+    /// Undocks the player from its current planet.
+    pub fn undock(&mut self) {
+        self.state = PlayerState::InSystem;
+    }
+
+    /// Attemps to fuel up the player ship as far as credits reaches.
+    pub fn refuel(&mut self) {
+        if let Some(ref mut ship) = self.ship {
+            // TODO: Assumes each fuel unit costs 10 credits.
+            let to_fill = (ship.characteristics().fuel - ship.fuel()).min(self.credits / 10);
+            self.credits -= to_fill * 10;
+            ship.add_fuel(to_fill);
+        }
     }
 
     /// Sets the route for the player.
@@ -154,7 +175,7 @@ impl Default for Player {
             credits: 0,
             ship: None,
             location: Point::origin(),
-            state: PlayerState::Stationary,
+            state: PlayerState::InSystem,
         }
     }
 }
@@ -162,7 +183,8 @@ impl Default for Player {
 /// Holds the current state of the player which affects the options of interaction.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum PlayerState {
-    Stationary,
+    InSystem,
+    Docked(usize),
     Traveling {
         start: DateTime<Utc>,
         route: Vec<Point>,

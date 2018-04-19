@@ -40,6 +40,11 @@ impl Ship {
         self.fuel -= 1;
     }
 
+    /// Add the given amount to the fuel level.
+    pub fn add_fuel(&mut self, amount: u32) {
+        self.fuel += amount;
+    }
+
     /// Returns a reference to the ship's characteristics.
     pub fn characteristics(&self) -> &ShipCharacteristics {
         &self.base
