@@ -4,9 +4,9 @@ use termion::event as keyevent;
 
 use event::{Event, HANDLER};
 
-mod planet;
+mod multi;
 
-pub use self::planet::PlanetDialog;
+pub use self::multi::MultiDialog;
 
 /// A dialog box.
 pub trait Dialog: Send {

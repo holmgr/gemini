@@ -2,13 +2,13 @@ use super::*;
 use termion::event as keyevent;
 
 use astronomicals::system::System;
-use player::PlayerState;
+use player::{Player, PlayerState};
 use tui::widgets::{Block, Borders, Row, Table, Widget};
 use tui::widgets::canvas::Canvas;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
-use gui::dialog::PlanetDialog;
+use gui::dialog::MultiDialog;
 
 lazy_static! {
     /// Styling for selected item.
@@ -41,6 +41,45 @@ impl SystemMapTab {
             _ => 0,
         }
     }
+
+    /// Opens dialog for planet interaction.
+    /// Actions available depends on the current player state.
+    fn open_dialog(&self) {
+        let player = self.state.player.lock().unwrap();
+        let galaxy = self.state.galaxy.lock().unwrap();
+        let system = galaxy.system(player.location()).unwrap();
+        let planet_id = self.selected_astronomical;
+
+        let dialog = match player.state() {
+            PlayerState::InSystem => {
+                // If in system we can dock.
+                let dock_fn = Box::new(move || Event::Dock(planet_id));
+
+                Some(MultiDialog::new(
+                    system.satelites[self.selected_astronomical].name.clone(),
+                    vec![("Dock", dock_fn)],
+                ))
+            }
+            PlayerState::Docked(id) if id == self.selected_astronomical => {
+                // If docked system we can refuel.
+                let refuel_fn = Box::new(|| Event::Refuel);
+
+                // If docked system we can undock.
+                let undock_fn = Box::new(move || Event::Undock(planet_id));
+
+                Some(MultiDialog::new(
+                    system.satelites[self.selected_astronomical].name.clone(),
+                    vec![("Undock", undock_fn), ("Refuel", refuel_fn)],
+                ))
+            }
+            _ => None,
+        };
+
+        // Send of dialog to be opened.
+        if let Some(dialog) = dialog {
+            self.send_handle.send(Event::OpenDialog(dialog));
+        }
+    }
 }
 
 impl Tab for SystemMapTab {
@@ -65,31 +104,9 @@ impl Tab for SystemMapTab {
     fn handle_event(&mut self, event: Event) {
         match event {
             Event::Input(input) => {
+                // Open planet interaction dialog if appropriate.
                 match input {
-                    keyevent::Key::Char('\n') => {
-                        let player = self.state.player.lock().unwrap();
-                        match player.state() {
-                            PlayerState::InSystem => {
-                                let galaxy = self.state.galaxy.lock().unwrap();
-                                let system = galaxy.system(player.location()).unwrap();
-                                self.send_handle.send(Event::OpenDialog(PlanetDialog::new(
-                                    self.selected_astronomical,
-                                    false,
-                                    system.satelites[self.selected_astronomical].name.clone(),
-                                )));
-                            }
-                            PlayerState::Docked(id) if id == self.selected_astronomical => {
-                                let galaxy = self.state.galaxy.lock().unwrap();
-                                let system = galaxy.system(player.location()).unwrap();
-                                self.send_handle.send(Event::OpenDialog(PlanetDialog::new(
-                                    self.selected_astronomical,
-                                    true,
-                                    system.satelites[self.selected_astronomical].name.clone(),
-                                )));
-                            }
-                            _ => {}
-                        }
-                    }
+                    keyevent::Key::Char('\n') => self.open_dialog(),
                     _ => {}
                 };
                 self.selected_astronomical = match input {
