@@ -22,7 +22,7 @@ termion = "1.5.1"
 Inflector = "^0.11"
 toml = "0.4.5"
 spade = { version = "1.4.0", features = ["serde_serialize"] }
-textwrap = { version = "0.9", features = ["hyphenation"] }
+textwrap = { version = "0.9" }
 bincode = "1.0.0"
 chrono = { version = "0.4", features = ["serde"] }
 fern = "0.5"
