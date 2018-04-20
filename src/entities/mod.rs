@@ -1,5 +1,6 @@
 use rand::Rng;
 use std::fmt;
+use statrs::distribution::{Categorical, Distribution};
 
 /// Represents a single Faction which is assigned on Sector level.
 #[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq)]
@@ -13,23 +14,15 @@ pub enum Faction {
 impl Faction {
     /// Generate a random faction according to the "distribution".
     pub fn random_faction<R: Rng>(gen: &mut R) -> Faction {
-        let probs = vec![
-            (Faction::Cartel, 15),
-            (Faction::Empire, 45),
-            (Faction::Federation, 30),
-            (Faction::Independent, 10),
-        ];
+        let probs = Categorical::new(&[15., 45., 30., 10.]).unwrap();
 
-        let mut rnd: u32 = gen.gen_range(0, 100);
-        for (fac, prob) in probs {
-            if rnd <= prob {
-                return fac;
-            } else {
-                rnd -= prob;
-            }
+        match probs.sample::<R>(gen) as usize {
+            0 => Faction::Cartel,
+            1 => Faction::Empire,
+            2 => Faction::Federation,
+            3 => Faction::Independent,
+            _ => Faction::Independent,
         }
-        // Default faction
-        Faction::Independent
     }
 }
 impl fmt::Display for Faction {
