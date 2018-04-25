@@ -21,8 +21,11 @@ addons:
 
 before_script:
     - rustup component add rustfmt-preview
+    - rustup install nightly
+    - cargo +nightly install clippy --force
 script:
     - cargo fmt --all -- --write-mode=diff
+    - cargo +nightly clippy
     - cargo build
     - cargo test
 
