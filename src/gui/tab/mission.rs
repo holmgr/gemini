@@ -10,7 +10,7 @@ impl Tab for MissionTab {
     /// Creates a mission tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
         Box::new(MissionTab {
-            state: state,
+            state,
             sender: send_handle,
         })
     }
@@ -21,8 +21,8 @@ impl Tab for MissionTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {}
+    fn handle_event(&mut self, _event: Event) {}
 
     /// Draws the tab in the given terminal and area.
-    fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {}
+    fn draw(&self, _term: &mut Terminal<MouseBackend>, _area: &Rect) {}
 }

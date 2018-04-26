@@ -27,9 +27,9 @@ pub enum StarType {
 
 impl fmt::Display for StarType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let type_str = match self {
-            &StarType::Single => "Single",
-            &StarType::Binary => "Binary",
+        let type_str = match *self {
+            StarType::Single => "Single",
+            StarType::Binary => "Binary",
         };
         write!(f, "{}", type_str)
     }

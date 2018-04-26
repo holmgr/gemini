@@ -13,12 +13,6 @@ pub struct OrdPoint {
     pub weight: u32,
 }
 
-impl OrdPoint {
-    pub fn new(point: Point, weight: u32) -> Self {
-        OrdPoint { point, weight }
-    }
-}
-
 impl Ord for OrdPoint {
     fn cmp(&self, other: &OrdPoint) -> Ordering {
         other.weight.partial_cmp(&self.weight).unwrap()
@@ -40,7 +34,7 @@ impl PartialEq for OrdPoint {
 impl Eq for OrdPoint {}
 
 /// Wrapper type implementing hashing for Point etc.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct HashablePoint(Point);
 
 impl HashablePoint {
@@ -52,11 +46,17 @@ impl HashablePoint {
     }
 }
 
+impl PartialEq for HashablePoint {
+    fn eq(&self, other: &HashablePoint) -> bool {
+        self.0 == other.0
+    }
+}
+
 impl Hash for HashablePoint {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0
             .iter()
-            .zip(&[73856093f64, 19349663f64])
+            .zip(&[73_856_093f64, 19_349_663f64])
             .map(|(&a, &b)| (a * b) as u64)
             .fold(0, |acc, val| acc ^ val)
             .hash(state);
@@ -92,9 +92,9 @@ impl PointN for HashablePoint {
 /// strings' lengths.
 pub fn edit_distance(a: &str, b: &str) -> i32 {
     // Handle zero length case.
-    if a.len() == 0 {
+    if a.is_empty() {
         return b.chars().count() as i32;
-    } else if b.len() == 0 {
+    } else if b.is_empty() {
         return a.chars().count() as i32;
     }
 
@@ -104,8 +104,8 @@ pub fn edit_distance(a: &str, b: &str) -> i32 {
     let mut cur = vec![0; len_b];
 
     // Initialize string b.
-    for i in 1..len_b {
-        pre[i] = i as i32;
+    for (i, prev) in pre.iter_mut().enumerate().take(len_b).skip(1) {
+        *prev = i as i32;
     }
 
     // Calculate edit distance.

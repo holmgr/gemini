@@ -1,5 +1,5 @@
-use std::{collections::HashMap, f64, iter::FromIterator, sync::{Arc, Mutex}, time::Instant,
-          usize::MAX};
+use std::{collections::HashMap, f64, iter::FromIterator,
+          sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}}, time::Instant, usize::MAX};
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use nalgebra::distance;
@@ -23,7 +23,7 @@ impl SectorGen {
     pub fn generate(
         &self,
         config: &GameConfig,
-        name_gen: Arc<Mutex<NameGen>>,
+        name_gen: &Arc<Mutex<NameGen>>,
         system_locations: Vec<HashablePoint>,
     ) -> Vec<Sector> {
         // Measure time for generation.
@@ -38,7 +38,7 @@ impl SectorGen {
             seq::sample_iter(&mut rng, system_locations.iter(), config.number_of_sectors)
                 .unwrap()
                 .into_iter()
-                .map(|system_location| system_location.as_point().clone())
+                .map(|system_location| *system_location.as_point())
                 .collect::<Vec<_>>();
 
         // Split data into two sets if using approximation
@@ -56,7 +56,7 @@ impl SectorGen {
         // Run K means until convergence, i.e until no reassignments
         let mut has_assigned = true;
         while has_assigned {
-            let wrapped_assigned = Mutex::new(false);
+            let wrapped_assigned = AtomicBool::new(false);
 
             // Assign to closest centroid
             cluster_map
@@ -65,10 +65,10 @@ impl SectorGen {
                     let mut closest_cluster = *cluster_id;
                     let mut closest_distance =
                         distance(system_location.as_point(), &centroids[*cluster_id]);
-                    for i in 0..centroids.len() {
-                        let distance = distance(system_location.as_point(), &centroids[i]);
+                    for (i, centroid) in centroids.iter().enumerate() {
+                        let distance = distance(system_location.as_point(), centroid);
                         if distance < closest_distance {
-                            *wrapped_assigned.lock().unwrap() = true;
+                            wrapped_assigned.store(true, Ordering::Relaxed);
                             closest_cluster = i;
                             closest_distance = distance;
                         }
@@ -76,7 +76,7 @@ impl SectorGen {
                     *cluster_id = closest_cluster;
                 });
 
-            has_assigned = *wrapped_assigned.lock().unwrap();
+            has_assigned = wrapped_assigned.load(Ordering::Relaxed);
 
             // Calculate new centroids
             centroids
@@ -106,7 +106,7 @@ impl SectorGen {
         );
 
         // Map systems to final cluster
-        for (system_location, id) in cluster_map.into_iter() {
+        for (system_location, id) in cluster_map {
             sector_vecs[id].push(system_location);
         }
 
@@ -114,8 +114,8 @@ impl SectorGen {
         rest.into_iter().for_each(|system_location| {
             let mut closest_cluster = 0;
             let mut closest_distance = f64::MAX;
-            for i in 0..centroids.len() {
-                let distance = distance(system_location.as_point(), &centroids[i]);
+            for (i, centroid) in centroids.iter().enumerate() {
+                let distance = distance(system_location.as_point(), centroid);
                 if distance < closest_distance {
                     closest_cluster = i;
                     closest_distance = distance;
@@ -137,11 +137,11 @@ impl SectorGen {
                 Sector {
                     system_locations: system_locations
                         .into_iter()
-                        .map(|hashpoint| hashpoint.as_point().clone())
+                        .map(|hashpoint| *hashpoint.as_point())
                         .collect::<Vec<_>>(),
                     name: name_gen_unwraped
                         .generate()
-                        .unwrap_or(String::from("Unnamed")),
+                        .unwrap_or_else(|| String::from("Unnamed")),
                     faction: Faction::random_faction(&mut faction_rng),
                 }
             })
@@ -165,7 +165,8 @@ impl SectorGen {
             sectors
                 .iter()
                 .fold(MAX, |acc, ref sec| acc.min(sec.system_locations.len())),
-            ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64),
+            ((now.elapsed().as_secs() * 1_000)
+                + u64::from(now.elapsed().subsec_nanos() / 1_000_000)),
             sectors
                 .iter()
                 .fold(0, |acc, ref sec| acc + match sec.faction {

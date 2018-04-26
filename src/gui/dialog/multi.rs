@@ -1,7 +1,7 @@
 use super::*;
 use std::sync::Mutex;
 use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
-          widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
+          widgets::{Block, Borders, SelectableList, Widget}};
 
 type Action = Fn() -> Event + Send + Sync;
 
@@ -33,30 +33,27 @@ impl Dialog for MultiDialog {
 
     /// Handles the user provided event.
     fn handle_event(&mut self, event: Event) {
-        match event {
-            Event::Input(input) => {
-                self.selected = match input {
-                    // Move up.
-                    keyevent::Key::Char('k') => self.selected.max(1) - 1,
-                    // Move down.
-                    keyevent::Key::Char('j') => (self.selected + 1).min(self.actions.len() - 1),
-                    _ => self.selected,
-                };
-                match input {
-                    keyevent::Key::Char('\n') => {
-                        // Call the appropriate action.
-                        let (_, ref action_fn) = self.actions[self.selected];
-                        self.sender.send(action_fn());
-                        self.sender.send(Event::CloseDialog);
-                    }
-                    keyevent::Key::Backspace => {
-                        self.sender.send(Event::CloseDialog);
-                    }
-                    _ => {}
-                };
-            }
-            _ => {}
-        };
+        if let Event::Input(input) = event {
+            self.selected = match input {
+                // Move up.
+                keyevent::Key::Char('k') => self.selected.max(1) - 1,
+                // Move down.
+                keyevent::Key::Char('j') => (self.selected + 1).min(self.actions.len() - 1),
+                _ => self.selected,
+            };
+            match input {
+                keyevent::Key::Char('\n') => {
+                    // Call the appropriate action.
+                    let (_, ref action_fn) = self.actions[self.selected];
+                    self.sender.send(action_fn()).unwrap();
+                    self.sender.send(Event::CloseDialog).unwrap();
+                }
+                keyevent::Key::Backspace => {
+                    self.sender.send(Event::CloseDialog).unwrap();
+                }
+                _ => {}
+            };
+        }
     }
 
     /// Draws the dialog in the given terminal and area.
