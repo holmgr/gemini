@@ -50,7 +50,7 @@ impl GameConfig {
             None => {
                 info!("Failed loading config, serving default");
                 let config: GameConfig = Default::default();
-                let _ = config.store();
+                config.store();
                 config
             }
         }
@@ -107,11 +107,11 @@ impl Default for GameConfig {
         GameConfig {
             map_seed: 42,
             starting_credits: 1000,
-            number_of_systems: 100000,
+            number_of_systems: 100_000,
             system_spread: 200.,
             number_of_sectors: 30,
             sector_approximation: true,
-            num_approximation_systems: 100000,
+            num_approximation_systems: 100_000,
             enable_gui: true,
         }
     }

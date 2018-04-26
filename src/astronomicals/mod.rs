@@ -1,6 +1,5 @@
 use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 use spade::rtree::RTree;
-use nalgebra::distance;
 use rayon::prelude::*;
 
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};
@@ -25,12 +24,12 @@ impl Galaxy {
         let mut map = RTree::new();
         systems
             .iter()
-            .for_each(|ref system| map.insert(HashablePoint::new(system.location.clone())));
+            .for_each(|ref system| map.insert(HashablePoint::new(system.location)));
 
         let mut systems_map = HashMap::new();
 
         for system in systems {
-            systems_map.insert(HashablePoint::new(system.location.clone()), system);
+            systems_map.insert(HashablePoint::new(system.location), system);
         }
 
         Galaxy {
@@ -42,12 +41,12 @@ impl Galaxy {
 
     /// Returns a reference system at the given location if it exists.
     pub fn system(&self, location: &Point) -> Option<&system::System> {
-        self.systems.get(&HashablePoint::new(location.clone()))
+        self.systems.get(&HashablePoint::new(*location))
     }
 
     /// Returns a mutable reference system at the given location if it exists.
     pub fn system_mut(&mut self, location: &Point) -> Option<&mut system::System> {
-        self.systems.get_mut(&HashablePoint::new(location.clone()))
+        self.systems.get_mut(&HashablePoint::new(*location))
     }
 
     /// Returns references to all systems.
@@ -61,7 +60,7 @@ impl Galaxy {
     }
 
     /// Finds the system with the closest matching name.
-    pub fn search_name(&self, query: &String) -> Option<&system::System> {
+    pub fn search_name(&self, query: &str) -> Option<&system::System> {
         self.systems
             .values()
             .min_by_key(|sys| edit_distance(query, &sys.name).abs())
@@ -70,7 +69,7 @@ impl Galaxy {
     /// Returns all system locations reachable from the given location within the given radius.
     pub fn reachable(&self, location: &Point, max_distance: f64) -> Vec<&Point> {
         self.map
-            .lookup_in_circle(&HashablePoint::new(location.clone()), &max_distance.powi(2))
+            .lookup_in_circle(&HashablePoint::new(*location), &max_distance.powi(2))
             .iter()
             .map(|hashpoint| hashpoint.as_point())
             .collect::<Vec<_>>()
@@ -79,7 +78,7 @@ impl Galaxy {
     /// Returns the nearest system location to the given point.
     pub fn nearest(&self, location: &Point) -> Option<&Point> {
         self.map
-            .nearest_neighbor(&HashablePoint::new(location.clone()))
+            .nearest_neighbor(&HashablePoint::new(*location))
             .map(|p| p.as_point())
     }
 
@@ -98,10 +97,10 @@ impl Galaxy {
         let mut previous = HashMap::<HashablePoint, HashablePoint>::new();
 
         // We're at `start`, with a zero cost
-        dist.insert(HashablePoint::new(start.clone()), 0);
+        dist.insert(HashablePoint::new(*start), 0);
         frontier.push(OrdPoint {
             weight: 0,
-            point: start.clone(),
+            point: *start,
         });
 
         let mut cost = None;
@@ -114,7 +113,7 @@ impl Galaxy {
             }
 
             // Important as we may have already found a better way
-            if weight > *dist.get(&HashablePoint::new(point.clone())).unwrap_or(&MAX) {
+            if weight > *dist.get(&HashablePoint::new(point)).unwrap_or(&MAX) {
                 continue;
             }
 
@@ -123,14 +122,12 @@ impl Galaxy {
             for neighbor in self.reachable(&point, (range).max(0.)) {
                 let next = OrdPoint {
                     weight: weight + 1,
-                    point: neighbor.clone(),
+                    point: *neighbor,
                 };
 
                 // If so, add it to the frontier and continue
                 if next.weight <= max_steps
-                    && next.weight
-                        < *dist.get(&HashablePoint::new(next.point.clone()))
-                            .unwrap_or(&MAX)
+                    && next.weight < *dist.get(&HashablePoint::new(next.point)).unwrap_or(&MAX)
                 {
                     frontier.push(next.clone());
                     // Relaxation, we have now found a better way
@@ -143,9 +140,9 @@ impl Galaxy {
         match cost {
             Some(cost) => {
                 let mut path = vec![];
-                let mut current = HashablePoint::new(goal.clone());
+                let mut current = HashablePoint::new(*goal);
                 while current.as_point() != start {
-                    path.push(current.as_point().clone());
+                    path.push(*current.as_point());
                     current = previous.remove(&current).unwrap();
                 }
                 path.reverse();
@@ -170,7 +167,7 @@ impl Updatable for Galaxy {
 pub fn hash(location: &Point) -> u64 {
     let values = location
         .iter()
-        .zip(&[73856093f64, 19349663f64, 83492791f64])
+        .zip(&[73_856_093f64, 19_349_663f64, 83_492_791f64])
         .map(|(&a, &b)| (a * b) as u64)
         .collect::<Vec<_>>();
     values.iter().fold(0, |acc, &val| acc ^ val)

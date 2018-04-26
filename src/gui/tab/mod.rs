@@ -29,7 +29,7 @@ pub trait Tab {
 }
 
 /// Returns a vector of tabs to be used.
-pub fn create_tabs(state: Arc<Game>) -> Vec<Box<Tab>> {
+pub fn create_tabs(state: &Arc<Game>) -> Vec<Box<Tab>> {
     vec![
         status::StatusTab::new(state.clone(), HANDLER.send_handle()),
         galaxymap::GalaxyMapTab::new(state.clone(), HANDLER.send_handle()),

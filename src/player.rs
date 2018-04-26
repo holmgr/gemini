@@ -22,7 +22,7 @@ impl Player {
         Player {
             credits,
             ship: Some(ship),
-            location: location.clone(),
+            location: *location,
             state: PlayerState::InSystem,
         }
     }
@@ -50,8 +50,7 @@ impl Player {
                         {
                             let new_start = *start
                                 + Duration::milliseconds(
-                                    (&distance(&self.location, &next) / Player::TRAVEL_SPEED)
-                                        as i64,
+                                    (distance(&self.location, &next) / Player::TRAVEL_SPEED) as i64,
                                 );
 
                             // Update position and reduce fuel.
@@ -133,7 +132,7 @@ impl Player {
     pub fn set_route(&mut self, route: Vec<Point>) {
         self.state = PlayerState::Traveling {
             start: Utc::now(),
-            route: route,
+            route,
         };
     }
 
@@ -162,7 +161,7 @@ impl Player {
                         .naive_utc(),
                 );
                 // Format in HH:MM:SS and AM/PM.
-                Some((eta.format("%r").to_string(), destination.clone()))
+                Some((eta.format("%r").to_string(), *destination))
             }
             _ => None,
         }

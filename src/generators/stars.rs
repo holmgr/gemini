@@ -21,9 +21,10 @@ impl StarGen {
         let mass = self.mass_gen.sample(gen).max(0.1);
 
         // Stars with high mass are binary stars.
-        let startype = match mass > 3. {
-            true => StarType::Binary,
-            false => StarType::Single,
+        let startype = if mass > 3. {
+            StarType::Binary
+        } else {
+            StarType::Single
         };
 
         // Mass-luminosity relation.

@@ -70,7 +70,7 @@ impl NameGen {
                     Some(&node) => node,
                     _ => self.graph.add_node(chr),
                 };
-                layers[index].insert(node.clone());
+                layers[index].insert(node);
 
                 self.graph.update_edge(prev, node, 0.0);
                 prev = node;
@@ -106,10 +106,10 @@ impl NameGen {
             rng: &mut IsaacRng,
         ) -> String {
             let mut final_string = String::new();
-            let mut current_node = start.clone();
+            let mut current_node = *start;
 
             // Traverse until we hit end.
-            while current_node != end.clone() {
+            while current_node != *end {
                 // Step to random neighbor in next layer for which it exists
                 // an edge.
                 let neighbors = graph.neighbors(current_node).collect::<Vec<NodeIndex>>();
@@ -125,7 +125,7 @@ impl NameGen {
         // Randomly generate a suffix uniformlly from training data, has a high
         // chance of returning None.
         // TODO: Load threshold from config.
-        fn get_suffix(rng: &mut IsaacRng, suffixes: &Vec<String>) -> Option<String> {
+        fn get_suffix(rng: &mut IsaacRng, suffixes: &[String]) -> Option<String> {
             let suffix_chance = 0.1;
             match rng.next_f64() {
                 x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),
@@ -137,7 +137,7 @@ impl NameGen {
         // TODO: Extract this to a seperate method, should also probably be
         // based on configuration entries.
         let is_valid_name =
-            |name: &String| (name.contains(" ") && name.len() < 11) || name.len() < 9;
+            |name: &String| (name.contains(' ') && name.len() < 11) || name.len() < 9;
 
         // Attempt N number of attempts retuning none if no unique string was
         // generated which fullfils the criteria.

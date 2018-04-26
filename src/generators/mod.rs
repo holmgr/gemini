@@ -45,10 +45,10 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
     let sector_gen = sectors::SectorGen::new();
     let sectors = sector_gen.generate(
         config,
-        name_gen.clone(),
+        &name_gen,
         locations
             .iter()
-            .map(|point| HashablePoint::new(point.clone()))
+            .map(|point| HashablePoint::new(*point))
             .collect::<Vec<_>>(),
     );
     // Create System generator.
@@ -93,7 +93,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                         .name(
                             name_gen_unwraped
                                 .generate()
-                                .unwrap_or(String::from("Unnamed")),
+                                .unwrap_or_else(|| String::from("Unnamed")),
                         )
                         .build()
                         .unwrap()
@@ -107,7 +107,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                 Some(planet) => planet.name.clone(),
                 None => name_gen_unwraped
                     .generate()
-                    .unwrap_or(String::from("Unnamed")),
+                    .unwrap_or_else(|| String::from("Unnamed")),
             };
 
             system_builder
@@ -124,7 +124,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         systems
             .iter()
             .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
-        ((now.elapsed().as_secs() * 1_000) + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
+        ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_nanos() / 1_000_000))
     );
 
     Galaxy::new(sectors, systems)

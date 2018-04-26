@@ -67,10 +67,10 @@ impl fmt::Display for Reputation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let out_str = match self.0 {
             -1000...-300 => "Hostile",
-            -300...-100 => "Unfriendly",
-            -100...100 => "Neutral",
-            100...300 => "Friendly",
-            300...1000 => "Allied",
+            -299...-100 => "Unfriendly",
+            -99...100 => "Neutral",
+            101...300 => "Friendly",
+            301...1000 => "Allied",
             _ => "Neutral",
         };
         write!(f, "{}", out_str)
@@ -88,11 +88,11 @@ pub enum SystemSecurity {
 
 impl fmt::Display for SystemSecurity {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let security_str = match self {
-            &SystemSecurity::Anarchy => "Anarchy",
-            &SystemSecurity::Low => "Low",
-            &SystemSecurity::Medium => "Medium",
-            &SystemSecurity::High => "High",
+        let security_str = match *self {
+            SystemSecurity::Anarchy => "Anarchy",
+            SystemSecurity::Low => "Low",
+            SystemSecurity::Medium => "Medium",
+            SystemSecurity::High => "High",
         };
         write!(f, "{}", security_str)
     }
@@ -112,14 +112,14 @@ pub enum SystemState {
 
 impl fmt::Display for SystemState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let state_str = match self {
-            &SystemState::Contested => "Contested",
-            &SystemState::CivilWar => "Civil War",
-            &SystemState::Boom => "Boom",
-            &SystemState::Bust => "Bust",
-            &SystemState::CivilUnrest => "Civil Unrest",
-            &SystemState::Famine => "Famine",
-            &SystemState::Outbreak => "Outbreak",
+        let state_str = match *self {
+            SystemState::Contested => "Contested",
+            SystemState::CivilWar => "Civil War",
+            SystemState::Boom => "Boom",
+            SystemState::Bust => "Bust",
+            SystemState::CivilUnrest => "Civil Unrest",
+            SystemState::Famine => "Famine",
+            SystemState::Outbreak => "Outbreak",
         };
         write!(f, "{}", state_str)
     }

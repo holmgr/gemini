@@ -84,10 +84,10 @@ pub enum ShipType {
 
 impl fmt::Display for ShipType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &ShipType::Assault => write!(f, "Assault Ship"),
-            &ShipType::Corvette => write!(f, "Light Corvette"),
-            &ShipType::Freighter => write!(f, "Light Freighter"),
+        match *self {
+            ShipType::Assault => write!(f, "Assault Ship"),
+            ShipType::Corvette => write!(f, "Light Corvette"),
+            ShipType::Freighter => write!(f, "Light Freighter"),
         }
     }
 }

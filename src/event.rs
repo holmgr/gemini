@@ -88,38 +88,29 @@ pub fn add_player_handler(state: Arc<Game>) {
         loop {
             let evt = rx.recv().unwrap();
             match evt {
-                Event::Travel => {
-                    sx.send(Event::AutosaveStarted);
+                Event::Travel | Event::Dock(_) | Event::Undock(_) | Event::Refuel => {
+                    match evt {
+                        Event::Dock(planet_id) => {
+                            if let Ok(mut player) = state.player.lock() {
+                                player.dock(planet_id);
+                            }
+                        }
+                        Event::Undock(_) => {
+                            if let Ok(mut player) = state.player.lock() {
+                                player.undock();
+                            }
+                        }
+                        Event::Refuel => {
+                            if let Ok(mut player) = state.player.lock() {
+                                player.refuel();
+                            }
+                        }
+                        _ => {}
+                    };
+                    sx.send(Event::AutosaveStarted).unwrap();
                     // Only need to save player.
                     state.save_player();
-                    sx.send(Event::AutosaveCompleted);
-                }
-                Event::Dock(planet_id) => {
-                    if let Ok(mut player) = state.player.lock() {
-                        player.dock(planet_id);
-                    }
-                    sx.send(Event::AutosaveStarted);
-                    // Only need to save player.
-                    state.save_player();
-                    sx.send(Event::AutosaveCompleted);
-                }
-                Event::Undock(planet_id) => {
-                    if let Ok(mut player) = state.player.lock() {
-                        player.undock();
-                    }
-                    sx.send(Event::AutosaveStarted);
-                    // Only need to save player.
-                    state.save_player();
-                    sx.send(Event::AutosaveCompleted);
-                }
-                Event::Refuel => {
-                    if let Ok(mut player) = state.player.lock() {
-                        player.refuel();
-                    }
-                    sx.send(Event::AutosaveStarted);
-                    // Only need to save player.
-                    state.save_player();
-                    sx.send(Event::AutosaveCompleted);
+                    sx.send(Event::AutosaveCompleted).unwrap();
                 }
                 _ => {}
             };
@@ -136,7 +127,7 @@ pub fn add_update_handler(state: Arc<Game>) {
     spawn(move || {
         // Update right away first time.
         state.update();
-        sx.send(Event::Update);
+        sx.send(Event::Update).unwrap();
         loop {
             // Wait uptil 10s, must check.
             park_timeout(timeout_remaining);
@@ -144,7 +135,7 @@ pub fn add_update_handler(state: Arc<Game>) {
             // If timeout reached, send event and reset timer.
             if elapsed >= timeout_freq {
                 state.update();
-                sx.send(Event::Update);
+                sx.send(Event::Update).unwrap();
                 timeout_remaining = timeout_freq;
                 beginning_park = Instant::now();
             } else {

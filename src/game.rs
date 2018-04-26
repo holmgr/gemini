@@ -32,7 +32,7 @@ impl Game {
     /// Update Game information, may advance time.
     pub fn update(&self) {
         // If we have advanced time some steps.
-        if let Some(_) = self.attempt_advance_time() {
+        if self.attempt_advance_time().is_some() {
             self.save_all();
         }
 
@@ -45,30 +45,29 @@ impl Game {
         let updated: &mut DateTime<Utc> = &mut self.updated.lock().unwrap();
         // Check if we need to advance time.
         let days_passed = Utc::now().signed_duration_since(*updated).num_days();
-        match days_passed > 0 {
-            true => {
-                // Measure time for generation.
-                let now = Instant::now();
-                debug!("Advancing time: {} steps", days_passed);
+        if days_passed > 0 {
+            // Measure time for generation.
+            let now = Instant::now();
+            debug!("Advancing time: {} steps", days_passed);
 
-                // Update state iterativly.
-                for _ in 0..days_passed {
-                    self.galaxy.lock().unwrap().update();
-                }
-
-                // Update last update timer.
-                *updated = updated
-                    .checked_add_signed(Duration::days(days_passed))
-                    .unwrap();
-                //self.save_all();
-                debug!(
-                    "Time advancement finished, took {} ms",
-                    ((now.elapsed().as_secs() * 1_000)
-                        + (now.elapsed().subsec_nanos() / 1_000_000) as u64)
-                );
-                Some(days_passed)
+            // Update state iterativly.
+            for _ in 0..days_passed {
+                self.galaxy.lock().unwrap().update();
             }
-            false => None,
+
+            // Update last update timer.
+            *updated = updated
+                .checked_add_signed(Duration::days(days_passed))
+                .unwrap();
+            //self.save_all();
+            debug!(
+                "Time advancement finished, took {} ms",
+                ((now.elapsed().as_secs() * 1_000)
+                    + u64::from(now.elapsed().subsec_nanos() / 1_000_000))
+            );
+            Some(days_passed)
+        } else {
+            None
         }
     }
 

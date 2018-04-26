@@ -9,14 +9,3 @@ pub struct Sector {
     pub faction: Faction,
     pub system_locations: Vec<Point>,
 }
-
-impl Sector {
-    /// Returns the point representing the centroid of the cluster.
-    pub fn center(&self) -> Point {
-        self.system_locations
-            .iter()
-            .fold(Point::origin(), |center, system| {
-                center + (system.coords / (self.system_locations.len() as f64))
-            })
-    }
-}

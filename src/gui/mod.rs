@@ -19,7 +19,7 @@ pub struct Gui {
 
 impl Gui {
     /// Creates a new GUI
-    pub fn new(game: Arc<Game>) -> Self {
+    pub fn new(game: &Arc<Game>) -> Self {
         // TODO: Make a bit more elegant
         add_keyboard_handler();
         // TODO: Move to some where more reasonable.
@@ -29,7 +29,7 @@ impl Gui {
 
         Gui {
             size: Rect::default(),
-            tabs: tab::create_tabs(game),
+            tabs: tab::create_tabs(&game),
             selected_tab: 0,
             dialog: None,
         }

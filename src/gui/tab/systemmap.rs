@@ -2,9 +2,8 @@ use super::*;
 use termion::event as keyevent;
 
 use astronomicals::system::System;
-use player::{Player, PlayerState};
+use player::PlayerState;
 use tui::widgets::{Block, Borders, Row, Table, Widget};
-use tui::widgets::canvas::Canvas;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
@@ -77,7 +76,7 @@ impl SystemMapTab {
 
         // Send of dialog to be opened.
         if let Some(dialog) = dialog {
-            self.send_handle.send(Event::OpenDialog(dialog));
+            self.send_handle.send(Event::OpenDialog(dialog)).unwrap();
         }
     }
 }
@@ -88,10 +87,10 @@ impl Tab for SystemMapTab {
         let max_selected_astronomical = SystemMapTab::num_astronomicals(&state);
 
         Box::new(SystemMapTab {
-            state: state,
-            send_handle: send_handle,
+            state,
+            send_handle,
             selected_astronomical: 0,
-            max_selected_astronomical: max_selected_astronomical,
+            max_selected_astronomical,
         })
     }
 
@@ -105,10 +104,9 @@ impl Tab for SystemMapTab {
         match event {
             Event::Input(input) => {
                 // Open planet interaction dialog if appropriate.
-                match input {
-                    keyevent::Key::Char('\n') => self.open_dialog(),
-                    _ => {}
-                };
+                if let keyevent::Key::Char('\n') = input {
+                    self.open_dialog();
+                }
                 self.selected_astronomical = match input {
                     // Move up.
                     keyevent::Key::Char('k') => self.selected_astronomical.max(1) - 1,
@@ -203,10 +201,10 @@ fn draw_system_table(
 }
 
 fn draw_system_map(
-    selected: usize,
-    system: &System,
-    term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    _selected: usize,
+    _system: &System,
+    _term: &mut Terminal<MouseBackend>,
+    _area: &Rect,
 ) {
     // TODO: Find decent presentation of a system, ascii art?
 }

@@ -34,11 +34,11 @@ impl Tab for ShipyardTab {
             .get_available(player_system);
 
         Box::new(ShipyardTab {
-            state: state,
+            state,
             sender: send_handle,
             selected: 0,
             max_selected: available_ships.len() - 1,
-            available_ships: available_ships,
+            available_ships,
         })
     }
 
@@ -98,7 +98,7 @@ impl Tab for ShipyardTab {
 /// Draw a list of the given ships with their names.
 fn draw_ship_list(
     selected: usize,
-    ships: &Vec<ShipCharacteristics>,
+    ships: &[ShipCharacteristics],
     term: &mut Terminal<MouseBackend>,
     area: &Rect,
 ) {

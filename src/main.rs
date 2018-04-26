@@ -65,7 +65,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
 
 fn main() {
     // Init logger
-    setup_logger();
+    setup_logger().unwrap();
 
     // Load GameConfig from disk
     let config = game_config::GameConfig::retrieve();
@@ -113,7 +113,7 @@ fn main() {
 
     // Init and start gui
     if enable_gui {
-        let mut gui = gui::Gui::new(game_state);
+        let mut gui = gui::Gui::new(&game_state);
         gui.start();
     }
 }

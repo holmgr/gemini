@@ -45,13 +45,13 @@ impl GalaxyMapTab {
     fn find_route(&mut self) {
         let galaxy = &self.state.galaxy.lock().unwrap();
         let player = &mut self.state.player.lock().unwrap();
-        let range = match player.ship() {
-            &Some(ref ship) => ship.range(),
-            &None => 0.,
+        let range = match *player.ship() {
+            Some(ref ship) => ship.range(),
+            None => 0.,
         };
-        let max_jumps = match player.ship() {
-            &Some(ref ship) => ship.fuel(),
-            &None => 0,
+        let max_jumps = match *player.ship() {
+            Some(ref ship) => ship.fuel(),
+            None => 0,
         };
         // Plan route if possible.
         self.route = galaxy.route(
@@ -68,12 +68,12 @@ impl GalaxyMapTab {
 
         // Only travel if the selected system is the same as the cursor and
         // and the final destination for the route.
-        if let Some((ref jumps, ref route)) = self.route {
+        if let Some((_, ref route)) = self.route {
             if self.selected.is_some() && self.selected.unwrap() == self.cursor
                 && self.selected.unwrap() == *route.last().unwrap()
             {
                 player.set_route(route.clone());
-                self.sender.send(Event::Travel);
+                self.sender.send(Event::Travel).unwrap();
             }
         }
 
@@ -83,9 +83,10 @@ impl GalaxyMapTab {
 
     /// Draws the event box in the given terminal and area.
     pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
-        let draw_str = match self.search_mode {
-            true => format!("{}{}", self.search_str, "{mod=bold |}"),
-            false => String::from("Press '/' to search for a system"),
+        let draw_str = if self.search_mode {
+            format!("{}{}", self.search_str, "{mod=bold |}")
+        } else {
+            String::from("Press '/' to search for a system")
         };
         Paragraph::default()
             .block(Block::default().borders(Borders::ALL))
@@ -158,7 +159,7 @@ impl GalaxyMapTab {
     fn draw_galaxy_map(
         &self,
         player: &Player,
-        systems: &Vec<&System>,
+        systems: &[&System],
         term: &mut Terminal<MouseBackend>,
         area: &Rect,
     ) {
@@ -175,7 +176,7 @@ impl GalaxyMapTab {
             .block(Block::default().title("Systems").borders(Borders::ALL))
             .paint(|ctx| {
                 for system in systems.iter() {
-                    let color = FACTION_COLORS.get(&system.faction).unwrap().clone();
+                    let color = *FACTION_COLORS.get(&system.faction).unwrap();
                     ctx.print(
                         system.location.coords.x,
                         system.location.coords.y,
@@ -230,15 +231,15 @@ impl GalaxyMapTab {
 impl Tab for GalaxyMapTab {
     /// Creates a map tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
-        let cursor = state.player.lock().unwrap().location().clone();
+        let cursor = *state.player.lock().unwrap().location();
         Box::new(GalaxyMapTab {
-            state: state,
+            state,
             sender: send_handle,
-            selected: Some(cursor.clone()),
+            selected: Some(cursor),
             search_mode: false,
             search_str: String::new(),
             route: None,
-            cursor: cursor,
+            cursor,
             map_scale: 1.,
         })
     }
@@ -250,101 +251,97 @@ impl Tab for GalaxyMapTab {
 
     /// Handles the user provided event.
     fn handle_event(&mut self, event: Event) {
-        match event {
-            Event::Input(input) => {
-                match input {
-                    keyevent::Key::Char('\n') if self.search_mode => {
-                        let galaxy = self.state.galaxy.lock().unwrap();
+        if let Event::Input(input) = event {
+            match input {
+                keyevent::Key::Char('\n') if self.search_mode => {
+                    let galaxy = self.state.galaxy.lock().unwrap();
 
-                        // Set cursor to the closest matching system if
-                        // possible.
-                        match galaxy.search_name(&self.search_str) {
-                            Some(system) => self.cursor = system.location.clone(),
-                            None => {}
-                        };
+                    // Set cursor to the closest matching system if
+                    // possible.
+                    if let Some(system) = galaxy.search_name(&self.search_str) {
+                        self.cursor = system.location;
+                    };
 
-                        // Clear input.
-                        self.search_str.clear();
-                        self.search_mode = false;
-                    }
-                    keyevent::Key::Char(e) if self.search_mode => {
-                        self.search_str.push(e);
-                        // Early exit.
-                        return;
-                    }
-                    keyevent::Key::Backspace if self.search_mode => {
-                        self.search_str.pop();
-                    }
-                    keyevent::Key::Char('\n') if self.selected.is_some() => {
-                        match self.route {
-                            Some(_) => self.travel_to_selected(),
-                            None => self.find_route(),
-                        };
-                    }
-                    // Center map around player
-                    keyevent::Key::Char(' ') => {
-                        if let Ok(player) = self.state.player.lock() {
-                            self.cursor = player.location().clone();
-                        }
-                    }
-                    // Start search mode.
-                    keyevent::Key::Char('/') => {
-                        self.search_mode = true;
-                        return;
-                    }
-                    // Quit search mode.
-                    keyevent::Key::Esc => {
-                        self.search_str.clear();
-                        self.search_mode = false;
-                        return;
-                    }
-                    _ => {}
-                };
-
-                self.map_scale *= match input {
-                    // Zoom out.
-                    keyevent::Key::Char('u') => 0.5,
-                    // Zoom in.
-                    keyevent::Key::Char('i') => 2.,
-                    // No zooming.
-                    _ => 1.,
-                };
-
-                // Prevent zooming too far in.
-                self.map_scale = self.map_scale.min(4.);
-
-                let translation = match input {
-                    // Move up.
-                    keyevent::Key::Char('k') => Vector2::new(0., 1. / self.map_scale),
-                    // Move down.
-                    keyevent::Key::Char('j') => Vector2::new(0., -1. / self.map_scale),
-                    // Move right.
-                    keyevent::Key::Char('l') => Vector2::new(1. / self.map_scale, 0.),
-                    // Move left.
-                    keyevent::Key::Char('h') => Vector2::new(-1. / self.map_scale, 0.),
-                    _ => Vector2::new(0., 0.),
-                };
-
-                // Move out of snapping system if currently snapped.
-                self.cursor += match self.selected {
-                    Some(_) => Vector2::new(
-                        translation.x * 1.1 * self.map_scale * MIN_SNAP_DIST,
-                        translation.y * 1.1 * self.map_scale * MIN_SNAP_DIST,
-                    ),
-                    None => translation,
-                };
-                self.selected = None;
-
-                // Check if cursor should snap to closest system.
-                if let Some(neighbor) = self.state.galaxy.lock().unwrap().nearest(&self.cursor) {
-                    if distance(&self.cursor, &neighbor) < MIN_SNAP_DIST {
-                        self.cursor = neighbor.clone();
-                        self.selected = Some(neighbor.clone());
+                    // Clear input.
+                    self.search_str.clear();
+                    self.search_mode = false;
+                }
+                keyevent::Key::Char(e) if self.search_mode => {
+                    self.search_str.push(e);
+                    // Early exit.
+                    return;
+                }
+                keyevent::Key::Backspace if self.search_mode => {
+                    self.search_str.pop();
+                }
+                keyevent::Key::Char('\n') if self.selected.is_some() => {
+                    match self.route {
+                        Some(_) => self.travel_to_selected(),
+                        None => self.find_route(),
+                    };
+                }
+                // Center map around player
+                keyevent::Key::Char(' ') => {
+                    if let Ok(player) = self.state.player.lock() {
+                        self.cursor = *player.location();
                     }
                 }
+                // Start search mode.
+                keyevent::Key::Char('/') => {
+                    self.search_mode = true;
+                    return;
+                }
+                // Quit search mode.
+                keyevent::Key::Esc => {
+                    self.search_str.clear();
+                    self.search_mode = false;
+                    return;
+                }
+                _ => {}
+            };
+
+            self.map_scale *= match input {
+                // Zoom out.
+                keyevent::Key::Char('u') => 0.5,
+                // Zoom in.
+                keyevent::Key::Char('i') => 2.,
+                // No zooming.
+                _ => 1.,
+            };
+
+            // Prevent zooming too far in.
+            self.map_scale = self.map_scale.min(4.);
+
+            let translation = match input {
+                // Move up.
+                keyevent::Key::Char('k') => Vector2::new(0., 1. / self.map_scale),
+                // Move down.
+                keyevent::Key::Char('j') => Vector2::new(0., -1. / self.map_scale),
+                // Move right.
+                keyevent::Key::Char('l') => Vector2::new(1. / self.map_scale, 0.),
+                // Move left.
+                keyevent::Key::Char('h') => Vector2::new(-1. / self.map_scale, 0.),
+                _ => Vector2::new(0., 0.),
+            };
+
+            // Move out of snapping system if currently snapped.
+            self.cursor += match self.selected {
+                Some(_) => Vector2::new(
+                    translation.x * 1.1 * self.map_scale * MIN_SNAP_DIST,
+                    translation.y * 1.1 * self.map_scale * MIN_SNAP_DIST,
+                ),
+                None => translation,
+            };
+            self.selected = None;
+
+            // Check if cursor should snap to closest system.
+            if let Some(neighbor) = self.state.galaxy.lock().unwrap().nearest(&self.cursor) {
+                if distance(&self.cursor, &neighbor) < MIN_SNAP_DIST {
+                    self.cursor = *neighbor;
+                    self.selected = Some(*neighbor);
+                }
             }
-            _ => {}
-        };
+        }
     }
 
     /// Draws the tab in the given terminal and area.
