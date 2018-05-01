@@ -36,6 +36,7 @@ mod event;
 mod ship;
 mod utils;
 mod player;
+mod economy;
 
 use log::LevelFilter;
 use app_dirs::{get_data_root, AppDataType};
