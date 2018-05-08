@@ -7,6 +7,7 @@ use astronomicals::Galaxy;
 use ship::Shipyard;
 use player::Player;
 use resources::{fetch_resource, ShipResource};
+use economy::Economy;
 
 const SAVE_PATH: &str = "gemini/saves/";
 
@@ -15,6 +16,7 @@ pub struct Game {
     pub galaxy: Mutex<Galaxy>,
     pub shipyard: Mutex<Shipyard>,
     pub player: Mutex<Player>,
+    pub economy: Mutex<Economy>,
     updated: Mutex<DateTime<Utc>>,
 }
 
@@ -25,6 +27,7 @@ impl Game {
             galaxy: Mutex::new(Galaxy::new(vec![], vec![])),
             shipyard: Mutex::new(Shipyard::new()),
             player: Mutex::new(Player::default()),
+            economy: Mutex::new(Economy::default()),
             updated: Mutex::new(Utc.ymd(2018, 1, 1).and_hms(0, 0, 0)), // Start time
         })
     }
@@ -53,6 +56,7 @@ impl Game {
             // Update state iterativly.
             for _ in 0..days_passed {
                 self.galaxy.lock().unwrap().update();
+                self.economy.lock().unwrap().update();
             }
 
             // Update last update timer.
@@ -87,6 +91,10 @@ impl Game {
             .and_then(|mut player_file|
                       // Save galaxy
                       serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok())
+            .and_then(|_| File::create(base_path.join("economy.cbor").as_path()).ok())
+            .and_then(|mut economy_file|
+                      // Save galaxy
+                      serialize_into(&mut economy_file, &(*self.economy.lock().unwrap())).ok())
             .and_then(|_| File::create(base_path.join("updated.cbor").as_path()).ok())
             .and_then(|mut update_file|
                       // Save galaxy
@@ -120,6 +128,9 @@ impl Game {
         let player: Option<Player> = File::open(base_path.join("player.cbor").as_path())
             .ok()
             .and_then(|player_file| deserialize_from(player_file).ok());
+        let economy: Option<Economy> = File::open(base_path.join("economy.cbor").as_path())
+            .ok()
+            .and_then(|economy_file| deserialize_from(economy_file).ok());
         let updated: Option<DateTime<Utc>> = File::open(base_path.join("updated.cbor").as_path())
             .ok()
             .and_then(|updated_file| deserialize_from(updated_file).ok());
@@ -127,11 +138,12 @@ impl Game {
         let mut shipyard = Shipyard::new();
         shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());
 
-        match (galaxy, player, updated) {
-            (Some(g), Some(p), Some(u)) => Some(Arc::new(Game {
+        match (galaxy, player, economy, updated) {
+            (Some(g), Some(p), Some(e), Some(u)) => Some(Arc::new(Game {
                 galaxy: Mutex::new(g),
                 shipyard: Mutex::new(shipyard),
                 player: Mutex::new(p),
+                economy: Mutex::new(e),
                 updated: Mutex::new(u),
             })),
             _ => None,

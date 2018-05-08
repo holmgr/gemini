@@ -1,7 +1,71 @@
-use std::fmt;
+use std::{fmt, slice::Iter, sync::{Arc, Mutex}};
+use rayon::prelude::*;
+
+use astronomicals::Galaxy;
+use game::Updatable;
+
+mod market;
+mod agent;
+
+use self::market::Market;
+use self::agent::Agent;
+
+/// Holds the economic state for the entire game.
+#[derive(Default, Serialize, Deserialize)]
+pub struct Economy {
+    markets: Vec<Market>,
+}
+
+impl Economy {
+    /// Creates the game economy using the given galaxy.
+    pub fn new(galaxy: &Galaxy) -> Economy {
+        // Create one market per sector.
+        let mut markets = vec![];
+        for sector in &galaxy.sectors {
+            let mut market = Market::new();
+            for system in sector
+                .system_locations
+                .iter()
+                .map(|loc| galaxy.system(loc).unwrap())
+            {
+                market.add_system(system);
+            }
+            markets.push(market);
+        }
+
+        Economy { markets }
+    }
+}
+
+impl Updatable for Economy {
+    /// Advances time and updates all agents etc.
+    fn update(&mut self) {
+        self.markets.par_iter_mut().for_each(|market| {
+            market.update();
+        });
+    }
+}
+
+/// An offer to buy some commodity.
+#[derive(Builder, Debug)]
+pub struct Bid {
+    pub agent: Arc<Mutex<Agent>>,
+    pub commodity: Commodity,
+    pub amount: u32,
+    pub unit_price: u32,
+}
+
+/// An offer to sell some commodity.
+#[derive(Builder, Debug)]
+pub struct Ask {
+    pub agent: Arc<Mutex<Agent>>,
+    pub commodity: Commodity,
+    pub amount: u32,
+    pub unit_price: u32,
+}
 
 /// A tradable and possibly producable commodity
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Commodity {
     Chemical,
     ConsumerItem,
@@ -19,6 +83,30 @@ pub enum Commodity {
     Textile,
     Waste,
     Weapon,
+}
+
+impl Commodity {
+    pub fn values() -> Iter<'static, Commodity> {
+        static COMMODITIES: [Commodity; 16] = [
+            Commodity::Chemical,
+            Commodity::ConsumerItem,
+            Commodity::Food,
+            Commodity::IllegalDrug,
+            Commodity::IndustrialMaterial,
+            Commodity::LegalDrug,
+            Commodity::Machinery,
+            Commodity::Medicine,
+            Commodity::Metal,
+            Commodity::Mineral,
+            Commodity::Salvage,
+            Commodity::Slavery,
+            Commodity::Technology,
+            Commodity::Textile,
+            Commodity::Waste,
+            Commodity::Weapon,
+        ];
+        COMMODITIES.into_iter()
+    }
 }
 
 impl fmt::Display for Commodity {

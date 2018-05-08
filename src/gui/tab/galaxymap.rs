@@ -134,7 +134,14 @@ impl GalaxyMapTab {
                     .render(term, &chunks[0]);
                 Table::new(
                     // Prepending empty character to get alignment with list above.
-                    [" Planet", "Mass", "Population", "Temperature", "Type"].into_iter(),
+                    [
+                        " Planet",
+                        "Mass",
+                        "Population",
+                        "Temperature",
+                        "Type",
+                        "Economy",
+                    ].into_iter(),
                     system.satelites.iter().map(|ref planet| {
                         let style: &Style = &DEFAULT_STYLE;
                         Row::StyledData(
@@ -144,13 +151,14 @@ impl GalaxyMapTab {
                                 format!("{:.1} M", planet.population),
                                 format!("{:.1}", planet.surface_temperature),
                                 planet.planet_type.to_string(),
+                                planet.economic_type.to_string(),
                             ].into_iter(),
                             &style,
                         )
                     }),
                 ).block(Block::default().title("Planets"))
                     .header_style(Style::default().fg(Color::Yellow))
-                    .widths(&[15, 5, 15, 15, 10])
+                    .widths(&[15, 5, 15, 15, 10, 15])
                     .render(term, &chunks[1]);
             });
     }
@@ -349,7 +357,7 @@ impl Tab for GalaxyMapTab {
         let galaxy = self.state.galaxy.lock().unwrap();
         Group::default()
             .direction(Direction::Horizontal)
-            .sizes(&[Size::Fixed(75), Size::Min(1)])
+            .sizes(&[Size::Fixed(85), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 // TODO: Draw system detailed information.
                 let systems = &galaxy.systems();
