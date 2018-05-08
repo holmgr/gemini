@@ -2,7 +2,7 @@ use rand::Rng;
 use statrs::distribution::{Continuous, Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
-use astronomicals::{planet::{PlanetBuilder, PlanetType}, star::Star};
+use astronomicals::{planet::{PlanetBuilder, PlanetEconomy, PlanetType}, star::Star};
 
 /// Basic non deterministic name generator for generating new Planets which
 /// are similar to the trained data provided.
@@ -59,6 +59,28 @@ impl PlanetGen {
             (x, _) if x >= 124.5 && random_val < 0.8 => PlanetType::Rocky,
             (x, _) if x >= 124.5 && random_val >= 0.8 => PlanetType::Metal,
             _ => PlanetType::Rocky,
+        }
+    }
+
+    /// Predict the planet economy type based on type.
+    pub fn predict_economy<R: Rng>(rng: &mut R, kind: &PlanetType) -> PlanetEconomy {
+        // Based on trained decision tree with modifications to allow for
+        // Earth-like planets at a higher rate.
+        let random_val: f64 = rng.gen();
+        match *kind {
+            PlanetType::Icy if random_val < 0.2 => PlanetEconomy::Extraction,
+            PlanetType::Icy if random_val < 0.4 => PlanetEconomy::Refinary,
+            PlanetType::Icy if random_val < 0.7 => PlanetEconomy::HighTech,
+            PlanetType::Icy if random_val < 0.8 => PlanetEconomy::Military,
+            PlanetType::Icy => PlanetEconomy::Industrial,
+            PlanetType::Rocky if random_val < 0.2 => PlanetEconomy::Extraction,
+            PlanetType::Rocky if random_val < 0.4 => PlanetEconomy::Refinary,
+            PlanetType::Rocky if random_val < 0.7 => PlanetEconomy::HighTech,
+            PlanetType::Rocky if random_val < 0.9 => PlanetEconomy::Military,
+            PlanetType::Rocky => PlanetEconomy::Industrial,
+            PlanetType::Earth => PlanetEconomy::Agriculture,
+            PlanetType::Metal => PlanetEconomy::Extraction,
+            _ => PlanetEconomy::None,
         }
     }
 

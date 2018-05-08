@@ -3,6 +3,9 @@ use serde_json;
 use serde::de::Deserialize;
 
 use ship::ShipCharacteristics;
+use economy::Commodity;
+use entities::Faction;
+use astronomicals::planet::PlanetEconomy;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.
@@ -25,6 +28,10 @@ lazy_static! {
             ShipResource::KEY,
             include_str!("../res/ships.json"),
         );
+        res.insert(
+            AgentResource::KEY,
+            include_str!("../res/economic_agents.json"),
+        );
         res
     };
 }
@@ -32,9 +39,19 @@ lazy_static! {
 /// Attempts to returns the resource with the given type, will return None
 /// if the type has no resource or if the deserialization fails.
 pub fn fetch_resource<T: Resource>() -> Option<T> {
+    let res_str = RESOURCES.get(T::KEY).unwrap();
+    match serde_json::from_str(res_str) {
+        Ok(res) => Some(res),
+        Err(msg) => {
+            error!("{}", msg);
+            None
+        }
+    }
+    /*
     RESOURCES
         .get(T::KEY)
         .and_then(|res: &&str| serde_json::from_str(res).unwrap_or(None))
+        */
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -57,6 +74,19 @@ pub struct ShipResource {
 
 impl Resource for ShipResource {
     const KEY: &'static str = "ships";
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Resource containing all production/consumptions for factions and planets.
+pub struct AgentResource {
+    pub faction_ideals: HashMap<Faction, HashMap<Commodity, u32>>,
+    pub faction_production: HashMap<Faction, HashMap<Commodity, u32>>,
+    pub planet_ideals: HashMap<PlanetEconomy, HashMap<Commodity, u32>>,
+    pub planet_production: HashMap<PlanetEconomy, HashMap<Commodity, u32>>,
+}
+
+impl Resource for AgentResource {
+    const KEY: &'static str = "economic_agents";
 }
 
 #[cfg(test)]

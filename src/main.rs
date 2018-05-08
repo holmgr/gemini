@@ -36,10 +36,12 @@ mod event;
 mod ship;
 mod utils;
 mod player;
+mod economy;
 
 use log::LevelFilter;
 use app_dirs::{get_data_root, AppDataType};
 use generators::generate_galaxy;
+use economy::Economy;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger() -> Result<(), fern::InitError> {
@@ -81,7 +83,12 @@ fn main() {
 
             // Generate galaxy
             info!("Generating galaxy...");
-            *game_state.galaxy.lock().unwrap() = generate_galaxy(&config);
+            let galaxy = generate_galaxy(&config);
+
+            info!("Setting up economy...");
+            *game_state.economy.lock().unwrap() = Economy::new(&galaxy);
+
+            *game_state.galaxy.lock().unwrap() = galaxy;
 
             info!("Loading ships...");
             game_state
@@ -103,6 +110,7 @@ fn main() {
                     .unwrap(),
             );
 
+            game_state.update();
             game_state.save_all();
             game_state
         }
