@@ -1,11 +1,10 @@
-use utils::Point;
 use entities::Faction;
+use utils::Point;
 
 /// Represents a group of systems in close proximity within the same faction.
 /// Markets in the economy is handled on this level of scale.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Sector {
-    pub name: String,
     pub faction: Faction,
     pub system_locations: Vec<Point>,
 }

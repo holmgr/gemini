@@ -1,15 +1,15 @@
 use std::sync::{Arc, mpsc::Sender};
 use tui::{Terminal, backend::MouseBackend, layout::Rect};
 
-use game::Game;
 use event::{Event, HANDLER};
+use game::Game;
 
-mod status;
 mod galaxymap;
-mod systemmap;
 mod market;
 mod mission;
 mod shipyard;
+mod status;
+mod systemmap;
 
 /// Interface for dealing with visual tabs in the GUI.
 pub trait Tab {

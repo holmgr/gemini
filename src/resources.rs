@@ -1,11 +1,11 @@
-use std::{str, collections::HashMap};
-use serde_json;
 use serde::de::Deserialize;
+use serde_json;
+use std::{str, collections::HashMap};
 
-use ship::ShipCharacteristics;
+use astronomicals::planet::PlanetEconomy;
 use economy::Commodity;
 use entities::Faction;
-use astronomicals::planet::PlanetEconomy;
+use ship::ShipCharacteristics;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.
@@ -58,7 +58,9 @@ pub fn fetch_resource<T: Resource>() -> Option<T> {
 /// Resource of all training names for name generation of celestial objects.
 pub struct AstronomicalNamesResource {
     pub names: Vec<String>,
+    pub scientific_names: Vec<String>,
     pub greek: Vec<String>,
+    pub roman: Vec<String>,
     pub decorators: Vec<String>,
 }
 

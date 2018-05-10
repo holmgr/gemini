@@ -1,8 +1,8 @@
+use app_dirs::{get_data_root, AppDataType};
+use notify::{watcher, RecursiveMode, Watcher};
 use std::{fs::{create_dir_all, File}, io::{Read, Write}, sync::mpsc::{channel, RecvError},
           time::Duration};
-use notify::{watcher, RecursiveMode, Watcher};
 use toml::{de::from_str, ser::to_string_pretty};
-use app_dirs::{get_data_root, AppDataType};
 
 const PREFS_PATH: &str = "gemini/conf/";
 

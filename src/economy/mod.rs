@@ -1,14 +1,14 @@
-use std::{fmt, slice::Iter, sync::{Arc, Mutex}};
 use rayon::prelude::*;
+use std::{fmt, slice::Iter, sync::{Arc, Mutex}};
 
 use astronomicals::Galaxy;
 use game::Updatable;
 
-mod market;
 mod agent;
+mod market;
 
-use self::market::Market;
 use self::agent::Agent;
+use self::market::Market;
 
 /// Holds the economic state for the entire game.
 #[derive(Default, Serialize, Deserialize)]

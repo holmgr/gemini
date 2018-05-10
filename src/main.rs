@@ -25,23 +25,23 @@ extern crate textwrap;
 extern crate toml;
 extern crate tui;
 
-mod game_config;
-mod resources;
-mod generators;
 mod astronomicals;
+mod economy;
 mod entities;
-mod game;
-mod gui;
 mod event;
+mod game;
+mod game_config;
+mod generators;
+mod gui;
+mod player;
+mod resources;
 mod ship;
 mod utils;
-mod player;
-mod economy;
 
-use log::LevelFilter;
 use app_dirs::{get_data_root, AppDataType};
-use generators::generate_galaxy;
 use economy::Economy;
+use generators::generate_galaxy;
+use log::LevelFilter;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger() -> Result<(), fern::InitError> {

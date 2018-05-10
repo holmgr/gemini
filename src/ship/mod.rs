@@ -1,7 +1,7 @@
-use std::fmt;
-use resources::ShipResource;
-use entities::Faction;
 use astronomicals::system::System;
+use entities::Faction;
+use resources::ShipResource;
+use std::fmt;
 
 /// Ship currently owned by the player.
 #[derive(Serialize, Deserialize, Clone, Debug)]

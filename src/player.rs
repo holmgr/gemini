@@ -1,8 +1,8 @@
 use chrono::{DateTime, Duration, Local, TimeZone, Utc};
 use nalgebra::distance;
 
-use utils::Point;
 use ship::Ship;
+use utils::Point;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 /// Player type holding the player's current ship, credits etc.

@@ -1,12 +1,12 @@
-use std::f64;
 use rand::{ChaChaRng, Rng, SeedableRng};
 use statrs::distribution::{Distribution, Poisson};
+use std::f64;
 
-use utils::Point;
 use astronomicals::{hash, planet::PlanetBuilder,
                     system::{Reputation, SystemBuilder, SystemSecurity, SystemState}};
-use generators::{planets::PlanetGen, stars::StarGen};
 use entities::Faction;
+use generators::{planets::PlanetGen, stars::StarGen};
+use utils::Point;
 
 /// Used for generating systems.
 pub struct SystemGen {
@@ -40,7 +40,7 @@ impl SystemGen {
         // Calculate hash.
         let hash = hash(&location);
         let seed: &[_] = &[hash as u32];
-        let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
+        let mut rng = ChaChaRng::from_seed(seed);
 
         let star = self.star_gen.generate(&mut rng).unwrap();
 

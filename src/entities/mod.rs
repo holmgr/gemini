@@ -1,6 +1,6 @@
 use rand::Rng;
-use std::fmt;
 use statrs::distribution::{Categorical, Distribution};
+use std::fmt;
 
 /// Represents a single Faction which is assigned on Sector level.
 #[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq)]
