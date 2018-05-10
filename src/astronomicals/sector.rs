@@ -5,7 +5,6 @@ use entities::Faction;
 /// Markets in the economy is handled on this level of scale.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Sector {
-    pub name: String,
     pub faction: Faction,
     pub system_locations: Vec<Point>,
 }

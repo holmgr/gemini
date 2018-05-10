@@ -58,7 +58,9 @@ pub fn fetch_resource<T: Resource>() -> Option<T> {
 /// Resource of all training names for name generation of celestial objects.
 pub struct AstronomicalNamesResource {
     pub names: Vec<String>,
+    pub scientific_names: Vec<String>,
     pub greek: Vec<String>,
+    pub roman: Vec<String>,
     pub decorators: Vec<String>,
 }
 

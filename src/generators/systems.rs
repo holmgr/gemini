@@ -40,7 +40,7 @@ impl SystemGen {
         // Calculate hash.
         let hash = hash(&location);
         let seed: &[_] = &[hash as u32];
-        let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
+        let mut rng = ChaChaRng::from_seed(seed);
 
         let star = self.star_gen.generate(&mut rng).unwrap();
 

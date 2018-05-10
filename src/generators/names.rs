@@ -1,18 +1,17 @@
-use std::{cmp::max, collections::{BTreeSet, HashSet}};
-use rand::{IsaacRng, Rng, SeedableRng};
+use statrs::distribution::{Categorical, Distribution};
+use rand::{ChaChaRng, Rng, SeedableRng};
 use inflector::Inflector;
-use petgraph::{Graph, prelude::NodeIndex};
 use resources::AstronomicalNamesResource;
 
-/// Basic non deterministic name generator for generating random strings which
-/// are similar to the trained data provided.
+/// Name generator which generates based on names given in training data.
 pub struct NameGen {
-    rng: IsaacRng,
-    generated: HashSet<String>,
-    graph: Graph<char, f64>,
-    start: NodeIndex,
-    end: NodeIndex,
-    suffixes: Vec<String>,
+    rng: ChaChaRng,
+    base_names: Vec<String>,
+    cache: Vec<String>,
+    greek_suffix: Vec<String>,
+    roman_suffix: Vec<String>,
+    decorator_suffix: Vec<String>,
+    scientific_names: Vec<String>,
 }
 
 impl NameGen {
@@ -20,165 +19,97 @@ impl NameGen {
     pub fn from_seed(seed: u32) -> NameGen {
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
-        let rng: IsaacRng = SeedableRng::from_seed(new_seed);
-        let mut graph = Graph::<char, f64>::new();
-        let start = graph.add_node('<');
-        let end = graph.add_node('>');
-        let generated = HashSet::<String>::new();
-        let suffixes = Vec::<String>::new();
+        let rng = ChaChaRng::from_seed(new_seed);
 
         NameGen {
             rng,
-            generated,
-            graph,
-            start,
-            end,
-            suffixes,
+            cache: vec![],
+            base_names: vec![],
+            greek_suffix: vec![],
+            roman_suffix: vec![],
+            decorator_suffix: vec![],
+            scientific_names: vec![],
         }
     }
 
-    /// Creates a new NameGen with the given seed.
+    /// Reseeds the name generator.
     pub fn reseed(&mut self, seed: u32) {
         // Create and initialize random generator using seed.
         let new_seed: &[_] = &[seed];
-        let rng: IsaacRng = SeedableRng::from_seed(new_seed);
-        self.rng = rng;
+        self.rng.reseed(new_seed);
     }
 
-    /// Trains the underlying model using the given AstronomicalNamesResource.
-    pub fn train(&mut self, data: &AstronomicalNamesResource) {
-        let depth = data.names.iter().fold(0, |acc, ref s| max(acc, s.len()));
+    /// Trains the underlying model using the given resouce.
+    pub fn train(&mut self, data: AstronomicalNamesResource) {
+        self.base_names = data.names;
+        self.scientific_names = data.scientific_names;
 
-        // Instansiate layers, number of layers is equal to the longest training
-        // string.
-        let mut layers = Vec::<BTreeSet<NodeIndex>>::new();
-        for _ in 0..depth {
-            layers.push(BTreeSet::<NodeIndex>::new());
-        }
-
-        // Add edges between all characters following each other at every
-        // position producing a forward connected graph.
-        for name in &data.names {
-            let chars = name.chars();
-            let mut prev = self.start;
-
-            for (index, chr) in chars.enumerate() {
-                let node = match layers[index]
-                    .iter()
-                    .find(|&&node| *self.graph.node_weight(node).unwrap() == chr)
-                {
-                    Some(&node) => node,
-                    _ => self.graph.add_node(chr),
-                };
-                layers[index].insert(node);
-
-                self.graph.update_edge(prev, node, 0.0);
-                prev = node;
-            }
-            // Add connection to end from last character.
-            self.graph.update_edge(prev, self.end, 0.0);
-        }
-        info!(
-            "Model has been trained, is using {} layers, {} nodes and {} edges",
-            depth,
-            self.graph.node_count(),
-            self.graph.edge_count()
-        );
+        self.rng.shuffle(&mut self.base_names);
+        self.rng.shuffle(&mut self.scientific_names);
 
         // Load suffixes.
-        self.suffixes.extend_from_slice(&data.greek[..]);
-        self.suffixes.extend_from_slice(&data.decorators[..]);
+        self.greek_suffix = data.greek;
+        self.roman_suffix = data.roman;
+        self.decorator_suffix = data.decorators;
     }
 
-    /// Attempts to generate a new name from the model.
-    /// This name is guaranteed to exist in the training set or to have been
-    /// previously generated.
-    /// Attempts N number of tries, if no unique name could be found it will
-    /// return None.
-    pub fn generate(&mut self) -> Option<String> {
-        // Non deterministicly generate a new string from the model.
-        // Note: This may produce an exisiting string in the training set or
-        // previously generated set.
-        fn generate_attempt(
-            graph: &Graph<char, f64>,
-            start: &NodeIndex,
-            end: &NodeIndex,
-            rng: &mut IsaacRng,
-        ) -> String {
-            let mut final_string = String::new();
-            let mut current_node = *start;
+    /// Generates a new main name using base names and suffixes.
+    fn generate_name(&mut self) -> Option<String> {
+        if self.cache.is_empty() {
+            if let Some(base_name) = self.base_names.pop() {
+                let suffix_probs = Categorical::new(&[80., 8., 4., 8.]).unwrap();
 
-            // Traverse until we hit end.
-            while current_node != *end {
-                // Step to random neighbor in next layer for which it exists
-                // an edge.
-                let neighbors = graph.neighbors(current_node).collect::<Vec<NodeIndex>>();
-                let next_node = rng.choose(neighbors.as_slice()).unwrap();
-                final_string.push(*graph.node_weight(current_node).unwrap());
-                current_node = *next_node;
-            }
-            // Remove start node character.
-            final_string.remove(0);
-            final_string
-        };
-
-        // Randomly generate a suffix uniformlly from training data, has a high
-        // chance of returning None.
-        // TODO: Load threshold from config.
-        fn get_suffix(rng: &mut IsaacRng, suffixes: &[String]) -> Option<String> {
-            let suffix_chance = 0.1;
-            match rng.next_f64() {
-                x if x < suffix_chance => Some(rng.choose(&suffixes[..]).unwrap().clone()),
-                _ => None,
-            }
-        }
-
-        // Check if a name is valid according to constraints.
-        // TODO: Extract this to a seperate method, should also probably be
-        // based on configuration entries.
-        let is_valid_name =
-            |name: &String| (name.contains(' ') && name.len() < 11) || name.len() < 9;
-
-        // Attempt N number of attempts retuning none if no unique string was
-        // generated which fullfils the criteria.
-        // TODO: Move name retries to config.
-        let gen_num_attempts = 27;
-        for _ in 0..gen_num_attempts {
-            let name = generate_attempt(&self.graph, &self.start, &self.end, &mut self.rng)
-                .to_title_case();
-            if is_valid_name(&name) && !self.generated.contains(&name) {
-                self.generated.insert(name.clone());
-                return match get_suffix(&mut self.rng, &self.suffixes) {
-                    Some(suffix) => Some(format!("{} {}", name, &suffix.to_title_case())),
-                    _ => Some(name),
+                let suffixes = match suffix_probs.sample(&mut self.rng) as usize {
+                    1 => self.greek_suffix.clone(),
+                    2 => self.roman_suffix.clone(),
+                    3 => self.decorator_suffix.clone(),
+                    _ => vec![],
                 };
+
+                self.cache.push(base_name.to_title_case());
+                for suffix in suffixes {
+                    self.cache
+                        .push(format!("{} {}", base_name.to_title_case(), suffix));
+                }
+            } else if !self.scientific_names.is_empty() {
+                self.cache.append(&mut self.scientific_names);
             }
         }
-        info!("Unsuccessful generation used {} tries", gen_num_attempts);
-        None
+        self.cache.pop()
     }
-}
 
-#[cfg(test)]
-mod names_test {
-    use super::*;
-    use setup_logger;
-    use resources::{fetch_resource, AstronomicalNamesResource};
+    /// Attempts to generate a new name main name and several secondary names from the model.
+    pub fn generate(&mut self, subcount: usize) -> (String, Vec<String>) {
+        let main_name = self.generate_name().unwrap_or_else(|| {
+            error!("Failed to generate main system name");
+            panic!()
+        });
 
-    #[test]
-    // All genrated names must be unique.
-    fn test_generate_unique() {
-        setup_logger();
+        let subname_type = Categorical::new(&[10., 40., 40.]).unwrap();
 
-        let mut gen = NameGen::from_seed(0);
-        let res = fetch_resource::<AstronomicalNamesResource>().unwrap();
-        gen.train(&res);
+        let mut sub_names = vec![];
+        let alphabet = vec![
+            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"
+        ];
 
-        let mut names = HashSet::<String>::new();
-        for _ in 0..30 {
-            names.insert(gen.generate().unwrap());
-        }
+        match subname_type.sample(&mut self.rng) as usize {
+            0 => {
+                for _ in 1..subcount {
+                    let sub_name = self.generate_name()
+                        .unwrap_or_else(|| String::from("Unnamed"));
+                    sub_names.push(sub_name);
+                }
+                sub_names.push(main_name.clone());
+            }
+            1 => for index in 1..subcount {
+                sub_names.push(format!("{} A-{}", main_name, index));
+            },
+            _ => for character in alphabet.iter().take(subcount) {
+                sub_names.push(format!("{} {}", main_name, character));
+            },
+        };
+        self.rng.shuffle(&mut sub_names);
 
-        assert_eq!(names.len(), 30);
+        (main_name, sub_names)
     }
 }

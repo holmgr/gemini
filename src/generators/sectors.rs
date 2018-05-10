@@ -1,12 +1,11 @@
 use std::{collections::HashMap, f64, iter::FromIterator,
-          sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}}, time::Instant, usize::MAX};
+          sync::atomic::{AtomicBool, Ordering}, time::Instant, usize::MAX};
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use nalgebra::distance;
 
 use utils::{HashablePoint, Point};
 use astronomicals::sector::Sector;
-use generators::names::NameGen;
 use game_config::GameConfig;
 use entities::Faction;
 
@@ -23,7 +22,6 @@ impl SectorGen {
     pub fn generate(
         &self,
         config: &GameConfig,
-        name_gen: &Arc<Mutex<NameGen>>,
         system_locations: Vec<HashablePoint>,
     ) -> Vec<Sector> {
         // Measure time for generation.
@@ -31,7 +29,7 @@ impl SectorGen {
 
         info!("Simulating expansion for initial sectors...");
         let seed: &[_] = &[config.map_seed as u32];
-        let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
+        let mut rng: ChaChaRng = ChaChaRng::from_seed(seed);
 
         // Setup initial centroids
         let mut centroids =
@@ -124,24 +122,17 @@ impl SectorGen {
             sector_vecs[closest_cluster].push(system_location);
         });
 
-        // Unwrap and lock name generator as it is mutated by generation.
-        let mut name_gen_unwraped = name_gen.lock().unwrap();
-
         // Create sector for each cluster
         let sectors = sector_vecs
             .into_iter()
             .map(|system_locations| {
                 let sector_seed: &[_] = &[system_locations.len() as u32];
                 let mut faction_rng: ChaChaRng = SeedableRng::from_seed(sector_seed);
-                name_gen_unwraped.reseed(*sector_seed.first().unwrap());
                 Sector {
                     system_locations: system_locations
                         .into_iter()
                         .map(|hashpoint| *hashpoint.as_point())
                         .collect::<Vec<_>>(),
-                    name: name_gen_unwraped
-                        .generate()
-                        .unwrap_or_else(|| String::from("Unnamed")),
                     faction: Faction::random_faction(&mut faction_rng),
                 }
             })
