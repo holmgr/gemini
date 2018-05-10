@@ -3,9 +3,9 @@ use termion::event as keyevent;
 
 use astronomicals::system::System;
 use player::PlayerState;
-use tui::widgets::{Block, Borders, Row, Table, Widget};
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
+use tui::widgets::{Block, Borders, Row, Table, Widget};
 
 use gui::dialog::MultiDialog;
 

@@ -1,11 +1,11 @@
-use std::{str, collections::HashMap};
-use serde_json;
 use serde::de::Deserialize;
+use serde_json;
+use std::{str, collections::HashMap};
 
-use ship::ShipCharacteristics;
+use astronomicals::planet::PlanetEconomy;
 use economy::Commodity;
 use entities::Faction;
-use astronomicals::planet::PlanetEconomy;
+use ship::ShipCharacteristics;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.

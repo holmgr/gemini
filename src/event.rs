@@ -1,7 +1,7 @@
+use game::Game;
 use std::{io, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}},
           thread::{park_timeout, spawn}, time::{Duration, Instant}};
 use termion::{event, input::TermRead};
-use game::Game;
 
 use gui::dialog::Dialog;
 

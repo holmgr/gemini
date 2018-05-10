@@ -1,7 +1,7 @@
-use statrs::distribution::{Categorical, Distribution};
-use rand::{ChaChaRng, Rng, SeedableRng};
 use inflector::Inflector;
+use rand::{ChaChaRng, Rng, SeedableRng};
 use resources::AstronomicalNamesResource;
+use statrs::distribution::{Categorical, Distribution};
 
 /// Name generator which generates based on names given in training data.
 pub struct NameGen {

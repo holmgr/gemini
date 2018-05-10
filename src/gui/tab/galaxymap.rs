@@ -1,14 +1,14 @@
 use super::*;
+use nalgebra::{distance, Vector2};
 use std::collections::HashMap;
 use termion::event as keyevent;
-use nalgebra::{distance, Vector2};
 use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
           widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Widget, canvas::Canvas}};
 
-use utils::Point;
 use astronomicals::system::System;
 use entities::Faction;
 use player::Player;
+use utils::Point;
 
 lazy_static! {
     /// Color mapping for each faction.

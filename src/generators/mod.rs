@@ -1,18 +1,18 @@
-use std::time::Instant;
 use rand::{ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal};
+use std::time::Instant;
 
-use utils::{HashablePoint, Point};
-use resources::{fetch_resource, AstronomicalNamesResource};
 use astronomicals::{hash, Galaxy, planet::{Planet, PlanetBuilder}, system::SystemBuilder};
 use game_config::GameConfig;
+use resources::{fetch_resource, AstronomicalNamesResource};
+use utils::{HashablePoint, Point};
 
 pub mod names;
-pub mod stars;
 pub mod planets;
-pub mod systems;
 pub mod sectors;
+pub mod stars;
+pub mod systems;
 
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.

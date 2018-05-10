@@ -1,14 +1,14 @@
-use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
-use spade::rtree::RTree;
 use rayon::prelude::*;
+use spade::rtree::RTree;
+use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
 
-use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 use game::Updatable;
+use utils::{edit_distance, HashablePoint, OrdPoint, Point};
 
-pub mod star;
 pub mod planet;
-pub mod system;
 pub mod sector;
+pub mod star;
+pub mod system;
 
 /// Main galaxy containing all systems.
 #[derive(Serialize, Deserialize, Clone, Debug)]

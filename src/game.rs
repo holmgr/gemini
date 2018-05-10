@@ -1,13 +1,13 @@
-use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant};
 use app_dirs::{get_data_root, AppDataType};
 use bincode::{deserialize_from, serialize_into};
 use chrono::{DateTime, Duration, TimeZone, Utc};
+use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant};
 
 use astronomicals::Galaxy;
-use ship::Shipyard;
+use economy::Economy;
 use player::Player;
 use resources::{fetch_resource, ShipResource};
-use economy::Economy;
+use ship::Shipyard;
 
 const SAVE_PATH: &str = "gemini/saves/";
 

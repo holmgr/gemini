@@ -1,13 +1,13 @@
-use std::{collections::HashMap, f64, iter::FromIterator,
-          sync::atomic::{AtomicBool, Ordering}, time::Instant, usize::MAX};
+use nalgebra::distance;
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
-use nalgebra::distance;
+use std::{collections::HashMap, f64, iter::FromIterator, sync::atomic::{AtomicBool, Ordering},
+          time::Instant, usize::MAX};
 
-use utils::{HashablePoint, Point};
 use astronomicals::sector::Sector;
-use game_config::GameConfig;
 use entities::Faction;
+use game_config::GameConfig;
+use utils::{HashablePoint, Point};
 
 /// Used for generating sectors.
 pub struct SectorGen {}

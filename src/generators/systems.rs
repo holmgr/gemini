@@ -1,12 +1,12 @@
-use std::f64;
 use rand::{ChaChaRng, Rng, SeedableRng};
 use statrs::distribution::{Distribution, Poisson};
+use std::f64;
 
-use utils::Point;
 use astronomicals::{hash, planet::PlanetBuilder,
                     system::{Reputation, SystemBuilder, SystemSecurity, SystemState}};
-use generators::{planets::PlanetGen, stars::StarGen};
 use entities::Faction;
+use generators::{planets::PlanetGen, stars::StarGen};
+use utils::Point;
 
 /// Used for generating systems.
 pub struct SystemGen {

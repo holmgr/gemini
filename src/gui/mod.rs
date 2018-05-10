@@ -1,13 +1,13 @@
 use std::{io, sync::{Arc, Mutex}};
+use termion::event as keyevent;
 use tui::{Terminal, backend::MouseBackend, layout::{Direction, Group, Rect, Size},
           style::{Color, Style}, widgets::{Block, Borders, Tabs, Widget}};
-use termion::event as keyevent;
 
-use game::Game;
 use event::{add_keyboard_handler, add_player_handler, add_update_handler, Event, HANDLER};
+use game::Game;
 
-mod tab;
 pub mod dialog;
+mod tab;
 
 /// Handles the graphical user interface to the user.
 pub struct Gui {

@@ -1,5 +1,5 @@
-use std::{collections::HashMap, iter::FromIterator, ops::Range};
 use rand::{ChaChaRng, SeedableRng};
+use std::{collections::HashMap, iter::FromIterator, ops::Range};
 
 use statrs::distribution::{DiscreteUniform, Distribution};
 
