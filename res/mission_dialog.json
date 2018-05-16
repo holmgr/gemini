@@ -1,0 +1,39 @@
+{
+    "dialog_options": [
+        {
+            "required": [],
+            "text": "Hello Captain.",
+            "results": ["Followup"]
+        },
+        {
+            "required": [],
+            "text": "Greetings Captain.",
+            "results": ["Followup"]
+        },
+        {
+            "required": [],
+            "text": "Your reputation precedes you, Captain.",
+            "results": ["Followup"]
+        },
+        {
+            "required": ["ReputationFriendly"],
+            "text": "Captain, nice to meet you again!",
+            "results": ["Followup"]
+        },
+        {
+            "required": ["Followup"],
+            "text": "I have some 'delicate' cargo needed transporting.",
+            "results": ["End"]
+        },
+        {
+            "required": ["Followup"],
+            "text": "How'd you like to turn a profit delivering a message for me?",
+            "results": ["End"]
+        },
+        {
+            "required": ["Followup"],
+            "text": "I have a business venture that may be of interest to someone with your particular set of skills.",
+            "results": ["End"]
+        }
+    ]
+}

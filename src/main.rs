@@ -37,6 +37,7 @@ mod player;
 mod resources;
 mod ship;
 mod utils;
+mod missions;
 
 use app_dirs::{get_data_root, AppDataType};
 use economy::Economy;

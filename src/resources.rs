@@ -6,6 +6,7 @@ use astronomicals::planet::PlanetEconomy;
 use economy::Commodity;
 use entities::Faction;
 use ship::ShipCharacteristics;
+use missions::dialog::Line;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.
@@ -31,6 +32,10 @@ lazy_static! {
         res.insert(
             AgentResource::KEY,
             include_str!("../res/economic_agents.json"),
+        );
+        res.insert(
+            MissionDialogResource::KEY,
+            include_str!("../res/mission_dialog.json"),
         );
         res
     };
@@ -89,6 +94,16 @@ pub struct AgentResource {
 
 impl Resource for AgentResource {
     const KEY: &'static str = "economic_agents";
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Resource containing dialog lines to be used for missions.
+pub struct MissionDialogResource {
+    pub dialog_options: Vec<Line>,
+}
+
+impl Resource for MissionDialogResource {
+    const KEY: &'static str = "mission_dialog";
 }
 
 #[cfg(test)]
