@@ -7,14 +7,14 @@ use super::*;
 /// Controls an economic market, i.e a sector of trading systems.
 #[derive(Serialize, Deserialize)]
 pub struct Market {
-    average_prices: HashMap<Commodity, u32>,
+    average_prices: HashMap<Commodity, u64>,
     agents: Vec<Arc<Mutex<Agent>>>,
 }
 
 impl Market {
     /// Creates a new empty market.
     pub fn new() -> Self {
-        let average_prices: HashMap<Commodity, u32> = Commodity::values()
+        let average_prices: HashMap<Commodity, u64> = Commodity::values()
             .map(|commodity| (commodity.clone(), 1000))
             .collect();
 
@@ -22,6 +22,13 @@ impl Market {
             average_prices,
             agents: vec![],
         }
+    }
+
+    /// Returns the agent, if any, which is associated with the given system.
+    pub fn agent(&self, system_hash: u32) -> Option<&Arc<Mutex<Agent>>> {
+        self.agents
+            .iter()
+            .find(|ref agent| agent.lock().unwrap().hash() == system_hash)
     }
 
     /// Adds the given system to this market.
@@ -32,14 +39,9 @@ impl Market {
     /// Attemps to resolve the bids and asks for the given commodity by matching
     /// the highest asks with the lowest bids performing the transaction.
     /// Returns the quantity traded.
-    fn resolve_offers(
-        &mut self,
-        commodity: &Commodity,
-        mut bids: Vec<Bid>,
-        mut asks: Vec<Ask>,
-    ) -> u32 {
-        bids.sort_unstable_by(|a, b| a.amount.partial_cmp(&b.amount).unwrap());
-        asks.sort_unstable_by(|a, b| b.amount.partial_cmp(&a.amount).unwrap());
+    fn resolve_offers(&mut self, commodity: &Commodity, mut bids: Vec<Bid>, mut asks: Vec<Ask>) {
+        bids.sort_unstable_by(|a, b| a.amount.partial_cmp(&b.unit_price).unwrap());
+        asks.sort_unstable_by(|a, b| b.amount.partial_cmp(&a.unit_price).unwrap());
 
         let mut money_traded = 0;
         let mut amount_traded = 0;
@@ -64,12 +66,12 @@ impl Market {
                 amount_traded += quantity_traded;
 
                 // Transfer money.
-                buyer.update_credits(-(money_traded as i32));
-                seller.update_credits(money_traded as i32);
+                buyer.update_credits(-(money_traded as i64));
+                seller.update_credits(money_traded as i64);
 
                 // Transfer goods.
-                buyer.update_inventory(&commodity, quantity_traded as i32);
-                seller.update_inventory(&commodity, -(quantity_traded as i32));
+                buyer.update_inventory(&commodity, quantity_traded as i64);
+                seller.update_inventory(&commodity, -(quantity_traded as i64));
 
                 // Update agent price beliefs on success
                 buyer.update_price_belief(&commodity, clearing_price, true);
@@ -106,8 +108,6 @@ impl Market {
                 .unwrap()
                 .update_price_belief(&ask.commodity, average_price, false);
         }
-
-        amount_traded
     }
 }
 
@@ -120,31 +120,53 @@ impl Updatable for Market {
             agent.lock().unwrap().update();
         }
 
-        // Until we no longer make any transaction we simulate trading.
-        let mut trades_made = true;
-        while trades_made {
-            trades_made = false;
-            for commodity in Commodity::values() {
-                // Gather bids/asks from agents.
-                let bids = self.agents.iter().fold(vec![], |mut bids, agent| {
-                    if let Some(mut partial_bid) = agent.lock().unwrap().generate_bid(commodity) {
-                        bids.push(partial_bid.agent(agent.clone()).build().unwrap());
-                    }
-                    bids
-                });
-                let asks = self.agents.iter().fold(vec![], |mut asks, agent| {
-                    if let Some(mut partial_ask) = agent.lock().unwrap().generate_ask(commodity) {
-                        asks.push(partial_ask.agent(agent.clone()).build().unwrap());
-                    }
-                    asks
-                });
+        let mut supply = HashMap::new();
+        let mut demand = HashMap::new();
 
-                // If we managed to resolve any offers, we need to simulate one more round.
-                let amount_traded = self.resolve_offers(commodity, bids, asks);
-                if amount_traded > 0 {
-                    trades_made = true;
+        // Simulate trading.
+        for commodity in Commodity::values() {
+            // Gather bids/asks from agents.
+            let bids = self.agents.iter().fold(vec![], |mut bids, agent| {
+                if let Some(mut partial_bid) = agent.lock().unwrap().generate_bid(commodity) {
+                    bids.push(partial_bid.agent(agent.clone()).build().unwrap());
                 }
-            }
+                bids
+            });
+            let asks = self.agents.iter().fold(vec![], |mut asks, agent| {
+                if let Some(mut partial_ask) = agent.lock().unwrap().generate_ask(commodity) {
+                    asks.push(partial_ask.agent(agent.clone()).build().unwrap());
+                }
+                asks
+            });
+
+            // Inform agents about supply and demand for this round.
+            bids.iter().for_each(|bid| {
+                let count = demand.entry(bid.commodity.clone()).or_insert(0);
+                *count += bid.amount;
+            });
+
+            asks.iter().for_each(|ask| {
+                let count = supply.entry(ask.commodity.clone()).or_insert(0);
+                *count += ask.amount;
+            });
+
+            // If we managed to resolve any offers, we need to simulate one more round.
+            self.resolve_offers(commodity, bids, asks);
+        }
+
+        // Update supply and demand.
+        let demand_supply = Commodity::values()
+            .map(|commodity| {
+                (
+                    commodity.clone(),
+                    *demand.get(&commodity).unwrap_or(&0) as u64,
+                    *supply.get(&commodity).unwrap_or(&0) as u64,
+                )
+            })
+            .collect::<Vec<(Commodity, u64, u64)>>();
+
+        for agent in &self.agents {
+            agent.lock().unwrap().update_population(&demand_supply);
         }
     }
 }

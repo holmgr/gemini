@@ -61,7 +61,6 @@ impl SystemGen {
                 let economic_type = PlanetGen::predict_economy(&mut rng, &planet_type);
                 builder
                     .surface_temperature(surface_temperature)
-                    .population(PlanetGen::initial_population(mass, &planet_type))
                     .planet_type(planet_type)
                     .economic_type(economic_type);
                 builder

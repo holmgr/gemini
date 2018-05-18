@@ -108,6 +108,7 @@ impl GalaxyMapTab {
             return;
         }
         let system = selected_system.unwrap();
+        let populations = self.state.economy.lock().unwrap().populations(&system);
 
         let system_data = vec![
             format!("Faction:       {}", system.faction.to_string()),
@@ -142,20 +143,24 @@ impl GalaxyMapTab {
                         "Type",
                         "Economy",
                     ].into_iter(),
-                    system.satelites.iter().map(|ref planet| {
-                        let style: &Style = &DEFAULT_STYLE;
-                        Row::StyledData(
-                            vec![
-                                format!(" {}", planet.name.clone()),
-                                format!("{:.1}", planet.mass),
-                                format!("{:.1} M", planet.population),
-                                format!("{:.1}", planet.surface_temperature),
-                                planet.planet_type.to_string(),
-                                planet.economic_type.to_string(),
-                            ].into_iter(),
-                            &style,
-                        )
-                    }),
+                    system
+                        .satelites
+                        .iter()
+                        .enumerate()
+                        .map(|(index, ref planet)| {
+                            let style: &Style = &DEFAULT_STYLE;
+                            Row::StyledData(
+                                vec![
+                                    format!(" {}", planet.name.clone()),
+                                    format!("{:.1}", planet.mass),
+                                    format!("{:.1} M", populations[index]),
+                                    format!("{:.1}", planet.surface_temperature),
+                                    planet.planet_type.to_string(),
+                                    planet.economic_type.to_string(),
+                                ].into_iter(),
+                                &style,
+                            )
+                        }),
                 ).block(Block::default().title("Planets"))
                     .header_style(Style::default().fg(Color::Yellow))
                     .widths(&[15, 5, 15, 15, 10, 15])

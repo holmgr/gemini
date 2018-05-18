@@ -26,19 +26,6 @@ impl PlanetGen {
         }
     }
 
-    /// Calculates the initial planet population based on mass and planet type.
-    pub fn initial_population(mass: f64, kind: &PlanetType) -> f64 {
-        let mass_factor = Gamma::new(7., 5.).unwrap();
-        let type_factor: f64 = match *kind {
-            PlanetType::Metal => 150.,
-            PlanetType::Earth => 800.0,
-            PlanetType::Rocky => 1.,
-            PlanetType::Icy => 0.5,
-            PlanetType::GasGiant => 0.,
-        };
-        mass_factor.pdf(mass) * type_factor * 6.
-    }
-
     /// Calculate planet surface temperature from star luminosity and distance
     /// to it. Uses the Bond albedo for the Earth.
     pub fn calculate_surface_temperature(orbit_distance: f64, star: &Star) -> f64 {

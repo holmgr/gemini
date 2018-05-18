@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 use std::{fmt, slice::Iter, sync::{Arc, Mutex}};
 
-use astronomicals::Galaxy;
+use astronomicals::{hash, Galaxy, system::System};
 use game::Updatable;
 
 mod agent;
@@ -35,6 +35,35 @@ impl Economy {
 
         Economy { markets }
     }
+
+    /// Returns the prices for the available commodities the the given system.
+    pub fn commodity_prices(&self, system: &System) -> Vec<(Commodity, i64)> {
+        let mut prices = vec![];
+
+        let system_hash = hash(&system.location);
+        for market in &self.markets {
+            if let Some(agent) = market.agent(system_hash as u32) {
+                prices = agent.lock().unwrap().prices();
+                break;
+            }
+        }
+
+        prices
+    }
+
+    pub fn populations(&self, system: &System) -> Vec<f64> {
+        let mut populations = vec![];
+
+        let system_hash = hash(&system.location);
+        for market in &self.markets {
+            if let Some(agent) = market.agent(system_hash as u32) {
+                populations = agent.lock().unwrap().populations();
+                break;
+            }
+        }
+
+        populations
+    }
 }
 
 impl Updatable for Economy {
@@ -51,8 +80,8 @@ impl Updatable for Economy {
 pub struct Bid {
     pub agent: Arc<Mutex<Agent>>,
     pub commodity: Commodity,
-    pub amount: u32,
-    pub unit_price: u32,
+    pub amount: u64,
+    pub unit_price: u64,
 }
 
 /// An offer to sell some commodity.
@@ -60,8 +89,8 @@ pub struct Bid {
 pub struct Ask {
     pub agent: Arc<Mutex<Agent>>,
     pub commodity: Commodity,
-    pub amount: u32,
-    pub unit_price: u32,
+    pub amount: u64,
+    pub unit_price: u64,
 }
 
 /// A tradable and possibly producable commodity

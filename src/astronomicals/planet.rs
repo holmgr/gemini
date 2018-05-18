@@ -7,7 +7,6 @@ pub struct Planet {
     pub name: String,
     pub mass: f64,
     pub gravity: f64,
-    pub population: f64,
     pub orbit_distance: f64,
     pub surface_temperature: f64,
     pub planet_type: PlanetType,
