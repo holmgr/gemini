@@ -14,7 +14,7 @@
             "Salvage": 0,
             "Slavery": 10,
             "Technology": 0,
-            "Textile": 0,
+            "Textile": 30,
             "Waste": 0,
             "Weapon": 20
         },
@@ -32,7 +32,7 @@
             "Salvage": 0,
             "Slavery": 0,
             "Technology": 0,
-            "Textile": 0,
+            "Textile": 30,
             "Waste": 0,
             "Weapon": 0
         },
@@ -50,7 +50,7 @@
             "Salvage": 0,
             "Slavery": 10,
             "Technology": 0,
-            "Textile": 0,
+            "Textile": 30,
             "Waste": 0,
             "Weapon": 0
         },
@@ -68,7 +68,7 @@
             "Salvage": 0,
             "Slavery": 10,
             "Technology": 0,
-            "Textile": 0,
+            "Textile": 30,
             "Waste": 0,
             "Weapon": 30
         }
@@ -149,21 +149,21 @@
     },
     "planet_ideals": {
         "Agriculture": {
-            "Chemical": 40,
+            "Chemical": 90,
             "ConsumerItem": 20,
             "Food": 0,
             "IllegalDrug": 0,
             "IndustrialMaterial": 0,
             "LegalDrug": 0,
             "Machinery": 0,
-            "Medicine": 10,
+            "Medicine": 20,
             "Metal": 0,
             "Mineral": 0,
             "Salvage": 0,
             "Slavery": 0,
             "Technology": 0,
             "Textile": 0,
-            "Waste": 30,
+            "Waste": 70,
             "Weapon": 0
         },
         "Extraction": {
@@ -279,7 +279,7 @@
         "Agriculture": {
             "Chemical": 0,
             "ConsumerItem": 0,
-            "Food": 500,
+            "Food": 1000,
             "IllegalDrug": 0,
             "IndustrialMaterial": 0,
             "LegalDrug": 0,
@@ -295,7 +295,7 @@
             "Weapon": 0
         },
         "Extraction": {
-            "Chemical": 30,
+            "Chemical": 300,
             "ConsumerItem": 0,
             "Food": 0,
             "IllegalDrug": 0,
@@ -325,19 +325,19 @@
             "Mineral": 0,
             "Salvage": 0,
             "Slavery": 0,
-            "Technology": 150,
+            "Technology": 15,
             "Textile": 0,
             "Waste": 0,
             "Weapon": 0
         },
         "Industrial": {
             "Chemical": 0,
-            "ConsumerItem": 150,
-            "Food": 50,
+            "ConsumerItem": 15,
+            "Food": 5,
             "IllegalDrug": 0,
             "IndustrialMaterial": 0,
             "LegalDrug": 0,
-            "Machinery": 100,
+            "Machinery": 10,
             "Medicine": 0,
             "Metal": 0,
             "Mineral": 0,
@@ -373,19 +373,19 @@
             "IllegalDrug": 0,
             "IndustrialMaterial": 0,
             "LegalDrug": 0,
-            "Machinery": 10,
+            "Machinery": 100,
             "Medicine": 0,
             "Metal": 0,
             "Mineral": 0,
             "Salvage": 0,
             "Slavery": 0,
-            "Technology": 30,
+            "Technology": 5,
             "Textile": 0,
-            "Waste": 10,
+            "Waste": 100,
             "Weapon": 150
         },
         "Refinary": {
-            "Chemical": 20,
+            "Chemical": 100,
             "ConsumerItem": 0,
             "Food": 0,
             "IllegalDrug": 0,

@@ -1,5 +1,5 @@
 use rand::Rng;
-use statrs::distribution::{Continuous, Distribution, Exponential, Gamma};
+use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
 use astronomicals::{planet::{PlanetBuilder, PlanetEconomy, PlanetType}, star::Star};
@@ -24,19 +24,6 @@ impl PlanetGen {
             mass_gen,
             orbit_dist_gen,
         }
-    }
-
-    /// Calculates the initial planet population based on mass and planet type.
-    pub fn initial_population(mass: f64, kind: &PlanetType) -> f64 {
-        let mass_factor = Gamma::new(7., 5.).unwrap();
-        let type_factor: f64 = match *kind {
-            PlanetType::Metal => 150.,
-            PlanetType::Earth => 800.0,
-            PlanetType::Rocky => 1.,
-            PlanetType::Icy => 0.5,
-            PlanetType::GasGiant => 0.,
-        };
-        mass_factor.pdf(mass) * type_factor * 6.
     }
 
     /// Calculate planet surface temperature from star luminosity and distance

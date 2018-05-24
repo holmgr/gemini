@@ -81,10 +81,10 @@ impl Resource for ShipResource {
 #[derive(Serialize, Deserialize, Debug)]
 /// Resource containing all production/consumptions for factions and planets.
 pub struct AgentResource {
-    pub faction_ideals: HashMap<Faction, HashMap<Commodity, u32>>,
-    pub faction_production: HashMap<Faction, HashMap<Commodity, u32>>,
-    pub planet_ideals: HashMap<PlanetEconomy, HashMap<Commodity, u32>>,
-    pub planet_production: HashMap<PlanetEconomy, HashMap<Commodity, u32>>,
+    pub faction_ideals: HashMap<Faction, HashMap<Commodity, u64>>,
+    pub faction_production: HashMap<Faction, HashMap<Commodity, u64>>,
+    pub planet_ideals: HashMap<PlanetEconomy, HashMap<Commodity, u64>>,
+    pub planet_production: HashMap<PlanetEconomy, HashMap<Commodity, u64>>,
 }
 
 impl Resource for AgentResource {
