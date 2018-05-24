@@ -1,5 +1,5 @@
 use rand::Rng;
-use statrs::distribution::{Continuous, Distribution, Exponential, Gamma};
+use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
 use astronomicals::{planet::{PlanetBuilder, PlanetEconomy, PlanetType}, star::Star};

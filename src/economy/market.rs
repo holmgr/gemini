@@ -31,6 +31,11 @@ impl Market {
             .find(|ref agent| agent.lock().unwrap().hash() == system_hash)
     }
 
+    /// Returns a reference to all agents.
+    pub fn agents(&self) -> &Vec<Arc<Mutex<Agent>>> {
+        &self.agents
+    }
+
     /// Adds the given system to this market.
     pub fn add_system(&mut self, system: &System) {
         self.agents.push(Arc::new(Mutex::new(Agent::new(system))));

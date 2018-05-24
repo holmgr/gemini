@@ -230,7 +230,7 @@ impl Agent {
     }
 
     /// Updates the planet populations held by the agent based on potential economic growth.
-    pub fn update_population(&mut self, demand_supply: &Vec<(Commodity, u64, u64)>) {
+    pub fn update_population(&mut self, demand_supply: &[(Commodity, u64, u64)]) {
         for (index, population) in self.populations.iter_mut().enumerate() {
             let productions = &self.productions[index];
             let potential_earnings = demand_supply.iter().fold(

@@ -140,7 +140,7 @@ impl Tab for SystemMapTab {
                         draw_system_table(
                             self.selected_astronomical,
                             None,
-                            populations,
+                            &populations,
                             &system,
                             term,
                             &chunks[0],
@@ -154,7 +154,7 @@ impl Tab for SystemMapTab {
                         draw_system_table(
                             self.selected_astronomical,
                             Some(id),
-                            populations,
+                            &populations,
                             &system,
                             term,
                             &chunks[0],
@@ -170,7 +170,7 @@ impl Tab for SystemMapTab {
 fn draw_system_table(
     selected: usize,
     docked_at: Option<usize>,
-    populations: Vec<f64>,
+    populations: &[f64],
     system: &System,
     term: &mut Terminal<MouseBackend>,
     area: &Rect,
