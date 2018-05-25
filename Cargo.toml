@@ -26,3 +26,4 @@ textwrap = { version = "0.9" }
 bincode = "1.0.0"
 chrono = { version = "0.4", features = ["serde"] }
 fern = "0.5"
+strfmt = "0.1.6"
