@@ -33,6 +33,7 @@ mod game;
 mod game_config;
 mod generators;
 mod gui;
+mod mission;
 mod player;
 mod resources;
 mod ship;
