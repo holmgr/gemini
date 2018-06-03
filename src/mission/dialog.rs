@@ -1,13 +1,20 @@
 use rand::Rng;
 use std::collections::HashSet;
 
-use resources::MissionDialogResource;
+use super::*;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
-pub enum Tag {
-    ReputationFriendly,
-    Followup,
-    End,
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Tag(String);
+
+impl Tag {
+
+    pub fn end() -> Self {
+        Tag{0: String::from("End")}
+    }
+
+    pub fn as_tag<T: fmt::Display>(value: T) -> Self {
+        Tag{0: value.to_string()}
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -24,11 +31,11 @@ pub fn create_dialog<R: Rng>(
 ) -> String {
     let mut res_str = String::new();
 
-    while !tags.contains(&Tag::End) {
+    while !tags.contains(&Tag::end()) {
         let mut line_options = vec![];
         let mut matches_count = 0;
 
-        for line in dialog_resource.dialog_options.iter() {
+        for line in &dialog_resource.dialog_options {
             if line.required.is_subset(&tags) {
                 if line.required.len() > matches_count {
                     matches_count = line.required.len();
@@ -64,11 +71,11 @@ mod tests {
         setup_logger();
 
         let resource = fetch_resource::<MissionDialogResource>().unwrap();
-        let tags = HashSet::new();
         let mut rng = ChaChaRng::from_seed(&[42]);
 
         for _ in 0..10 {
-            println!("{}", create_dialog(&resource, &mut rng, tags.clone()));
+            //let tags = HashSet::new();
+            //println!("{}", create_dialog(&resource, &mut rng, tags));
         }
     }
 }
