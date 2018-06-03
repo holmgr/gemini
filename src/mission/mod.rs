@@ -1,12 +1,14 @@
 use rand::Rng;
 use statrs::distribution::{Categorical, Distribution};
-use std::{collections::{HashSet, HashMap}, sync::Arc, fmt};
+use std::{collections::{HashMap, HashSet},
+          fmt,
+          sync::Arc};
 
-use resources::{fetch_resource, MissionDialogResource};
 use game::Game;
+use resources::{fetch_resource, MissionDialogResource};
 
 pub mod dialog;
-use self::dialog::{Tag, create_dialog};
+use self::dialog::{create_dialog, Tag};
 
 type Context = HashMap<String, String>;
 
@@ -45,6 +47,7 @@ impl Mission {
         tags.insert(Tag::as_tag(motivation));
 
         let description = create_dialog(&resource, gen, tags);
+
         Mission {
             motivation,
             description,
@@ -99,14 +102,13 @@ impl Motivation {
             ],
             Motivation::Reputation => vec![
                 // Donate items
-                vec![Action::Donate]
+                vec![Action::Donate],
             ],
             Motivation::Wealth => vec![
                 // Deliver supplies
                 vec![Action::Get, Action::Goto, Action::Give],
-           ],
+            ],
         };
-
         gen.choose(&choices).unwrap().clone()
     }
 }
@@ -141,7 +143,6 @@ mod tests {
     #[test]
     fn test_mission_gen() {
         setup_logger();
-
         let state = Game::new();
 
         let tag = Tag::as_tag(Motivation::Wealth);
