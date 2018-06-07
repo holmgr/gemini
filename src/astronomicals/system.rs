@@ -1,7 +1,8 @@
 use astronomicals::{hash, planet::Planet, star::Star};
 use entities::Faction;
 use game::Updatable;
-use std::{fmt, hash::{Hash, Hasher}};
+use std::{fmt,
+          hash::{Hash, Hasher}};
 use utils::Point;
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]

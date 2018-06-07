@@ -1,6 +1,6 @@
 use serde::de::Deserialize;
 use serde_json;
-use std::{str, collections::HashMap};
+use std::{collections::HashMap, str};
 
 use astronomicals::planet::PlanetEconomy;
 use economy::Commodity;

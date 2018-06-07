@@ -1,8 +1,12 @@
 use nalgebra::distance;
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
-use std::{collections::HashMap, f64, iter::FromIterator, sync::atomic::{AtomicBool, Ordering},
-          time::Instant, usize::MAX};
+use std::{collections::HashMap,
+          f64,
+          iter::FromIterator,
+          sync::atomic::{AtomicBool, Ordering},
+          time::Instant,
+          usize::MAX};
 
 use astronomicals::sector::Sector;
 use entities::Faction;
