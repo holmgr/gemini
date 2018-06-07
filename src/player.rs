@@ -1,5 +1,4 @@
 use chrono::{DateTime, Duration, Local, TimeZone, Utc};
-use nalgebra::distance;
 
 use ship::Ship;
 use utils::Point;
@@ -43,14 +42,14 @@ impl Player {
                     match route.split_first() {
                         // Arrived at next system in route?
                         Some((next, rest))
-                            if distance(&self.location, &route[0])
+                            if self.location.distance(&route[0])
                                 <= Utc::now().signed_duration_since(*start).num_milliseconds()
                                     as f64
                                     * Player::TRAVEL_SPEED =>
                         {
                             let new_start = *start
                                 + Duration::milliseconds(
-                                    (distance(&self.location, &next) / Player::TRAVEL_SPEED) as i64,
+                                    (self.location.distance(&next) / Player::TRAVEL_SPEED) as i64,
                                 );
 
                             // Update position and reduce fuel.
@@ -99,8 +98,8 @@ impl Player {
     }
 
     /// Get the current player location.
-    pub fn location(&self) -> &Point {
-        &self.location
+    pub fn location(&self) -> Point {
+        self.location
     }
 
     /// Returns the player state.
@@ -154,7 +153,7 @@ impl Player {
                 let (dist, destination) = route
                     .iter()
                     .fold((0., &self.location), |(dist, prev), curr| {
-                        (dist + distance(prev, curr), curr)
+                        (dist + prev.distance(curr), curr)
                     });
                 let eta = Local.from_utc_datetime(
                     &(*start + Duration::milliseconds((dist / Player::TRAVEL_SPEED) as i64))

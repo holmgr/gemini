@@ -1,15 +1,106 @@
+use spade::{PointN, TwoDimensional};
 use std::{cmp::{min, Ordering},
           hash::{Hash, Hasher},
-          mem::swap};
+          mem::swap,
+          ops::{Add, AddAssign, MulAssign}};
 
-use nalgebra::geometry::Point2;
-use spade::PointN;
+/// Generic Point type for geometry.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
+}
 
-/// Alias for 3D Point from nalgebra.
-pub type Point = Point2<f64>;
+impl Point {
+    /// Create a new point.
+    pub fn new(x: f64, y: f64) -> Point {
+        Point { x, y }
+    }
+
+    /// Create a new point with origin coordinates.
+    pub fn origin() -> Point {
+        Point::new(0., 0.)
+    }
+
+    /// Returns the euclidian distance to another point.
+    pub fn distance(&self, other: &Point) -> f64 {
+        ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
+    }
+
+    /// Returns the hash of the point coordinates.
+    /// Hash based on algorithm used is presented in the paper:
+    /// Optimized Spatial Hashing for Collision Detection of Deformable Objects.
+    pub fn hash(&self) -> u64 {
+        ((self.x * 73_856_093f64) as u64 ^ (self.y * 19_349_663f64) as u64)
+    }
+}
+
+impl Add for Point {
+    type Output = Point;
+
+    fn add(self, other: Point) -> Point {
+        Point::new(self.x + other.x, self.y + other.y)
+    }
+}
+
+impl AddAssign for Point {
+    fn add_assign(&mut self, other: Point) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
+impl MulAssign<f64> for Point {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.x *= rhs;
+        self.y *= rhs;
+    }
+}
+
+impl PartialEq for Point {
+    fn eq(&self, other: &Point) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}
+
+impl Hash for Point {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.hash().hash(state);
+    }
+}
+
+impl Eq for Point {}
+
+impl TwoDimensional for Point {}
+
+impl PointN for Point {
+    type Scalar = f64;
+
+    fn dimensions() -> usize {
+        2
+    }
+
+    fn nth(&self, index: usize) -> &Self::Scalar {
+        match index {
+            0 => &self.x,
+            _ => &self.y,
+        }
+    }
+
+    fn nth_mut(&mut self, index: usize) -> &mut Self::Scalar {
+        match index {
+            0 => &mut self.x,
+            _ => &mut self.y,
+        }
+    }
+
+    fn from_value(value: Self::Scalar) -> Point {
+        Point::new(value, value)
+    }
+}
 
 /// Point with weight associated so that it can be ordered.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub struct OrdPoint {
     pub point: Point,
     pub weight: u32,
@@ -34,59 +125,6 @@ impl PartialEq for OrdPoint {
 }
 
 impl Eq for OrdPoint {}
-
-/// Wrapper type implementing hashing for Point etc.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct HashablePoint(Point);
-
-impl HashablePoint {
-    pub fn new(point: Point) -> HashablePoint {
-        HashablePoint { 0: point }
-    }
-    pub fn as_point(&self) -> &Point {
-        &self.0
-    }
-}
-
-impl PartialEq for HashablePoint {
-    fn eq(&self, other: &HashablePoint) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl Hash for HashablePoint {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0
-            .iter()
-            .zip(&[73_856_093f64, 19_349_663f64])
-            .map(|(&a, &b)| (a * b) as u64)
-            .fold(0, |acc, val| acc ^ val)
-            .hash(state);
-    }
-}
-
-impl Eq for HashablePoint {}
-
-impl PointN for HashablePoint {
-    type Scalar = f64;
-
-    fn dimensions() -> usize {
-        2
-    }
-
-    fn nth(&self, index: usize) -> &Self::Scalar {
-        &(self.0)[index]
-    }
-    fn nth_mut(&mut self, index: usize) -> &mut Self::Scalar {
-        &mut (self.0)[index]
-    }
-
-    fn from_value(value: Self::Scalar) -> HashablePoint {
-        HashablePoint {
-            0: Point::new(value, value),
-        }
-    }
-}
 
 /// Returns the edit distance between strings `a` and `b` using Levenshtein
 /// distance.

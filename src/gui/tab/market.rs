@@ -26,9 +26,10 @@ impl Tab for MarketTab {
     /// Creates a market tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
         let cloned_state = state.clone();
-        let player = state.player.lock().unwrap();
         let galaxy = state.galaxy.lock().unwrap();
-        let system = galaxy.system(player.location()).unwrap();
+        let system = galaxy
+            .system(&state.player.lock().unwrap().location())
+            .unwrap();
         let max_selected = state.economy.lock().unwrap().commodity_prices(system).len() - 1;
 
         Box::new(MarketTab {
@@ -60,9 +61,10 @@ impl Tab for MarketTab {
             }
             Event::Update => {
                 // Update maximum index if needed.
-                let player = self.state.player.lock().unwrap();
                 let galaxy = self.state.galaxy.lock().unwrap();
-                let system = galaxy.system(player.location()).unwrap();
+                let system = galaxy
+                    .system(&self.state.player.lock().unwrap().location())
+                    .unwrap();
                 self.max_selected = self.state
                     .economy
                     .lock()
@@ -81,7 +83,7 @@ impl Tab for MarketTab {
 
         if let PlayerState::Docked(_) = player.state() {
             let galaxy = self.state.galaxy.lock().unwrap();
-            let system = galaxy.system(player.location()).unwrap();
+            let system = galaxy.system(&player.location()).unwrap();
             let prices = self.state.economy.lock().unwrap().commodity_prices(system);
 
             Table::new(

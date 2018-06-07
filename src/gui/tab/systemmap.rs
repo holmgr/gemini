@@ -35,7 +35,7 @@ impl SystemMapTab {
         match player.state() {
             PlayerState::InSystem | PlayerState::Docked(_) => {
                 let galaxy = state.galaxy.lock().unwrap();
-                galaxy.system(player.location()).unwrap().satelites.len() - 1
+                galaxy.system(&player.location()).unwrap().satelites.len() - 1
             }
             _ => 0,
         }
@@ -46,7 +46,7 @@ impl SystemMapTab {
     fn open_dialog(&self) {
         let player = self.state.player.lock().unwrap();
         let galaxy = self.state.galaxy.lock().unwrap();
-        let system = galaxy.system(player.location()).unwrap();
+        let system = galaxy.system(&player.location()).unwrap();
         let planet_id = self.selected_astronomical;
 
         let dialog = match player.state() {
@@ -135,7 +135,7 @@ impl Tab for SystemMapTab {
                 match player.state() {
                     PlayerState::InSystem => {
                         let galaxy = self.state.galaxy.lock().unwrap();
-                        let system = galaxy.system(player.location()).unwrap();
+                        let system = galaxy.system(&player.location()).unwrap();
                         let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,
@@ -149,7 +149,7 @@ impl Tab for SystemMapTab {
                     }
                     PlayerState::Docked(id) => {
                         let galaxy = self.state.galaxy.lock().unwrap();
-                        let system = galaxy.system(player.location()).unwrap();
+                        let system = galaxy.system(&player.location()).unwrap();
                         let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,

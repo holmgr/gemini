@@ -55,10 +55,10 @@ fn draw_player_info(
             "Location:  {}",
             match player.state() {
                 PlayerState::InSystem => {
-                    galaxy.system(player.location()).unwrap().name.clone() + " System"
+                    galaxy.system(&player.location()).unwrap().name.clone() + " System"
                 }
                 PlayerState::Docked(planet_id) => {
-                    let system = galaxy.system(player.location()).unwrap();
+                    let system = galaxy.system(&player.location()).unwrap();
                     let system_name = &system.name;
                     let planet_name = &system.satelites[planet_id].name;
                     format!("{}, {} System", planet_name, system_name)

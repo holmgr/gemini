@@ -13,7 +13,6 @@ rand = "^0.4"
 petgraph = "0.4.8"
 rayon = "0.9.0"
 log = "0.4"
-nalgebra = { version = "^0.14", features = ["serde-serialize"] }
 statrs = "0.9.0"
 lazy_static = "1.0"
 derive_builder = "0.5.1"

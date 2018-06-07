@@ -26,7 +26,7 @@ impl Tab for ShipyardTab {
         let dup_state = state.clone();
         let galaxy = dup_state.galaxy.lock().unwrap();
         let player_system = galaxy
-            .system(dup_state.player.lock().unwrap().location())
+            .system(&dup_state.player.lock().unwrap().location())
             .unwrap();
         let available_ships = dup_state
             .shipyard
@@ -68,7 +68,7 @@ impl Tab for ShipyardTab {
                 // If player is not at a system something is very wrong.
                 let galaxy = self.state.galaxy.lock().unwrap();
                 let player_system = galaxy
-                    .system(self.state.player.lock().unwrap().location())
+                    .system(&self.state.player.lock().unwrap().location())
                     .unwrap();
                 self.available_ships = self.state
                     .shipyard

@@ -5,7 +5,7 @@ use std::{collections::HashMap,
           ops::Range};
 
 use super::*;
-use astronomicals::{hash, planet::PlanetType, system::System};
+use astronomicals::{planet::PlanetType, system::System};
 use resources::{fetch_resource, AgentResource};
 
 /// Economic agent, able to take part in transactions.
@@ -81,7 +81,7 @@ impl Agent {
         }));
 
         Agent {
-            seed: hash(&system.location) as u32,
+            seed: system.location.hash() as u32,
             populations: system
                 .satelites
                 .iter()
