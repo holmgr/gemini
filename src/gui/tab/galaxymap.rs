@@ -366,7 +366,7 @@ impl Tab for GalaxyMapTab {
             .sizes(&[Size::Fixed(85), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 // TODO: Draw system detailed information.
-                let systems = &galaxy.systems();
+                let systems = galaxy.systems().collect::<Vec<_>>();
                 let player = &self.state.player.lock().unwrap();
                 //let player_loc = &self.state.player.lock().unwrap().location().clone();
                 // Draw sidebar.
