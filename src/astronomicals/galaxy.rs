@@ -5,7 +5,7 @@ use spade::rtree::RTree;
 use std::{collections::{BinaryHeap, HashMap},
           u32::MAX};
 
-/// Main galaxy containing all systems.
+/// A galaxy of systems.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Galaxy {
     pub sectors: Vec<sector::Sector>,
@@ -14,7 +14,7 @@ pub struct Galaxy {
 }
 
 impl Galaxy {
-    /// Create a new Galaxy with the given sectors and systems.
+    /// Create a new galaxy with the given sectors and systems.
     pub fn new(sectors: Vec<sector::Sector>, systems: Vec<system::System>) -> Self {
         let mut map = RTree::new();
         systems
@@ -144,6 +144,16 @@ impl Galaxy {
                 Some((cost, path))
             }
             None => None,
+        }
+    }
+}
+
+impl Default for Galaxy {
+    fn default() -> Self {
+        Galaxy {
+            sectors: vec![],
+            map: RTree::new(),
+            systems: HashMap::new(),
         }
     }
 }

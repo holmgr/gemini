@@ -26,7 +26,7 @@ impl Game {
     /// Creates a new game.
     pub fn new() -> Arc<Self> {
         Arc::new(Game {
-            galaxy: Mutex::new(Galaxy::new(vec![], vec![])),
+            galaxy: Mutex::new(Galaxy::default()),
             shipyard: Mutex::new(Shipyard::new()),
             player: Mutex::new(Player::default()),
             economy: Mutex::new(Economy::default()),
