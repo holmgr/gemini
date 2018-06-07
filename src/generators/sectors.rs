@@ -8,7 +8,7 @@ use std::{collections::HashMap,
           time::Instant,
           usize::MAX};
 
-use astronomicals::sector::Sector;
+use astronomicals::Sector;
 use entities::Faction;
 use game_config::GameConfig;
 use utils::{HashablePoint, Point};

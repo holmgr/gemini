@@ -3,7 +3,7 @@ use std::{fmt,
           slice::Iter,
           sync::{Arc, Mutex}};
 
-use astronomicals::{hash, system::System, Galaxy};
+use astronomicals::{hash, Galaxy, System};
 use game::Updatable;
 
 mod agent;

@@ -6,7 +6,7 @@ use tui::{layout::{Direction, Group, Rect, Size},
           style::{Color, Style},
           widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget}};
 
-use astronomicals::system::System;
+use astronomicals::System;
 use entities::Faction;
 use player::Player;
 use utils::Point;

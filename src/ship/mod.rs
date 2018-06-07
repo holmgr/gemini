@@ -1,4 +1,4 @@
-use astronomicals::system::System;
+use astronomicals::System;
 use entities::Faction;
 use resources::ShipResource;
 use std::fmt;

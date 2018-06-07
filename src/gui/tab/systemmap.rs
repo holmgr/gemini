@@ -1,7 +1,7 @@
 use super::*;
 use termion::event as keyevent;
 
-use astronomicals::system::System;
+use astronomicals::System;
 use player::PlayerState;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
