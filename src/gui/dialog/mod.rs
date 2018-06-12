@@ -1,6 +1,6 @@
-use std::sync::{Arc, mpsc::Sender};
+use std::sync::{mpsc::Sender, Arc};
 use termion::event as keyevent;
-use tui::{Terminal, backend::MouseBackend, layout::Rect};
+use tui::{backend::MouseBackend, layout::Rect, Terminal};
 
 use event::{Event, HANDLER};
 

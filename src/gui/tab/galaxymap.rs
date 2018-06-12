@@ -2,8 +2,9 @@ use super::*;
 use nalgebra::{distance, Vector2};
 use std::collections::HashMap;
 use termion::event as keyevent;
-use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
-          widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Widget, canvas::Canvas}};
+use tui::{layout::{Direction, Group, Rect, Size},
+          style::{Color, Style},
+          widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget}};
 
 use astronomicals::system::System;
 use entities::Faction;

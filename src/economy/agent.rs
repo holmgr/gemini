@@ -1,6 +1,8 @@
 use rand::{ChaChaRng, SeedableRng};
 use statrs::distribution::{Continuous, DiscreteUniform, Distribution, Gamma};
-use std::{collections::HashMap, iter::{repeat, FromIterator}, ops::Range};
+use std::{collections::HashMap,
+          iter::{repeat, FromIterator},
+          ops::Range};
 
 use super::*;
 use astronomicals::{hash, planet::PlanetType, system::System};

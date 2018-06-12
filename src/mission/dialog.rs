@@ -7,13 +7,16 @@ use super::*;
 pub struct Tag(String);
 
 impl Tag {
-
     pub fn end() -> Self {
-        Tag{0: String::from("End")}
+        Tag {
+            0: String::from("End"),
+        }
     }
 
     pub fn as_tag<T: fmt::Display>(value: T) -> Self {
-        Tag{0: value.to_string()}
+        Tag {
+            0: value.to_string(),
+        }
     }
 }
 

@@ -89,7 +89,7 @@ impl NameGen {
 
         let mut sub_names = vec![];
         let alphabet = vec![
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"
+            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P",
         ];
 
         match subname_type.sample(&mut self.rng) as usize {
