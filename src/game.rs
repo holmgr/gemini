@@ -1,7 +1,9 @@
 use app_dirs::{get_data_root, AppDataType};
 use bincode::{deserialize_from, serialize_into};
 use chrono::{DateTime, Duration, TimeZone, Utc};
-use std::{fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant};
+use std::{
+    fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant,
+};
 
 use astronomicals::Galaxy;
 use economy::Economy;

@@ -1,6 +1,10 @@
 use game::Game;
-use std::{io, sync::{Arc, Mutex, mpsc::{channel, Receiver, Sender}},
-          thread::{park_timeout, spawn}, time::{Duration, Instant}};
+use std::{
+    io, sync::{
+        mpsc::{channel, Receiver, Sender}, Arc, Mutex,
+    },
+    thread::{park_timeout, spawn}, time::{Duration, Instant},
+};
 use termion::{event, input::TermRead};
 
 use gui::dialog::Dialog;

@@ -1,6 +1,8 @@
 use rayon::prelude::*;
 use spade::rtree::RTree;
-use std::{collections::{BinaryHeap, HashMap}, u32::MAX};
+use std::{
+    collections::{BinaryHeap, HashMap}, u32::MAX,
+};
 
 use game::Updatable;
 use utils::{edit_distance, HashablePoint, OrdPoint, Point};

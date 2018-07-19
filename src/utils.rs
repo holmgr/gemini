@@ -1,4 +1,6 @@
-use std::{cmp::{min, Ordering}, hash::{Hash, Hasher}, mem::swap};
+use std::{
+    cmp::{min, Ordering}, hash::{Hash, Hasher}, mem::swap,
+};
 
 use nalgebra::geometry::Point2;
 use spade::PointN;

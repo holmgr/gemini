@@ -2,8 +2,10 @@ use super::*;
 use nalgebra::{distance, Vector2};
 use std::collections::HashMap;
 use termion::event as keyevent;
-use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
-          widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Widget, canvas::Canvas}};
+use tui::{
+    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget},
+};
 
 use astronomicals::system::System;
 use entities::Faction;
@@ -69,7 +71,8 @@ impl GalaxyMapTab {
         // Only travel if the selected system is the same as the cursor and
         // and the final destination for the route.
         if let Some((_, ref route)) = self.route {
-            if self.selected.is_some() && self.selected.unwrap() == self.cursor
+            if self.selected.is_some()
+                && self.selected.unwrap() == self.cursor
                 && self.selected.unwrap() == *route.last().unwrap()
             {
                 player.set_route(route.clone());

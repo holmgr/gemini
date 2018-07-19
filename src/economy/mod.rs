@@ -1,7 +1,9 @@
 use rayon::prelude::*;
-use std::{fmt, slice::Iter, sync::{Arc, Mutex}};
+use std::{
+    fmt, slice::Iter, sync::{Arc, Mutex},
+};
 
-use astronomicals::{hash, Galaxy, system::System};
+use astronomicals::{hash, system::System, Galaxy};
 use game::Updatable;
 
 mod agent;
