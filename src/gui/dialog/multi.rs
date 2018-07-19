@@ -1,7 +1,9 @@
 use super::*;
 use std::sync::Mutex;
-use tui::{layout::{Direction, Group, Rect, Size}, style::{Color, Style},
-          widgets::{Block, Borders, SelectableList, Widget}};
+use tui::{
+    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    widgets::{Block, Borders, SelectableList, Widget},
+};
 
 type Action = Fn() -> Event + Send + Sync;
 

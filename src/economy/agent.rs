@@ -1,6 +1,8 @@
 use rand::{ChaChaRng, SeedableRng};
 use statrs::distribution::{Continuous, DiscreteUniform, Distribution, Gamma};
-use std::{collections::HashMap, iter::{repeat, FromIterator}, ops::Range};
+use std::{
+    collections::HashMap, iter::{repeat, FromIterator}, ops::Range,
+};
 
 use super::*;
 use astronomicals::{hash, planet::PlanetType, system::System};
@@ -137,7 +139,8 @@ impl Agent {
             .iter()
             .enumerate()
             .fold(0, |acc, (index, ideal)| {
-                acc + (self.populations[index] * Agent::POPULATION_FACTOR
+                acc + (self.populations[index]
+                    * Agent::POPULATION_FACTOR
                     * *ideal.get(commodity).unwrap_or(&0) as f64) as i64
             });
         (*current_stock as i64) - (ideal_stock as i64)
