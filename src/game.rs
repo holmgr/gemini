@@ -68,8 +68,7 @@ impl Game {
             //self.save_all();
             debug!(
                 "Time advancement finished, took {} ms",
-                ((now.elapsed().as_secs() * 1_000)
-                    + u64::from(now.elapsed().subsec_nanos() / 1_000_000))
+                ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis()))
             );
             Some(days_passed)
         } else {

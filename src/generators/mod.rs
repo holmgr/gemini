@@ -102,7 +102,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         systems
             .iter()
             .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
-        ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_nanos() / 1_000_000))
+        ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis()))
     );
 
     Galaxy::new(sectors, systems)

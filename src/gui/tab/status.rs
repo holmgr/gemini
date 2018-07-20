@@ -38,7 +38,7 @@ impl Tab for StatusTab {
             .sizes(&[Size::Fixed(70), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 let player = &self.state.player.lock().unwrap();
-                draw_player_info(&player, &self.state, term, &chunks[0]);
+                draw_player_info(&player, &self.state, term, chunks[0]);
             });
     }
 }
@@ -48,7 +48,7 @@ fn draw_player_info(
     player: &Player,
     state: &Arc<Game>,
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     // Data fields to be displayed in a table like format.
     let ship = player.ship();
@@ -134,7 +134,7 @@ fn draw_player_info(
     Group::default()
         .direction(Direction::Vertical)
         .sizes(&[Size::Fixed(20), Size::Min(1)])
-        .render(term, area, |term, chunks| {
+        .render(term, &area, |term, chunks| {
             Paragraph::default()
                 .block(Block::default().title("Commander").borders(Borders::ALL))
                 .style(Style::default().fg(Color::Yellow))

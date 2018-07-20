@@ -141,9 +141,9 @@ impl Tab for SystemMapTab {
                             &populations,
                             &system,
                             term,
-                            &chunks[0],
+                            chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
+                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
                     }
                     PlayerState::Docked(id) => {
                         let galaxy = self.state.galaxy.lock().unwrap();
@@ -155,9 +155,9 @@ impl Tab for SystemMapTab {
                             &populations,
                             &system,
                             term,
-                            &chunks[0],
+                            chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
+                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
                     }
                     _ => {}
                 }
@@ -171,7 +171,7 @@ fn draw_system_table(
     populations: &[f64],
     system: &System,
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     Table::new(
         // Prepending empty character to get alignment with list above.
@@ -215,7 +215,7 @@ fn draw_system_map(
     _selected: usize,
     _system: &System,
     _term: &mut Terminal<MouseBackend>,
-    _area: &Rect,
+    _area: Rect,
 ) {
     // TODO: Find decent presentation of a system, ascii art?
 }

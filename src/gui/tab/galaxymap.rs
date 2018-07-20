@@ -80,7 +80,7 @@ impl GalaxyMapTab {
     }
 
     /// Draws the event box in the given terminal and area.
-    pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
+    pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: Rect) {
         let draw_str = if self.search_mode {
             format!("{}{}", self.search_str, "{mod=bold |}")
         } else {
@@ -99,7 +99,7 @@ impl GalaxyMapTab {
         player_loc: &Point,
         selected_system: Option<&System>,
         term: &mut Terminal<MouseBackend>,
-        area: &Rect,
+        area: Rect,
     ) {
         // Do not draw anything if no system is selected.
         if selected_system.is_none() {
@@ -125,7 +125,7 @@ impl GalaxyMapTab {
         Group::default()
             .direction(Direction::Vertical)
             .sizes(&[Size::Fixed(9), Size::Min(1)])
-            .render(term, area, |term, chunks| {
+            .render(term, &area, |term, chunks| {
                 SelectableList::default()
                     .items(&system_data)
                     .block(Block::default().title(&format!("{} System", system.name)))
@@ -172,7 +172,7 @@ impl GalaxyMapTab {
         player: &Player,
         systems: &[&System],
         term: &mut Terminal<MouseBackend>,
-        area: &Rect,
+        area: Rect,
     ) {
         let player_loc = player.location();
         // Scale map to not overlap systems.
@@ -366,11 +366,11 @@ impl Tab for GalaxyMapTab {
                             &player.location(),
                             self.selected.map(|point| galaxy.system(&point).unwrap()),
                             term,
-                            &sidebar_chunk[0],
+                            sidebar_chunk[0],
                         );
-                        self.draw_search(term, &sidebar_chunk[1]);
+                        self.draw_search(term, sidebar_chunk[1]);
                     });
-                self.draw_galaxy_map(player, &systems, term, &chunks[1]);
+                self.draw_galaxy_map(player, &systems, term, chunks[1]);
             });
     }
 }

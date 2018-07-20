@@ -92,8 +92,8 @@ impl Tab for ShipyardTab {
             //.sizes(&[Size::Percent(10), Size::Percent(90)])
             .sizes(&[Size::Fixed(15), Size::Min(1)])
             .render(term, area, |term, chunks| {
-                draw_ship_list(self.selected, &self.available_ships, term, &chunks[0]);
-                draw_ship_info(&self.available_ships[self.selected], term, &chunks[1]);
+                draw_ship_list(self.selected, &self.available_ships, term, chunks[0]);
+                draw_ship_info(&self.available_ships[self.selected], term, chunks[1]);
             });
     }
 }
@@ -103,7 +103,7 @@ fn draw_ship_list(
     selected: usize,
     ships: &[ShipCharacteristics],
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     SelectableList::default()
         .block(Block::default().title("Ships").borders(Borders::ALL))
@@ -118,7 +118,7 @@ fn draw_ship_list(
 }
 
 /// Draw detailed ship information for a given ship.
-fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>, area: &Rect) {
+fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>, area: Rect) {
     let ship_data = vec![
         ("Name", ship.name.clone()),
         ("Manufacturer", ship.manufacturer.clone()),
@@ -153,7 +153,7 @@ fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>,
         .direction(Direction::Vertical)
         .sizes(row_sizes.as_slice())
         .margin(4)
-        .render(term, area, |term, chunks| {
+        .render(term, &area, |term, chunks| {
             for (index, &chunk) in chunks.iter().enumerate() {
                 // Draw a single row.
                 Group::default()

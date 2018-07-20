@@ -1,8 +1,8 @@
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use std::{
-    collections::HashMap, f64, iter::FromIterator, sync::atomic::{AtomicBool, Ordering},
-    time::Instant, usize::MAX,
+    collections::HashMap, iter::FromIterator, sync::atomic::{AtomicBool, Ordering}, time::Instant,
+    usize::MAX,
 };
 
 use astronomicals::Sector;
@@ -125,8 +125,7 @@ impl SectorGen {
             sectors
                 .iter()
                 .fold(MAX, |acc, ref sec| acc.min(sec.system_locations.len())),
-            ((now.elapsed().as_secs() * 1_000)
-                + u64::from(now.elapsed().subsec_nanos() / 1_000_000)),
+            ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis())),
             sectors
                 .iter()
                 .fold(0, |acc, ref sec| acc + match sec.faction {
