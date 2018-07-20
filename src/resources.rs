@@ -85,20 +85,3 @@ pub struct AgentResource {
 impl Resource for AgentResource {
     const KEY: &'static str = "economic_agents";
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use setup_logger;
-
-    #[test]
-    fn test_fetch_resource() {
-        // Init logger
-        setup_logger().unwrap();
-
-        let res = fetch_resource::<AstronomicalNamesResource>().unwrap();
-        assert!(res.names.len() > 0);
-        assert!(res.greek.len() > 0);
-        assert!(res.decorators.len() > 0);
-    }
-}
