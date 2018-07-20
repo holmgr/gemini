@@ -2,8 +2,9 @@ use rand::Rng;
 use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
-use astronomicals::{planet::{PlanetBuilder, PlanetEconomy, PlanetType},
-                    Star};
+use astronomicals::{
+    planet::{PlanetBuilder, PlanetEconomy, PlanetType}, Star,
+};
 
 /// Basic non deterministic name generator for generating new Planets which
 /// are similar to the trained data provided.

@@ -2,8 +2,9 @@ use super::*;
 
 use rayon::prelude::*;
 use spade::rtree::RTree;
-use std::{collections::{BinaryHeap, HashMap},
-          u32::MAX};
+use std::{
+    collections::{BinaryHeap, HashMap}, u32::MAX,
+};
 
 /// A galaxy of systems.
 #[derive(Serialize, Deserialize, Clone, Debug)]

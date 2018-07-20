@@ -1,7 +1,8 @@
 use super::*;
 use entities::Faction;
-use std::{fmt,
-          hash::{Hash, Hasher}};
+use std::{
+    fmt, hash::{Hash, Hasher},
+};
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]

@@ -3,9 +3,9 @@ use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
-use astronomicals::{planet::{Planet, PlanetBuilder},
-                    system::SystemBuilder,
-                    Galaxy};
+use astronomicals::{
+    planet::{Planet, PlanetBuilder}, system::SystemBuilder, Galaxy,
+};
 use game_config::GameConfig;
 use resources::{fetch_resource, AstronomicalNamesResource};
 use utils::Point;

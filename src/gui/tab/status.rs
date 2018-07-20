@@ -1,7 +1,8 @@
 use super::*;
-use tui::{layout::{Direction, Group, Rect, Size},
-          style::{Color, Style},
-          widgets::{Block, Borders, Paragraph, SelectableList, Widget}};
+use tui::{
+    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    widgets::{Block, Borders, Paragraph, SelectableList, Widget},
+};
 
 use player::{Player, PlayerState};
 

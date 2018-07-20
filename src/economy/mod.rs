@@ -1,7 +1,7 @@
 use rayon::prelude::*;
-use std::{fmt,
-          slice::Iter,
-          sync::{Arc, Mutex}};
+use std::{
+    fmt, slice::Iter, sync::{Arc, Mutex},
+};
 
 use astronomicals::{Galaxy, System};
 use game::Updatable;
