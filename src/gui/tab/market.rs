@@ -4,6 +4,7 @@ use tui::layout::Rect;
 use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Row, Table, Widget};
 
+use super::GUIEvent;
 use player::PlayerState;
 
 lazy_static! {
@@ -46,7 +47,7 @@ impl Tab for MarketTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         match event {
             Event::Input(input) => {
                 // TODO: Open dialog with sell/buy of goods.
@@ -75,6 +76,7 @@ impl Tab for MarketTab {
             }
             _ => {}
         };
+        None
     }
 
     /// Draws the tab in the given terminal and area.

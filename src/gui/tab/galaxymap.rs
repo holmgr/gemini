@@ -6,6 +6,7 @@ use tui::{
     widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget},
 };
 
+use super::GUIEvent;
 use astronomicals::System;
 use entities::Faction;
 use player::Player;
@@ -250,7 +251,7 @@ impl Tab for GalaxyMapTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         if let Event::Input(input) = event {
             match input {
                 keyevent::Key::Char('\n') if self.search_mode => {
@@ -269,7 +270,7 @@ impl Tab for GalaxyMapTab {
                 keyevent::Key::Char(e) if self.search_mode => {
                     self.search_str.push(e);
                     // Early exit.
-                    return;
+                    return None;
                 }
                 keyevent::Key::Backspace if self.search_mode => {
                     self.search_str.pop();
@@ -289,13 +290,13 @@ impl Tab for GalaxyMapTab {
                 // Start search mode.
                 keyevent::Key::Char('/') => {
                     self.search_mode = true;
-                    return;
+                    return None;
                 }
                 // Quit search mode.
                 keyevent::Key::Esc => {
                     self.search_str.clear();
                     self.search_mode = false;
-                    return;
+                    return None;
                 }
                 _ => {}
             };
@@ -342,6 +343,7 @@ impl Tab for GalaxyMapTab {
                 }
             }
         }
+        None
     }
 
     /// Draws the tab in the given terminal and area.

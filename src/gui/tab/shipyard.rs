@@ -50,7 +50,7 @@ impl Tab for ShipyardTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         match event {
             Event::Input(input) => match input {
                 // Move up item list.
@@ -82,6 +82,7 @@ impl Tab for ShipyardTab {
             }
             _ => {}
         };
+        None
     }
 
     /// Draws the tab in the given terminal and area.

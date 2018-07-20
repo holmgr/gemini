@@ -1,6 +1,4 @@
-use std::{
-    io, sync::{Arc, Mutex},
-};
+use std::{io, sync::Arc};
 use termion::event as keyevent;
 use tui::{
     backend::MouseBackend, layout::{Direction, Group, Rect, Size}, style::{Color, Style},
@@ -13,12 +11,20 @@ use game::Game;
 pub mod dialog;
 mod tab;
 
+use self::dialog::Dialog;
+
+/// Events used for communicating specifically between GUI components.
+pub enum GUIEvent {
+    OpenDialog(Box<Dialog>),
+    CloseDialog,
+}
+
 /// Handles the graphical user interface to the user.
 pub struct Gui {
     size: Rect,
     tabs: Vec<Box<tab::Tab>>,
     selected_tab: usize,
-    dialog: Option<Arc<Mutex<dialog::Dialog>>>,
+    dialog: Option<Box<dialog::Dialog>>,
 }
 
 impl Gui {
@@ -76,23 +82,26 @@ impl Gui {
                     }
                     _ => {
                         // Forward event to current tab or dialog if open.
-                        match self.dialog {
-                            Some(ref dialog) => dialog.lock().unwrap().handle_event(evt),
+                        let gui_event = match self.dialog {
+                            Some(ref mut dialog) => dialog.handle_event(evt),
                             _ => self.tabs[self.selected_tab].handle_event(evt),
+                        };
+                        match gui_event {
+                            Some(GUIEvent::OpenDialog(dialog)) => {
+                                self.dialog = Some(dialog);
+                            }
+                            Some(GUIEvent::CloseDialog) => {
+                                self.dialog = None;
+                            }
+                            None => {}
                         };
                     }
                 },
-                Event::OpenDialog(dialog) => {
-                    self.dialog = Some(dialog);
-                }
-                Event::CloseDialog => {
-                    self.dialog = None;
-                }
                 _ => {
                     // Forward all general events to all tabs.
-                    self.tabs
-                        .iter_mut()
-                        .for_each(|tab| tab.handle_event(evt.clone()));
+                    for tab in &mut self.tabs {
+                        tab.handle_event(evt.clone());
+                    }
                 }
             }
         }
@@ -115,7 +124,7 @@ impl Gui {
                     .render(term, &chunks[0]);
                 // Draw dialog or current tab.
                 match self.dialog {
-                    Some(ref dialog) => dialog.lock().unwrap().draw(term, &chunks[1]),
+                    Some(ref dialog) => dialog.draw(term, &chunks[1]),
                     None => self.tabs[self.selected_tab].draw(term, &chunks[1]),
                 }
             });

@@ -43,13 +43,13 @@ impl SystemMapTab {
 
     /// Opens dialog for planet interaction.
     /// Actions available depends on the current player state.
-    fn open_dialog(&self) {
+    fn try_open_dialog(&self) -> Option<Box<MultiDialog>> {
         let player = self.state.player.lock().unwrap();
         let galaxy = self.state.galaxy.lock().unwrap();
         let system = galaxy.system(&player.location()).unwrap();
         let planet_id = self.selected_astronomical;
 
-        let dialog = match player.state() {
+        match player.state() {
             PlayerState::InSystem => {
                 // If in system we can dock.
                 let dock_fn = Box::new(move || Event::Dock(planet_id));
@@ -72,11 +72,6 @@ impl SystemMapTab {
                 ))
             }
             _ => None,
-        };
-
-        // Send of dialog to be opened.
-        if let Some(dialog) = dialog {
-            self.send_handle.send(Event::OpenDialog(dialog)).unwrap();
         }
     }
 }
@@ -100,12 +95,13 @@ impl Tab for SystemMapTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         match event {
             Event::Input(input) => {
                 // Open planet interaction dialog if appropriate.
                 if let keyevent::Key::Char('\n') = input {
-                    self.open_dialog();
+                    return self.try_open_dialog()
+                        .map(|dialog| GUIEvent::OpenDialog(dialog));
                 }
                 self.selected_astronomical = match input {
                     // Move up.
@@ -116,13 +112,15 @@ impl Tab for SystemMapTab {
                     }
                     _ => self.selected_astronomical,
                 };
+                None
             }
             Event::Update => {
                 // Update maximum index if needed.
                 self.max_selected_astronomical = SystemMapTab::num_astronomicals(&self.state);
+                None
             }
-            _ => {}
-        };
+            _ => None,
+        }
     }
 
     /// Draws the tab in the given terminal and area.

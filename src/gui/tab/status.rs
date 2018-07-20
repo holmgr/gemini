@@ -27,7 +27,9 @@ impl Tab for StatusTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, _event: Event) {}
+    fn handle_event(&mut self, _event: Event) -> Option<GUIEvent> {
+        None
+    }
 
     /// Draws the tab in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
