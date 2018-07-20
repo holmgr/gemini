@@ -1,8 +1,10 @@
 use super::*;
 use entities::Faction;
+use game::Updatable;
 use std::{
     fmt, hash::{Hash, Hasher},
 };
+use utils::Point;
 
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]

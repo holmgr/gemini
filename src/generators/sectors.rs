@@ -36,17 +36,9 @@ impl SectorGen {
                 .cloned()
                 .collect::<Vec<_>>();
 
-        // Split data into two sets if using approximation
-        let mut idx = 0;
-        let (cluster_set, rest): (Vec<Point>, Vec<Point>) =
-            system_locations.into_iter().partition(|_| {
-                idx += 1;
-                idx < config.num_approximation_systems || !config.sector_approximation
-            });
-
         // System to cluster_id mapping
         let mut cluster_map: HashMap<Point, usize> =
-            HashMap::from_iter(cluster_set.into_iter().map(|point| (point, 0)));
+            HashMap::from_iter(system_locations.into_iter().map(|point| (point, 0)));
 
         // Run K means until convergence, i.e until no reassignments
         let mut has_assigned = true;
@@ -101,20 +93,6 @@ impl SectorGen {
         for (system_location, id) in cluster_map {
             sector_vecs[id].push(system_location);
         }
-
-        // Assign remaining systems to closest centroid if any left
-        rest.into_iter().for_each(|system_location| {
-            let mut closest_cluster = 0;
-            let mut closest_distance = f64::MAX;
-            for (i, centroid) in centroids.iter().enumerate() {
-                let distance = system_location.distance(centroid);
-                if distance < closest_distance {
-                    closest_cluster = i;
-                    closest_distance = distance;
-                }
-            }
-            sector_vecs[closest_cluster].push(system_location);
-        });
 
         // Create sector for each cluster
         let sectors = sector_vecs

@@ -22,7 +22,7 @@ addons:
 before_script:
     - rustup component add rustfmt-preview
     - rustup install nightly
-    - cargo +nightly install clippy --force
+    - rustup component add --toolchain=nightly clippy-preview
 script:
     - cargo fmt --all -- --write-mode=diff
     - cargo +nightly clippy

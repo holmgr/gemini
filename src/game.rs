@@ -2,7 +2,7 @@ use app_dirs::{get_data_root, AppDataType};
 use bincode::{deserialize_from, serialize_into};
 use chrono::{DateTime, Duration, TimeZone, Utc};
 use std::{
-    fs::{create_dir_all, File}, sync::{Arc, Mutex}, time::Instant,
+    fs::{create_dir_all, File}, io::{BufReader, BufWriter}, sync::{Arc, Mutex}, time::Instant,
 };
 
 use astronomicals::Galaxy;
@@ -83,24 +83,20 @@ impl Game {
             .unwrap()
             .join(SAVE_PATH);
 
-        create_dir_all(base_path.as_path())
-            .ok()
-            .and_then(|_| File::create(base_path.join("galaxy.cbor").as_path()).ok())
-            .and_then(|mut galaxy_file|
-                      // Save galaxy
-                      serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).ok())
-            .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
-            .and_then(|mut player_file|
-                      // Save galaxy
-                      serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok())
-            .and_then(|_| File::create(base_path.join("economy.cbor").as_path()).ok())
-            .and_then(|mut economy_file|
-                      // Save galaxy
-                      serialize_into(&mut economy_file, &(*self.economy.lock().unwrap())).ok())
-            .and_then(|_| File::create(base_path.join("updated.cbor").as_path()).ok())
-            .and_then(|mut update_file|
-                      // Save galaxy
-                      serialize_into(&mut update_file, &(*self.updated.lock().unwrap())).ok());
+        if create_dir_all(base_path.as_path()).is_ok() {
+            let mut galaxy_file =
+                BufWriter::new(File::create(base_path.join("galaxy.cbor").as_path()).unwrap());
+            serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap()));
+            let mut player_file =
+                BufWriter::new(File::create(base_path.join("player.cbor").as_path()).unwrap());
+            serialize_into(&mut player_file, &(*self.player.lock().unwrap()));
+            let mut economy_file =
+                BufWriter::new(File::create(base_path.join("economy.cbor").as_path()).unwrap());
+            serialize_into(&mut economy_file, &(*self.economy.lock().unwrap()));
+            let mut update_file =
+                BufWriter::new(File::create(base_path.join("updated.cbor").as_path()).unwrap());
+            serialize_into(&mut update_file, &(*self.updated.lock().unwrap()));
+        }
     }
 
     /// Creates and stores a quicksave of the player data.
@@ -109,12 +105,11 @@ impl Game {
             .unwrap()
             .join(SAVE_PATH);
 
-        create_dir_all(base_path.as_path())
-            .ok()
-            .and_then(|_| File::create(base_path.join("player.cbor").as_path()).ok())
-            .and_then(|mut player_file|
-                      // Save galaxy
-                      serialize_into(&mut player_file, &(*self.player.lock().unwrap())).ok());
+        if create_dir_all(base_path.as_path()).is_ok() {
+            let mut player_file =
+                BufWriter::new(File::create(base_path.join("player.cbor").as_path()).unwrap());
+            serialize_into(&mut player_file, &(*self.player.lock().unwrap()));
+        }
     }
 
     /// Attempts to load a quicksave of a game state.
@@ -125,17 +120,17 @@ impl Game {
 
         let galaxy: Option<Galaxy> = File::open(base_path.join("galaxy.cbor").as_path())
             .ok()
-            .and_then(|galaxy_file| deserialize_from(galaxy_file).ok());
+            .and_then(|galaxy_file| deserialize_from(BufReader::new(galaxy_file)).ok());
 
         let player: Option<Player> = File::open(base_path.join("player.cbor").as_path())
             .ok()
-            .and_then(|player_file| deserialize_from(player_file).ok());
+            .and_then(|player_file| deserialize_from(BufReader::new(player_file)).ok());
         let economy: Option<Economy> = File::open(base_path.join("economy.cbor").as_path())
             .ok()
-            .and_then(|economy_file| deserialize_from(economy_file).ok());
+            .and_then(|economy_file| deserialize_from(BufReader::new(economy_file)).ok());
         let updated: Option<DateTime<Utc>> = File::open(base_path.join("updated.cbor").as_path())
             .ok()
-            .and_then(|updated_file| deserialize_from(updated_file).ok());
+            .and_then(|updated_file| deserialize_from(BufReader::new(updated_file)).ok());
 
         let mut shipyard = Shipyard::new();
         shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());

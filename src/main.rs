@@ -72,8 +72,6 @@ fn main() {
     let config = game_config::GameConfig::retrieve();
     info!("Initial config is: {:#?}", config);
 
-    let enable_gui = config.enable_gui;
-
     // Inital game state
     let game_state = match game::Game::load() {
         Some(game_state) => game_state,
@@ -119,8 +117,6 @@ fn main() {
     event::EventHandler::start();
 
     // Init and start gui
-    if enable_gui {
-        let mut gui = gui::Gui::new(&game_state);
-        gui.start();
-    }
+    let mut gui = gui::Gui::new(&game_state);
+    gui.start();
 }

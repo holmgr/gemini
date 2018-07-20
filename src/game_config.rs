@@ -18,9 +18,6 @@ pub struct GameConfig {
     pub number_of_systems: u64,
     pub system_spread: f64,
     pub number_of_sectors: usize,
-    pub sector_approximation: bool,
-    pub num_approximation_systems: usize,
-    pub enable_gui: bool,
 }
 
 impl GameConfig {
@@ -108,12 +105,9 @@ impl Default for GameConfig {
         GameConfig {
             map_seed: 42,
             starting_credits: 1000,
-            number_of_systems: 100_000,
-            system_spread: 200.,
-            number_of_sectors: 30,
-            sector_approximation: true,
-            num_approximation_systems: 100_000,
-            enable_gui: true,
+            number_of_systems: 10_000,
+            system_spread: 150.,
+            number_of_sectors: 150,
         }
     }
 }
