@@ -1,4 +1,4 @@
-use astronomicals::{hash, planet::Planet, star::Star};
+use super::*;
 use entities::Faction;
 use game::Updatable;
 use std::{
@@ -31,7 +31,7 @@ impl Updatable for System {
 
 impl Hash for System {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        hash(&self.location).hash(state);
+        Hash::hash(&self.location, state);
     }
 }
 

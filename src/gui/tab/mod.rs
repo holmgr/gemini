@@ -1,6 +1,7 @@
 use std::sync::{mpsc::Sender, Arc};
 use tui::{backend::MouseBackend, layout::Rect, Terminal};
 
+use super::GUIEvent;
 use event::{Event, HANDLER};
 use game::Game;
 
@@ -22,7 +23,7 @@ pub trait Tab {
     fn title(&self) -> String;
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event);
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent>;
 
     /// Draws the tab in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect);

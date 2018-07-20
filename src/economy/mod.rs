@@ -3,7 +3,7 @@ use std::{
     fmt, slice::Iter, sync::{Arc, Mutex},
 };
 
-use astronomicals::{hash, system::System, Galaxy};
+use astronomicals::{system::System, Galaxy};
 use game::Updatable;
 
 mod agent;
@@ -42,7 +42,7 @@ impl Economy {
     pub fn commodity_prices(&self, system: &System) -> Vec<(Commodity, i64)> {
         let mut prices = vec![];
 
-        let system_hash = hash(&system.location);
+        let system_hash = system.location.hash();
         for market in &self.markets {
             if let Some(agent) = market.agent(system_hash as u32) {
                 prices = agent.lock().unwrap().prices();
@@ -56,7 +56,7 @@ impl Economy {
     pub fn populations(&self, system: &System) -> Vec<f64> {
         let mut populations = vec![];
 
-        let system_hash = hash(&system.location);
+        let system_hash = system.location.hash();
         for market in &self.markets {
             if let Some(agent) = market.agent(system_hash as u32) {
                 populations = agent.lock().unwrap().populations();

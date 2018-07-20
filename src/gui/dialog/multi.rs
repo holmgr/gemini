@@ -1,11 +1,11 @@
 use super::*;
-use std::sync::Mutex;
 use tui::{
     layout::{Direction, Group, Rect, Size}, style::{Color, Style},
     widgets::{Block, Borders, SelectableList, Widget},
 };
 
 type Action = Fn() -> Event + Send + Sync;
+use super::GUIEvent;
 
 /// Multiple choice dialog window.
 pub struct MultiDialog {
@@ -17,13 +17,13 @@ pub struct MultiDialog {
 
 impl MultiDialog {
     /// Create a new PlanetDialog.
-    pub fn new(title: String, actions: Vec<(&'static str, Box<Action>)>) -> Arc<Mutex<Self>> {
-        Arc::new(Mutex::new(MultiDialog {
+    pub fn new(title: String, actions: Vec<(&'static str, Box<Action>)>) -> Box<Self> {
+        Box::new(MultiDialog {
             sender: HANDLER.send_handle(),
             title,
             selected: 0,
             actions,
-        }))
+        })
     }
 }
 
@@ -34,7 +34,7 @@ impl Dialog for MultiDialog {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         if let Event::Input(input) = event {
             self.selected = match input {
                 // Move up.
@@ -43,19 +43,18 @@ impl Dialog for MultiDialog {
                 keyevent::Key::Char('j') => (self.selected + 1).min(self.actions.len() - 1),
                 _ => self.selected,
             };
-            match input {
+            return match input {
                 keyevent::Key::Char('\n') => {
                     // Call the appropriate action.
                     let (_, ref action_fn) = self.actions[self.selected];
                     self.sender.send(action_fn()).unwrap();
-                    self.sender.send(Event::CloseDialog).unwrap();
+                    Some(GUIEvent::CloseDialog)
                 }
-                keyevent::Key::Backspace => {
-                    self.sender.send(Event::CloseDialog).unwrap();
-                }
-                _ => {}
+                keyevent::Key::Backspace => Some(GUIEvent::CloseDialog),
+                _ => None,
             };
         }
+        None
     }
 
     /// Draws the dialog in the given terminal and area.

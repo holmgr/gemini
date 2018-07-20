@@ -27,7 +27,7 @@ impl Tab for ShipyardTab {
         let dup_state = state.clone();
         let galaxy = dup_state.galaxy.lock().unwrap();
         let player_system = galaxy
-            .system(dup_state.player.lock().unwrap().location())
+            .system(&dup_state.player.lock().unwrap().location())
             .unwrap();
         let available_ships = dup_state
             .shipyard
@@ -50,7 +50,7 @@ impl Tab for ShipyardTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         match event {
             Event::Input(input) => match input {
                 // Move up item list.
@@ -69,7 +69,7 @@ impl Tab for ShipyardTab {
                 // If player is not at a system something is very wrong.
                 let galaxy = self.state.galaxy.lock().unwrap();
                 let player_system = galaxy
-                    .system(self.state.player.lock().unwrap().location())
+                    .system(&self.state.player.lock().unwrap().location())
                     .unwrap();
                 self.available_ships = self.state
                     .shipyard
@@ -82,6 +82,7 @@ impl Tab for ShipyardTab {
             }
             _ => {}
         };
+        None
     }
 
     /// Draws the tab in the given terminal and area.
@@ -91,8 +92,8 @@ impl Tab for ShipyardTab {
             //.sizes(&[Size::Percent(10), Size::Percent(90)])
             .sizes(&[Size::Fixed(15), Size::Min(1)])
             .render(term, area, |term, chunks| {
-                draw_ship_list(self.selected, &self.available_ships, term, &chunks[0]);
-                draw_ship_info(&self.available_ships[self.selected], term, &chunks[1]);
+                draw_ship_list(self.selected, &self.available_ships, term, chunks[0]);
+                draw_ship_info(&self.available_ships[self.selected], term, chunks[1]);
             });
     }
 }
@@ -102,7 +103,7 @@ fn draw_ship_list(
     selected: usize,
     ships: &[ShipCharacteristics],
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     SelectableList::default()
         .block(Block::default().title("Ships").borders(Borders::ALL))
@@ -117,7 +118,7 @@ fn draw_ship_list(
 }
 
 /// Draw detailed ship information for a given ship.
-fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>, area: &Rect) {
+fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>, area: Rect) {
     let ship_data = vec![
         ("Name", ship.name.clone()),
         ("Manufacturer", ship.manufacturer.clone()),
@@ -152,7 +153,7 @@ fn draw_ship_info(ship: &ShipCharacteristics, term: &mut Terminal<MouseBackend>,
         .direction(Direction::Vertical)
         .sizes(row_sizes.as_slice())
         .margin(4)
-        .render(term, area, |term, chunks| {
+        .render(term, &area, |term, chunks| {
             for (index, &chunk) in chunks.iter().enumerate() {
                 // Draw a single row.
                 Group::default()

@@ -27,7 +27,9 @@ impl Tab for StatusTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, _event: Event) {}
+    fn handle_event(&mut self, _event: Event) -> Option<GUIEvent> {
+        None
+    }
 
     /// Draws the tab in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
@@ -36,7 +38,7 @@ impl Tab for StatusTab {
             .sizes(&[Size::Fixed(70), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 let player = &self.state.player.lock().unwrap();
-                draw_player_info(&player, &self.state, term, &chunks[0]);
+                draw_player_info(&player, &self.state, term, chunks[0]);
             });
     }
 }
@@ -46,7 +48,7 @@ fn draw_player_info(
     player: &Player,
     state: &Arc<Game>,
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     // Data fields to be displayed in a table like format.
     let ship = player.ship();
@@ -56,10 +58,10 @@ fn draw_player_info(
             "Location:  {}",
             match player.state() {
                 PlayerState::InSystem => {
-                    galaxy.system(player.location()).unwrap().name.clone() + " System"
+                    galaxy.system(&player.location()).unwrap().name.clone() + " System"
                 }
                 PlayerState::Docked(planet_id) => {
-                    let system = galaxy.system(player.location()).unwrap();
+                    let system = galaxy.system(&player.location()).unwrap();
                     let system_name = &system.name;
                     let planet_name = &system.satelites[planet_id].name;
                     format!("{}, {} System", planet_name, system_name)
@@ -132,7 +134,7 @@ fn draw_player_info(
     Group::default()
         .direction(Direction::Vertical)
         .sizes(&[Size::Fixed(20), Size::Min(1)])
-        .render(term, area, |term, chunks| {
+        .render(term, &area, |term, chunks| {
             Paragraph::default()
                 .block(Block::default().title("Commander").borders(Borders::ALL))
                 .style(Style::default().fg(Color::Yellow))

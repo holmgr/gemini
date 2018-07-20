@@ -1,5 +1,4 @@
 use super::*;
-use nalgebra::{distance, Vector2};
 use std::collections::HashMap;
 use termion::event as keyevent;
 use tui::{
@@ -7,7 +6,8 @@ use tui::{
     widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget},
 };
 
-use astronomicals::system::System;
+use super::GUIEvent;
+use astronomicals::System;
 use entities::Faction;
 use player::Player;
 use utils::Point;
@@ -56,12 +56,7 @@ impl GalaxyMapTab {
             None => 0,
         };
         // Plan route if possible.
-        self.route = galaxy.route(
-            &player.location(),
-            &self.selected.unwrap(),
-            range,
-            max_jumps,
-        );
+        self.route = galaxy.route(player.location(), self.selected.unwrap(), range, max_jumps);
     }
 
     /// Moves the player's location to the selected system.
@@ -85,7 +80,7 @@ impl GalaxyMapTab {
     }
 
     /// Draws the event box in the given terminal and area.
-    pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
+    pub fn draw_search(&self, term: &mut Terminal<MouseBackend>, area: Rect) {
         let draw_str = if self.search_mode {
             format!("{}{}", self.search_str, "{mod=bold |}")
         } else {
@@ -104,7 +99,7 @@ impl GalaxyMapTab {
         player_loc: &Point,
         selected_system: Option<&System>,
         term: &mut Terminal<MouseBackend>,
-        area: &Rect,
+        area: Rect,
     ) {
         // Do not draw anything if no system is selected.
         if selected_system.is_none() {
@@ -120,7 +115,7 @@ impl GalaxyMapTab {
             format!("Reputation:    {}", system.reputation.to_string()),
             format!(
                 "Distance:      {:.1} ly",
-                distance(player_loc, &system.location)
+                player_loc.distance(&system.location)
             ),
             format!("Star mass:     {:.1} M", system.star.mass),
             format!("Star type:     {}", system.star.startype.to_string()),
@@ -130,7 +125,7 @@ impl GalaxyMapTab {
         Group::default()
             .direction(Direction::Vertical)
             .sizes(&[Size::Fixed(9), Size::Min(1)])
-            .render(term, area, |term, chunks| {
+            .render(term, &area, |term, chunks| {
                 SelectableList::default()
                     .items(&system_data)
                     .block(Block::default().title(&format!("{} System", system.name)))
@@ -177,15 +172,15 @@ impl GalaxyMapTab {
         player: &Player,
         systems: &[&System],
         term: &mut Terminal<MouseBackend>,
-        area: &Rect,
+        area: Rect,
     ) {
         let player_loc = player.location();
         // Scale map to not overlap systems.
         let map_scaling = 20. * self.map_scale;
         let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
             (
-                (s.location.coords.x / map_scaling).abs().max(x_max),
-                (s.location.coords.y / map_scaling).abs().max(y_max),
+                (s.location.x / map_scaling).abs().max(x_max),
+                (s.location.y / map_scaling).abs().max(y_max),
             )
         });
         Canvas::default()
@@ -193,33 +188,23 @@ impl GalaxyMapTab {
             .paint(|ctx| {
                 for system in systems.iter() {
                     let color = *FACTION_COLORS.get(&system.faction).unwrap();
-                    ctx.print(
-                        system.location.coords.x,
-                        system.location.coords.y,
-                        ".",
-                        color,
-                    );
+                    ctx.print(system.location.x, system.location.y, ".", color);
                 }
                 // Draw player location.
-                ctx.print(player_loc.coords.x, player_loc.coords.y, "X", Color::White);
+                ctx.print(player_loc.x, player_loc.y, "X", Color::White);
 
                 // Draw the cursor.
-                ctx.print(
-                    self.cursor.coords.x,
-                    self.cursor.coords.y,
-                    "*",
-                    Color::Yellow,
-                );
+                ctx.print(self.cursor.x, self.cursor.y, "*", Color::Yellow);
 
                 // Draw route if available.
                 if let Some((_, ref route)) = self.route {
                     for system in route {
-                        ctx.print(system.coords.x, system.coords.y, "X", Color::Yellow);
+                        ctx.print(system.x, system.y, "X", Color::Yellow);
                     }
-                    ctx.print(player_loc.coords.x, player_loc.coords.y, "S", Color::Yellow);
+                    ctx.print(player_loc.x, player_loc.y, "S", Color::Yellow);
                     ctx.print(
-                        route.last().unwrap().coords.x,
-                        route.last().unwrap().coords.y,
+                        route.last().unwrap().x,
+                        route.last().unwrap().y,
                         "G",
                         Color::Yellow,
                     );
@@ -227,19 +212,19 @@ impl GalaxyMapTab {
                 // Draw currently travelling route if available.
                 if let Some(ref route) = player.route() {
                     for system in route {
-                        ctx.print(system.coords.x, system.coords.y, "X", Color::White);
+                        ctx.print(system.x, system.y, "X", Color::White);
                     }
-                    ctx.print(player_loc.coords.x, player_loc.coords.y, "S", Color::White);
+                    ctx.print(player_loc.x, player_loc.y, "S", Color::White);
                     ctx.print(
-                        route.last().unwrap().coords.x,
-                        route.last().unwrap().coords.y,
+                        route.last().unwrap().x,
+                        route.last().unwrap().y,
                         "G",
                         Color::White,
                     );
                 }
             })
-            .x_bounds([self.cursor.coords.x - max_x, self.cursor.coords.x + max_x])
-            .y_bounds([self.cursor.coords.y - max_y, self.cursor.coords.y + max_y])
+            .x_bounds([self.cursor.x - max_x, self.cursor.x + max_x])
+            .y_bounds([self.cursor.y - max_y, self.cursor.y + max_y])
             .render(term, &area);
     }
 }
@@ -247,7 +232,7 @@ impl GalaxyMapTab {
 impl Tab for GalaxyMapTab {
     /// Creates a map tab.
     fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
-        let cursor = *state.player.lock().unwrap().location();
+        let cursor = state.player.lock().unwrap().location();
         Box::new(GalaxyMapTab {
             state,
             sender: send_handle,
@@ -266,7 +251,7 @@ impl Tab for GalaxyMapTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         if let Event::Input(input) = event {
             match input {
                 keyevent::Key::Char('\n') if self.search_mode => {
@@ -285,7 +270,7 @@ impl Tab for GalaxyMapTab {
                 keyevent::Key::Char(e) if self.search_mode => {
                     self.search_str.push(e);
                     // Early exit.
-                    return;
+                    return None;
                 }
                 keyevent::Key::Backspace if self.search_mode => {
                     self.search_str.pop();
@@ -299,19 +284,19 @@ impl Tab for GalaxyMapTab {
                 // Center map around player
                 keyevent::Key::Char(' ') => {
                     if let Ok(player) = self.state.player.lock() {
-                        self.cursor = *player.location();
+                        self.cursor = player.location();
                     }
                 }
                 // Start search mode.
                 keyevent::Key::Char('/') => {
                     self.search_mode = true;
-                    return;
+                    return None;
                 }
                 // Quit search mode.
                 keyevent::Key::Esc => {
                     self.search_str.clear();
                     self.search_mode = false;
-                    return;
+                    return None;
                 }
                 _ => {}
             };
@@ -330,19 +315,19 @@ impl Tab for GalaxyMapTab {
 
             let translation = match input {
                 // Move up.
-                keyevent::Key::Char('k') => Vector2::new(0., 1. / self.map_scale),
+                keyevent::Key::Char('k') => Point::new(0., 1. / self.map_scale),
                 // Move down.
-                keyevent::Key::Char('j') => Vector2::new(0., -1. / self.map_scale),
+                keyevent::Key::Char('j') => Point::new(0., -1. / self.map_scale),
                 // Move right.
-                keyevent::Key::Char('l') => Vector2::new(1. / self.map_scale, 0.),
+                keyevent::Key::Char('l') => Point::new(1. / self.map_scale, 0.),
                 // Move left.
-                keyevent::Key::Char('h') => Vector2::new(-1. / self.map_scale, 0.),
-                _ => Vector2::new(0., 0.),
+                keyevent::Key::Char('h') => Point::new(-1. / self.map_scale, 0.),
+                _ => Point::new(0., 0.),
             };
 
             // Move out of snapping system if currently snapped.
             self.cursor += match self.selected {
-                Some(_) => Vector2::new(
+                Some(_) => Point::new(
                     translation.x * 1.1 * self.map_scale * MIN_SNAP_DIST,
                     translation.y * 1.1 * self.map_scale * MIN_SNAP_DIST,
                 ),
@@ -352,12 +337,13 @@ impl Tab for GalaxyMapTab {
 
             // Check if cursor should snap to closest system.
             if let Some(neighbor) = self.state.galaxy.lock().unwrap().nearest(&self.cursor) {
-                if distance(&self.cursor, &neighbor) < MIN_SNAP_DIST {
+                if self.cursor.distance(&neighbor) < MIN_SNAP_DIST {
                     self.cursor = *neighbor;
                     self.selected = Some(*neighbor);
                 }
             }
         }
+        None
     }
 
     /// Draws the tab in the given terminal and area.
@@ -368,7 +354,7 @@ impl Tab for GalaxyMapTab {
             .sizes(&[Size::Fixed(85), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 // TODO: Draw system detailed information.
-                let systems = &galaxy.systems();
+                let systems = galaxy.systems().collect::<Vec<_>>();
                 let player = &self.state.player.lock().unwrap();
                 //let player_loc = &self.state.player.lock().unwrap().location().clone();
                 // Draw sidebar.
@@ -380,11 +366,11 @@ impl Tab for GalaxyMapTab {
                             &player.location(),
                             self.selected.map(|point| galaxy.system(&point).unwrap()),
                             term,
-                            &sidebar_chunk[0],
+                            sidebar_chunk[0],
                         );
-                        self.draw_search(term, &sidebar_chunk[1]);
+                        self.draw_search(term, sidebar_chunk[1]);
                     });
-                self.draw_galaxy_map(player, &systems, term, &chunks[1]);
+                self.draw_galaxy_map(player, &systems, term, chunks[1]);
             });
     }
 }

@@ -4,11 +4,11 @@ use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
 use astronomicals::{
-    hash, planet::{Planet, PlanetBuilder}, system::SystemBuilder, Galaxy,
+    planet::{Planet, PlanetBuilder}, system::SystemBuilder, Galaxy,
 };
 use game_config::GameConfig;
 use resources::{fetch_resource, AstronomicalNamesResource};
-use utils::{HashablePoint, Point};
+use utils::Point;
 
 pub mod names;
 pub mod planets;
@@ -44,13 +44,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
 
     // Generate sectors
     let sector_gen = sectors::SectorGen::new();
-    let sectors = sector_gen.generate(
-        config,
-        locations
-            .iter()
-            .map(|point| HashablePoint::new(*point))
-            .collect::<Vec<_>>(),
-    );
+    let sectors = sector_gen.generate(config, locations);
     // Create System generator.
     let system_gen = systems::SystemGen::new();
 
@@ -78,12 +72,12 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         );
 
     // Sort to ensure that naming etc, will be deterministic.
-    builders.sort_by_key(|&(ref system_builder, _)| hash(&system_builder.location.unwrap()));
+    builders.sort_by_key(|&(ref system_builder, _)| system_builder.location.unwrap().hash());
 
     let systems = builders
         .into_iter()
         .map(|(mut system_builder, planet_builders)| {
-            let hash = hash(&system_builder.location.unwrap());
+            let hash = system_builder.location.unwrap().hash();
             name_gen.reseed(hash as u32);
 
             let (system_name, planet_names) = name_gen.generate(planet_builders.len());
@@ -108,7 +102,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         systems
             .iter()
             .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
-        ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_nanos() / 1_000_000))
+        ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis()))
     );
 
     Galaxy::new(sectors, systems)

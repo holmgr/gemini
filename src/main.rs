@@ -9,7 +9,6 @@ extern crate inflector;
 extern crate lazy_static;
 #[macro_use]
 extern crate log;
-extern crate nalgebra;
 extern crate notify;
 extern crate petgraph;
 extern crate rand;

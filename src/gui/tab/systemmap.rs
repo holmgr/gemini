@@ -1,7 +1,7 @@
 use super::*;
 use termion::event as keyevent;
 
-use astronomicals::system::System;
+use astronomicals::System;
 use player::PlayerState;
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
@@ -35,7 +35,7 @@ impl SystemMapTab {
         match player.state() {
             PlayerState::InSystem | PlayerState::Docked(_) => {
                 let galaxy = state.galaxy.lock().unwrap();
-                galaxy.system(player.location()).unwrap().satelites.len() - 1
+                galaxy.system(&player.location()).unwrap().satelites.len() - 1
             }
             _ => 0,
         }
@@ -43,13 +43,13 @@ impl SystemMapTab {
 
     /// Opens dialog for planet interaction.
     /// Actions available depends on the current player state.
-    fn open_dialog(&self) {
+    fn try_open_dialog(&self) -> Option<Box<MultiDialog>> {
         let player = self.state.player.lock().unwrap();
         let galaxy = self.state.galaxy.lock().unwrap();
-        let system = galaxy.system(player.location()).unwrap();
+        let system = galaxy.system(&player.location()).unwrap();
         let planet_id = self.selected_astronomical;
 
-        let dialog = match player.state() {
+        match player.state() {
             PlayerState::InSystem => {
                 // If in system we can dock.
                 let dock_fn = Box::new(move || Event::Dock(planet_id));
@@ -72,11 +72,6 @@ impl SystemMapTab {
                 ))
             }
             _ => None,
-        };
-
-        // Send of dialog to be opened.
-        if let Some(dialog) = dialog {
-            self.send_handle.send(Event::OpenDialog(dialog)).unwrap();
         }
     }
 }
@@ -100,12 +95,13 @@ impl Tab for SystemMapTab {
     }
 
     /// Handles the user provided event.
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, event: Event) -> Option<GUIEvent> {
         match event {
             Event::Input(input) => {
                 // Open planet interaction dialog if appropriate.
                 if let keyevent::Key::Char('\n') = input {
-                    self.open_dialog();
+                    return self.try_open_dialog()
+                        .map(|dialog| GUIEvent::OpenDialog(dialog));
                 }
                 self.selected_astronomical = match input {
                     // Move up.
@@ -116,13 +112,15 @@ impl Tab for SystemMapTab {
                     }
                     _ => self.selected_astronomical,
                 };
+                None
             }
             Event::Update => {
                 // Update maximum index if needed.
                 self.max_selected_astronomical = SystemMapTab::num_astronomicals(&self.state);
+                None
             }
-            _ => {}
-        };
+            _ => None,
+        }
     }
 
     /// Draws the tab in the given terminal and area.
@@ -135,7 +133,7 @@ impl Tab for SystemMapTab {
                 match player.state() {
                     PlayerState::InSystem => {
                         let galaxy = self.state.galaxy.lock().unwrap();
-                        let system = galaxy.system(player.location()).unwrap();
+                        let system = galaxy.system(&player.location()).unwrap();
                         let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,
@@ -143,13 +141,13 @@ impl Tab for SystemMapTab {
                             &populations,
                             &system,
                             term,
-                            &chunks[0],
+                            chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
+                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
                     }
                     PlayerState::Docked(id) => {
                         let galaxy = self.state.galaxy.lock().unwrap();
-                        let system = galaxy.system(player.location()).unwrap();
+                        let system = galaxy.system(&player.location()).unwrap();
                         let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,
@@ -157,9 +155,9 @@ impl Tab for SystemMapTab {
                             &populations,
                             &system,
                             term,
-                            &chunks[0],
+                            chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, &chunks[1]);
+                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
                     }
                     _ => {}
                 }
@@ -173,7 +171,7 @@ fn draw_system_table(
     populations: &[f64],
     system: &System,
     term: &mut Terminal<MouseBackend>,
-    area: &Rect,
+    area: Rect,
 ) {
     Table::new(
         // Prepending empty character to get alignment with list above.
@@ -217,7 +215,7 @@ fn draw_system_map(
     _selected: usize,
     _system: &System,
     _term: &mut Terminal<MouseBackend>,
-    _area: &Rect,
+    _area: Rect,
 ) {
     // TODO: Find decent presentation of a system, ascii art?
 }

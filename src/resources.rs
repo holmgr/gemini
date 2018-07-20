@@ -47,15 +47,10 @@ pub fn fetch_resource<T: Resource>() -> Option<T> {
             None
         }
     }
-    /*
-    RESOURCES
-        .get(T::KEY)
-        .and_then(|res: &&str| serde_json::from_str(res).unwrap_or(None))
-        */
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-/// Resource of all training names for name generation of celestial objects.
+/// Resource used in name generation of celestial objects.
 pub struct AstronomicalNamesResource {
     pub names: Vec<String>,
     pub scientific_names: Vec<String>,
@@ -69,7 +64,7 @@ impl Resource for AstronomicalNamesResource {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-/// Resource of all ships available in the game.
+/// Resource with all ships available in the game.
 pub struct ShipResource {
     pub ships: Vec<ShipCharacteristics>,
 }
@@ -89,21 +84,4 @@ pub struct AgentResource {
 
 impl Resource for AgentResource {
     const KEY: &'static str = "economic_agents";
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use setup_logger;
-
-    #[test]
-    fn test_fetch_resource() {
-        // Init logger
-        setup_logger();
-
-        let res = fetch_resource::<AstronomicalNamesResource>().unwrap();
-        assert!(res.names.len() > 0);
-        assert!(res.greek.len() > 0);
-        assert!(res.decorators.len() > 0);
-    }
 }

@@ -3,7 +3,7 @@ use statrs::distribution::{Distribution, Poisson};
 use std::f64;
 
 use astronomicals::{
-    hash, planet::PlanetBuilder, system::{Reputation, SystemBuilder, SystemSecurity, SystemState},
+    planet::PlanetBuilder, system::{Reputation, SystemBuilder, SystemSecurity, SystemState},
 };
 use entities::Faction;
 use generators::{planets::PlanetGen, stars::StarGen};
@@ -39,7 +39,7 @@ impl SystemGen {
         faction: Faction,
     ) -> (SystemBuilder, Vec<PlanetBuilder>) {
         // Calculate hash.
-        let hash = hash(&location);
+        let hash = location.hash();
         let seed: &[_] = &[hash as u32];
         let mut rng = ChaChaRng::from_seed(seed);
 

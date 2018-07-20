@@ -7,8 +7,6 @@ use std::{
 };
 use termion::{event, input::TermRead};
 
-use gui::dialog::Dialog;
-
 /// User and system events.
 #[derive(Clone)]
 pub enum Event {
@@ -20,8 +18,6 @@ pub enum Event {
     Undock(usize),
     AutosaveStarted,
     AutosaveCompleted,
-    OpenDialog(Arc<Mutex<Dialog>>),
-    CloseDialog,
 }
 
 lazy_static! {
