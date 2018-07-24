@@ -5,12 +5,16 @@ use tui::{backend::MouseBackend, layout::Rect, Terminal};
 use super::GUIEvent;
 use event::{Event, HANDLER};
 
+mod alert;
+mod confirm;
 mod multi;
 
+pub use self::alert::AlertDialog;
+pub use self::confirm::ConfirmDialog;
 pub use self::multi::MultiDialog;
 
 /// A dialog box.
-pub trait Dialog: Send {
+pub trait Dialog {
     /// Returns the title string describing the dialog box.
     fn title(&self) -> String;
 

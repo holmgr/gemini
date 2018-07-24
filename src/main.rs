@@ -35,12 +35,12 @@ mod gui;
 mod player;
 mod resources;
 mod ship;
+mod simulator;
 mod utils;
 
 use app_dirs::{get_data_root, AppDataType};
-use economy::Economy;
-use generators::generate_galaxy;
 use log::LevelFilter;
+use simulator::Simulator;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger() -> Result<(), fern::InitError> {
@@ -68,55 +68,13 @@ fn main() {
     // Init logger
     setup_logger().unwrap();
 
-    // Load GameConfig from disk
-    let config = game_config::GameConfig::retrieve();
-    info!("Initial config is: {:#?}", config);
-
-    // Inital game state
-    let game_state = match game::Game::load() {
-        Some(game_state) => game_state,
-        None => {
-            let game_state = game::Game::new();
-
-            // Generate galaxy
-            info!("Generating galaxy...");
-            let galaxy = generate_galaxy(&config);
-
-            info!("Setting up economy...");
-            *game_state.economy.lock().unwrap() = Economy::new(&galaxy);
-
-            *game_state.galaxy.lock().unwrap() = galaxy;
-
-            info!("Loading ships...");
-            game_state
-                .shipyard
-                .lock()
-                .unwrap()
-                .add_ships(resources::fetch_resource::<resources::ShipResource>().unwrap());
-
-            info!("Creating player...");
-            *game_state.player.lock().unwrap() = player::Player::new(
-                config.starting_credits,
-                game_state.shipyard.lock().unwrap().create_base_ship(),
-                // TODO: Replace starting point in config.
-                game_state
-                    .galaxy
-                    .lock()
-                    .unwrap()
-                    .nearest(&utils::Point::origin())
-                    .unwrap(),
-            );
-
-            game_state.update();
-            game_state.save_all();
-            game_state
-        }
-    };
-
     // Start event handler
     event::EventHandler::start();
 
+    // Start simulator
+    let simulator = Simulator::new();
+
     // Init and start gui
-    let mut gui = gui::Gui::new(&game_state);
+    let mut gui = gui::Gui::new(simulator);
     gui.start();
 }
