@@ -8,7 +8,7 @@ use std::{
 use termion::{event, input::TermRead};
 
 /// User and system events.
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Event {
     Input(event::Key),
     Update,
@@ -47,7 +47,7 @@ impl EventHandler {
         spawn(|| loop {
             let evt = HANDLER.receiver.lock().unwrap().recv().unwrap();
             for listener in HANDLER.listeners.lock().unwrap().iter() {
-                listener.send(evt.clone()).unwrap();
+                listener.send(evt).unwrap();
             }
         });
     }

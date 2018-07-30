@@ -4,8 +4,7 @@ use tui::{
     widgets::{Block, Borders, SelectableList, Widget},
 };
 
-type Action = Fn() -> Event + Send + Sync;
-use super::GUIEvent;
+type Action = Fn(&mut Sender<Event>) -> Option<GUIEvent>;
 
 /// Multiple choice dialog window.
 pub struct MultiDialog {
@@ -16,14 +15,14 @@ pub struct MultiDialog {
 }
 
 impl MultiDialog {
-    /// Create a new PlanetDialog.
-    pub fn new(title: String, actions: Vec<(&'static str, Box<Action>)>) -> Box<Self> {
-        Box::new(MultiDialog {
+    /// Create a new multiple choice dialog window.
+    pub fn new(title: String, actions: Vec<(&'static str, Box<Action>)>) -> Self {
+        MultiDialog {
             sender: HANDLER.send_handle(),
             title,
             selected: 0,
             actions,
-        })
+        }
     }
 }
 
@@ -47,8 +46,7 @@ impl Dialog for MultiDialog {
                 keyevent::Key::Char('\n') => {
                     // Call the appropriate action.
                     let (_, ref action_fn) = self.actions[self.selected];
-                    self.sender.send(action_fn()).unwrap();
-                    Some(GUIEvent::CloseDialog)
+                    action_fn(&mut self.sender)
                 }
                 keyevent::Key::Backspace => Some(GUIEvent::CloseDialog),
                 _ => None,

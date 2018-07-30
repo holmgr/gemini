@@ -52,24 +52,33 @@ impl SystemMapTab {
         match player.state() {
             PlayerState::InSystem => {
                 // If in system we can dock.
-                let dock_fn = Box::new(move || Event::Dock(planet_id));
+                let dock_fn = Box::new(move |sender: &mut Sender<Event>| {
+                    sender.send(Event::Dock(planet_id)).unwrap();
+                    Some(GUIEvent::CloseDialog)
+                });
 
-                Some(MultiDialog::new(
+                Some(Box::new(MultiDialog::new(
                     system.satelites[self.selected_astronomical].name.clone(),
                     vec![("Dock", dock_fn)],
-                ))
+                )))
             }
             PlayerState::Docked(id) if id == self.selected_astronomical => {
                 // If docked system we can refuel.
-                let refuel_fn = Box::new(|| Event::Refuel);
+                let refuel_fn = Box::new(|sender: &mut Sender<Event>| {
+                    sender.send(Event::Refuel).unwrap();
+                    Some(GUIEvent::CloseDialog)
+                });
 
                 // If docked system we can undock.
-                let undock_fn = Box::new(move || Event::Undock(planet_id));
+                let undock_fn = Box::new(move |sender: &mut Sender<Event>| {
+                    sender.send(Event::Undock(planet_id)).unwrap();
+                    Some(GUIEvent::CloseDialog)
+                });
 
-                Some(MultiDialog::new(
+                Some(Box::new(MultiDialog::new(
                     system.satelites[self.selected_astronomical].name.clone(),
                     vec![("Undock", undock_fn), ("Refuel", refuel_fn)],
-                ))
+                )))
             }
             _ => None,
         }
