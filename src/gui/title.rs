@@ -1,11 +1,11 @@
 use event::Event;
 use std::fmt;
-use std::sync::{mpsc::Sender, Arc};
+use std::sync::mpsc::Sender;
 use termion::event as keyevent;
 use tui::{backend::MouseBackend, layout::Rect, Terminal};
 use tui::{
     layout::{Direction, Group, Size}, style::{Alignment, Color, Style},
-    widgets::{Block, Borders, Paragraph, SelectableList, Widget},
+    widgets::{Block, Paragraph, SelectableList, Widget},
 };
 
 use super::GUIEvent;
