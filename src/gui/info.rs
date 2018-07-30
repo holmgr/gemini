@@ -4,7 +4,7 @@ use tui::{
     widgets::{Block, Paragraph, Widget},
 };
 
-const TITLE_ART: &'static str = include_str!("../../res/title.txt");
+const TITLE_ART: &str = include_str!("../../res/title.txt");
 
 /// Draws a information page with the given information.
 pub fn draw_info_page(term: &mut Terminal<MouseBackend>, area: Rect, information: &str) {
