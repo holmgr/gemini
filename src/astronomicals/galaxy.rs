@@ -1,7 +1,7 @@
 use super::*;
 
 use rayon::prelude::*;
-use spade::rtree::RTree;
+use spade::{rtree::RTree, BoundingRect};
 use std::{
     collections::{BinaryHeap, HashMap}, u32::MAX,
 };
@@ -68,6 +68,12 @@ impl Galaxy {
     pub fn reachable(&self, location: &Point, max_distance: f64) -> Vec<&Point> {
         let center = *location;
         self.map.lookup_in_circle(&center, &max_distance.powi(2))
+    }
+
+    /// Returns all system locations reachable from the given location within the given rectangle.
+    pub fn reachable_rect(&self, corner1: &Point, corner2: &Point) -> Vec<&Point> {
+        let rect = BoundingRect::from_corners(corner1, corner2);
+        self.map.lookup_in_rectangle(&rect)
     }
 
     /// Returns the nearest system location to the given point.
