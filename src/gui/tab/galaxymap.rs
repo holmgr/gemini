@@ -171,18 +171,11 @@ impl GalaxyMapTab {
         &self,
         player: &Player,
         systems: &[&System],
+        map_radius: f64,
         term: &mut Terminal<MouseBackend>,
         area: Rect,
     ) {
         let player_loc = player.location();
-        // Scale map to not overlap systems.
-        let map_scaling = 20. * self.map_scale;
-        let (max_x, max_y) = systems.iter().fold((0., 0.), |(x_max, y_max), s| {
-            (
-                (s.location.x / map_scaling).abs().max(x_max),
-                (s.location.y / map_scaling).abs().max(y_max),
-            )
-        });
         Canvas::default()
             .block(Block::default().title("Systems").borders(Borders::ALL))
             .paint(|ctx| {
@@ -223,8 +216,8 @@ impl GalaxyMapTab {
                     );
                 }
             })
-            .x_bounds([self.cursor.x - max_x, self.cursor.x + max_x])
-            .y_bounds([self.cursor.y - max_y, self.cursor.y + max_y])
+            .x_bounds([self.cursor.x - map_radius, self.cursor.x + map_radius])
+            .y_bounds([self.cursor.y - map_radius, self.cursor.y + map_radius])
             .render(term, &area);
     }
 }
@@ -354,9 +347,8 @@ impl Tab for GalaxyMapTab {
             .sizes(&[Size::Fixed(85), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 // TODO: Draw system detailed information.
-                let systems = galaxy.systems().collect::<Vec<_>>();
                 let player = &self.state.player.lock().unwrap();
-                //let player_loc = &self.state.player.lock().unwrap().location().clone();
+
                 // Draw sidebar.
                 Group::default()
                     .direction(Direction::Vertical)
@@ -370,7 +362,18 @@ impl Tab for GalaxyMapTab {
                         );
                         self.draw_search(term, sidebar_chunk[1]);
                     });
-                self.draw_galaxy_map(player, &systems, term, chunks[1]);
+
+                // Find all systems which should be drawn on screen
+                let map_radius = 20. / self.map_scale;
+                let upper_left = self.cursor + Point::new(-map_radius, -map_radius);
+                let lower_right = self.cursor + Point::new(map_radius, map_radius);
+
+                let systems = galaxy
+                    .reachable_rect(&upper_left, &lower_right)
+                    .into_iter()
+                    .map(|loc| galaxy.system(&loc).unwrap())
+                    .collect::<Vec<_>>();
+                self.draw_galaxy_map(player, &systems, map_radius, term, chunks[1]);
             });
     }
 }
