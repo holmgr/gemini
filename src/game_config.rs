@@ -1,7 +1,6 @@
 use app_dirs::{get_data_root, AppDataType};
-use notify::{watcher, RecursiveMode, Watcher};
 use std::{
-    fs::{create_dir_all, File}, io::{Read, Write}, sync::mpsc::{channel, RecvError}, time::Duration,
+    fs::{create_dir_all, File}, io::{Read, Write},
 };
 use toml::{de::from_str, ser::to_string_pretty};
 
@@ -68,35 +67,6 @@ impl GameConfig {
                 let encoded = to_string_pretty(self).unwrap();
                 config_file.write_all(&encoded.into_bytes()).ok()
             });
-    }
-
-    /// Setup a blocking Watcher listening for any file changes at the
-    /// preferences location of the GameConfig.
-    /// If some change is detected it will attempt to return the updated
-    /// GameConfig.
-    /// # Failures
-    /// Channel error when attempting to read while watching for changes.
-    pub fn await_update() -> Result<GameConfig, RecvError> {
-        // Create a channel to receive the events.
-        let (tx, rx) = channel();
-
-        // Create a watcher object, delivering debounced events.
-        // The notification back-end is selected based on the platform.
-        let mut watcher = watcher(tx, Duration::from_secs(30)).unwrap();
-
-        // Add a path to be watched. All files and directories at that path and
-        // below will be monitored for changes.
-        let config_path = get_data_root(AppDataType::UserConfig)
-            .unwrap()
-            .join(PREFS_PATH);
-        watcher
-            .watch(config_path, RecursiveMode::Recursive)
-            .unwrap();
-
-        match rx.recv() {
-            Ok(_) => Ok(GameConfig::retrieve()),
-            Err(e) => Err(e),
-        }
     }
 }
 
