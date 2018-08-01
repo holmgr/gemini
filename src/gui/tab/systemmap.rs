@@ -143,11 +143,9 @@ impl Tab for SystemMapTab {
                     PlayerState::InSystem => {
                         let galaxy = self.state.galaxy.lock().unwrap();
                         let system = galaxy.system(&player.location()).unwrap();
-                        let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,
                             None,
-                            &populations,
                             &system,
                             term,
                             chunks[0],
@@ -157,11 +155,9 @@ impl Tab for SystemMapTab {
                     PlayerState::Docked(id) => {
                         let galaxy = self.state.galaxy.lock().unwrap();
                         let system = galaxy.system(&player.location()).unwrap();
-                        let populations = self.state.economy.lock().unwrap().populations(&system);
                         draw_system_table(
                             self.selected_astronomical,
                             Some(id),
-                            &populations,
                             &system,
                             term,
                             chunks[0],
@@ -177,7 +173,6 @@ impl Tab for SystemMapTab {
 fn draw_system_table(
     selected: usize,
     docked_at: Option<usize>,
-    populations: &[f64],
     system: &System,
     term: &mut Terminal<MouseBackend>,
     area: Rect,
@@ -202,11 +197,17 @@ fn draw_system_table(
                     Some(id) if idx == id => &DOCKED_STYLE,
                     _ => &DEFAULT_STYLE,
                 };
+                // Calculate the cardinal populaton name.
+                let cardinal_population = match planet.population {
+                     99999...999_999_999 => format!("{:.1} M", planet.population as f64 / 1_000_000.),
+                     999_999_999...999_999_999_999 => format!("{:.1} B", planet.population as f64 / 1_000_000_000.),
+                     _ => format!("{:.1}", planet.population),
+                };
                 Row::StyledData(
                     vec![
                         format!(" {}", planet.name.clone()),
                         format!("{:.1}", planet.mass),
-                        format!("{:.1} M", populations[idx]),
+                        cardinal_population,
                         format!("{:.1}", planet.surface_temperature),
                         planet.planet_type.to_string(),
                         planet.economic_type.to_string(),
