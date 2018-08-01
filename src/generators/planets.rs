@@ -3,7 +3,7 @@ use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
 use astronomicals::{
-    planet::{PlanetBuilder, PlanetEconomy, PlanetType},
+    planet::{PlanetBuilder, PlanetEconomy, PlanetType, PlanetID},
     Star,
 };
 
@@ -77,6 +77,7 @@ impl PlanetGen {
     /// Generates a new PlanetBuilder from the _distribution_ using the provided random
     /// generator. Sets the fields which are independent on the context.
     pub fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {
+        let id = PlanetID::from(gen.gen::<u64>());
         let mass = self.mass_gen.sample(gen);
 
         // Magic constant, needed to scale back since scaling needed to fit gamma.
@@ -85,6 +86,7 @@ impl PlanetGen {
         // TODO: Make something a bit more accurate regarding planet type and gravity.
         Some(
             PlanetBuilder::default()
+                .id(id)
                 .mass(mass)
                 .orbit_distance(orbit_distance)
                 .gravity(mass)

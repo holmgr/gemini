@@ -1,9 +1,20 @@
 use std::fmt;
 
+/// Unique planet identifier.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct PlanetID(u64);
+
+impl From<u64> for PlanetID {
+    fn from(id: u64) -> PlanetID {
+        PlanetID { 0: id }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]
 /// Represents a visitable planet in game with some attributes.
 pub struct Planet {
+    pub id: PlanetID,
     pub name: String,
     pub mass: f64,
     pub gravity: f64,
