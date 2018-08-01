@@ -74,6 +74,12 @@ impl PlanetGen {
         }
     }
 
+    /// Calculates the initial planet population.
+    pub fn initial_population(_: f64, _: &PlanetType) -> u64 {
+        // TODO: Make a bit more intelligent :)
+        10_000_000
+    }
+
     /// Generates a new PlanetBuilder from the _distribution_ using the provided random
     /// generator. Sets the fields which are independent on the context.
     pub fn generate<R: Rng>(&self, gen: &mut R) -> Option<PlanetBuilder> {

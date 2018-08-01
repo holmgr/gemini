@@ -107,7 +107,6 @@ impl GalaxyMapTab {
             return;
         }
         let system = selected_system.unwrap();
-        let populations = self.state.economy.lock().unwrap().populations(&system);
 
         let system_data = vec![
             format!("Faction:       {}", system.faction.to_string()),
@@ -145,14 +144,20 @@ impl GalaxyMapTab {
                     system
                         .satelites
                         .iter()
-                        .enumerate()
-                        .map(|(index, ref planet)| {
+                        .map(|planet| {
                             let style: &Style = &DEFAULT_STYLE;
+
+                            // Calculate the cardinal populaton name.
+                            let cardinal_population = match planet.population {
+                                 99999...999_999_999 => format!("{:.1} M", planet.population as f64 / 1_000_000.),
+                                 999_999_999...999_999_999_999 => format!("{:.1} B", planet.population as f64 / 1_000_000_000.),
+                                 _ => format!("{:.1}", planet.population),
+                            };
                             Row::StyledData(
                                 vec![
                                     format!(" {}", planet.name.clone()),
                                     format!("{:.1}", planet.mass),
-                                    format!("{:.1} M", populations[index]),
+                                    cardinal_population,
                                     format!("{:.1}", planet.surface_temperature),
                                     planet.planet_type.to_string(),
                                     planet.economic_type.to_string(),
