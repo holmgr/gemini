@@ -1,0 +1,49 @@
+{
+    "schematics": [
+        {
+            "required_env": "Agriculture",
+            "import": [ ["Chemical", 1], ["Waste", 1] ],
+            "export": [ ["Food", 5] ]
+        },
+        {
+            "required_env": "Extraction",
+            "import": [ ["Technology", 1], ["Medicine", 2], ["Machinery", 1] ],
+            "export": [ ["Chemical", 5], ["Waste", 1] ]
+        },
+        {
+            "required_env": "Extraction",
+            "import": [ ["Chemical", 1], ["Technology", 2], ["Machinery", 2] ],
+            "export": [ ["Metal", 5] ]
+        },
+        {
+            "required_env": "Extraction",
+            "import": [ ["Chemical", 1], ["Machinery", 3] ],
+            "export": [ ["Mineral", 5] ]
+        },
+        {
+            "required_env": "HighTech",
+            "import": [ ["Metal", 2], ["Mineral", 1] ],
+            "export": [ ["Technology", 5] ]
+        },
+        {
+            "required_env": "HighTech",
+            "import": [ ["Chemical", 3], ["Mineral", 1] ],
+            "export": [ ["Medicine", 5] ]
+        },
+        {
+            "required_env": "HighTech",
+            "import": [ ["Metal", 5] ],
+            "export": [ ["Machinery", 5] ]
+        },
+        {
+            "required_env": "Industrial",
+            "import": [ ["Chemical", 2], ["Mineral", 1], ["Metal", 1] ],
+            "export": [ ["IndustrialMaterial", 5] ]
+        },
+        {
+            "required_env": "Military",
+            "import": [ ["Metal", 2], ["Technology", 1] ],
+            "export": [ ["Weapon", 5] ]
+        }
+    ]
+}

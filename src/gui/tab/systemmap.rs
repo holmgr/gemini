@@ -199,9 +199,13 @@ fn draw_system_table(
                 };
                 // Calculate the cardinal populaton name.
                 let cardinal_population = match planet.population {
-                     99999...999_999_999 => format!("{:.1} M", planet.population as f64 / 1_000_000.),
-                     999_999_999...999_999_999_999 => format!("{:.1} B", planet.population as f64 / 1_000_000_000.),
-                     _ => format!("{:.1}", planet.population),
+                    99999...999_999_999 => {
+                        format!("{:.1} M", planet.population as f64 / 1_000_000.)
+                    }
+                    999_999_999...999_999_999_999 => {
+                        format!("{:.1} B", planet.population as f64 / 1_000_000_000.)
+                    }
+                    _ => format!("{:.1}", planet.population),
                 };
                 Row::StyledData(
                     vec![

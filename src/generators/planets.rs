@@ -57,13 +57,11 @@ impl PlanetGen {
         // Earth-like planets at a higher rate.
         let random_val: f64 = rng.gen();
         match *kind {
-            PlanetType::Icy if random_val < 0.2 => PlanetEconomy::Extraction,
-            PlanetType::Icy if random_val < 0.4 => PlanetEconomy::Refinary,
+            PlanetType::Icy if random_val < 0.4 => PlanetEconomy::Extraction,
             PlanetType::Icy if random_val < 0.7 => PlanetEconomy::HighTech,
             PlanetType::Icy if random_val < 0.8 => PlanetEconomy::Military,
             PlanetType::Icy => PlanetEconomy::Industrial,
             PlanetType::Rocky if random_val < 0.2 => PlanetEconomy::Extraction,
-            PlanetType::Rocky if random_val < 0.4 => PlanetEconomy::Refinary,
             PlanetType::Rocky if random_val < 0.7 => PlanetEconomy::HighTech,
             PlanetType::Rocky if random_val < 0.9 => PlanetEconomy::Military,
             PlanetType::Rocky => PlanetEconomy::Industrial,

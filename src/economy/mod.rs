@@ -3,14 +3,21 @@ use std::{
     fmt, slice::Iter, sync::{Arc, Mutex},
 };
 
-use astronomicals::{system::System, Galaxy};
+use astronomicals::{planet::PlanetID, system::System, Galaxy};
 use game::Updatable;
 
 mod agent;
 mod market;
+pub mod schematic;
+mod sdm;
 
 use self::agent::Agent;
 use self::market::Market;
+pub use self::schematic::Schematic;
+use self::sdm::Sdm;
+use self::sdm::RBF;
+
+static GALAXY_WORKER_POPULATION: u64 = 1_000_000_000_000;
 
 /// Holds the economic state for the entire game.
 #[derive(Default, Serialize, Deserialize)]
@@ -24,14 +31,15 @@ impl Economy {
         // Create one market per sector.
         let mut markets = vec![];
         for sector in &galaxy.sectors {
-            let mut market = Market::new();
-            for system in sector
+            let systems = sector
                 .system_locations
                 .iter()
                 .map(|loc| galaxy.system(loc).unwrap())
-            {
-                market.add_system(system);
-            }
+                .collect::<Vec<_>>();
+            let mut market = Market::new(
+                GALAXY_WORKER_POPULATION / galaxy.sectors.len() as u64,
+                systems,
+            );
             markets.push(market);
         }
 
@@ -40,31 +48,7 @@ impl Economy {
 
     /// Returns the prices for the available commodities the the given system.
     pub fn commodity_prices(&self, system: &System) -> Vec<(Commodity, i64)> {
-        let mut prices = vec![];
-
-        let system_hash = system.location.hash();
-        for market in &self.markets {
-            if let Some(agent) = market.agent(system_hash as u32) {
-                prices = agent.lock().unwrap().prices();
-                break;
-            }
-        }
-
-        prices
-    }
-
-    pub fn populations(&self, system: &System) -> Vec<f64> {
-        let mut populations = vec![];
-
-        let system_hash = system.location.hash();
-        for market in &self.markets {
-            if let Some(agent) = market.agent(system_hash as u32) {
-                populations = agent.lock().unwrap().populations();
-                break;
-            }
-        }
-
-        populations
+        unimplemented!();
     }
 }
 
@@ -77,26 +61,8 @@ impl Updatable for Economy {
     }
 }
 
-/// An offer to buy some commodity.
-#[derive(Builder, Debug)]
-pub struct Bid {
-    pub agent: Arc<Mutex<Agent>>,
-    pub commodity: Commodity,
-    pub amount: u64,
-    pub unit_price: u64,
-}
-
-/// An offer to sell some commodity.
-#[derive(Builder, Debug)]
-pub struct Ask {
-    pub agent: Arc<Mutex<Agent>>,
-    pub commodity: Commodity,
-    pub amount: u64,
-    pub unit_price: u64,
-}
-
 /// A tradable and possibly producable commodity
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Commodity {
     Chemical,
     ConsumerItem,
@@ -137,6 +103,12 @@ impl Commodity {
             Commodity::Weapon,
         ];
         COMMODITIES.into_iter()
+    }
+
+    const BASE_COST: f64 = 100.;
+    pub fn cost(&self) -> f64 {
+        // TODO: Make specific based on the given commodity.
+        Commodity::BASE_COST
     }
 }
 

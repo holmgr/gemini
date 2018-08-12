@@ -10,6 +10,12 @@ impl From<u64> for PlanetID {
     }
 }
 
+impl From<PlanetID> for u64 {
+    fn from(id: PlanetID) -> u64 {
+        id.0
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Builder, Clone)]
 #[builder(field(public))]
 /// Represents a visitable planet in game with some attributes.
@@ -56,9 +62,8 @@ pub enum PlanetEconomy {
     Extraction,
     HighTech,
     Industrial,
-    None,
     Military,
-    Refinary,
+    None,
 }
 
 impl fmt::Display for PlanetEconomy {
@@ -71,9 +76,8 @@ impl fmt::Display for PlanetEconomy {
                 PlanetEconomy::Extraction => "Extraction",
                 PlanetEconomy::HighTech => "High Tech",
                 PlanetEconomy::Industrial => "Industrial",
-                PlanetEconomy::None => "None",
                 PlanetEconomy::Military => "Military",
-                PlanetEconomy::Refinary => "Refinary",
+                PlanetEconomy::None => "None",
             }
         )
     }

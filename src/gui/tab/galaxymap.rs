@@ -140,30 +140,31 @@ impl GalaxyMapTab {
                         "Type",
                         "Economy",
                     ].into_iter(),
-                    system
-                        .satelites
-                        .iter()
-                        .map(|planet| {
-                            let style: &Style = &DEFAULT_STYLE;
+                    system.satelites.iter().map(|planet| {
+                        let style: &Style = &DEFAULT_STYLE;
 
-                            // Calculate the cardinal populaton name.
-                            let cardinal_population = match planet.population {
-                                 99999...999_999_999 => format!("{:.1} M", planet.population as f64 / 1_000_000.),
-                                 999_999_999...999_999_999_999 => format!("{:.1} B", planet.population as f64 / 1_000_000_000.),
-                                 _ => format!("{:.1}", planet.population),
-                            };
-                            Row::StyledData(
-                                vec![
-                                    format!(" {}", planet.name.clone()),
-                                    format!("{:.1}", planet.mass),
-                                    cardinal_population,
-                                    format!("{:.1}", planet.surface_temperature),
-                                    planet.planet_type.to_string(),
-                                    planet.economic_type.to_string(),
-                                ].into_iter(),
-                                &style,
-                            )
-                        }),
+                        // Calculate the cardinal populaton name.
+                        let cardinal_population = match planet.population {
+                            99999...999_999_999 => {
+                                format!("{:.1} M", planet.population as f64 / 1_000_000.)
+                            }
+                            999_999_999...999_999_999_999 => {
+                                format!("{:.1} B", planet.population as f64 / 1_000_000_000.)
+                            }
+                            _ => format!("{:.1}", planet.population),
+                        };
+                        Row::StyledData(
+                            vec![
+                                format!(" {}", planet.name.clone()),
+                                format!("{:.1}", planet.mass),
+                                cardinal_population,
+                                format!("{:.1}", planet.surface_temperature),
+                                planet.planet_type.to_string(),
+                                planet.economic_type.to_string(),
+                            ].into_iter(),
+                            &style,
+                        )
+                    }),
                 ).block(Block::default().title("Planets"))
                     .header_style(Style::default().fg(Color::Yellow))
                     .widths(&[15, 5, 15, 15, 10, 15])
