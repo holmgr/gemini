@@ -2,7 +2,8 @@ use super::*;
 use entities::Faction;
 use game::Updatable;
 use std::{
-    fmt, hash::{Hash, Hasher},
+    fmt,
+    hash::{Hash, Hasher},
 };
 use utils::Point;
 

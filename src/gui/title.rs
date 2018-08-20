@@ -4,7 +4,8 @@ use std::sync::mpsc::Sender;
 use termion::event as keyevent;
 use tui::{backend::MouseBackend, layout::Rect, Terminal};
 use tui::{
-    layout::{Direction, Group, Size}, style::{Alignment, Color, Style},
+    layout::{Direction, Group, Size},
+    style::{Alignment, Color, Style},
     widgets::{Block, Paragraph, SelectableList, Widget},
 };
 
@@ -85,7 +86,8 @@ impl TitlePage {
     /// Draws the dialog in the given terminal and area.
     pub fn draw(&self, term: &mut Terminal<MouseBackend>, area: Rect) {
         let page_area = Rect::new((area.width - 80) / 2, (area.height - 40) / 2, 80, 40);
-        let labels: Vec<String> = self.actions
+        let labels: Vec<String> = self
+            .actions
             .iter()
             .map(|a| format!("{:^1$}", a.to_string(), 80))
             .collect::<Vec<_>>();

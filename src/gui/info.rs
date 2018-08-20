@@ -1,6 +1,7 @@
 use tui::{backend::MouseBackend, layout::Rect, Terminal};
 use tui::{
-    layout::{Direction, Group, Size}, style::{Alignment, Color, Style},
+    layout::{Direction, Group, Size},
+    style::{Alignment, Color, Style},
     widgets::{Block, Paragraph, Widget},
 };
 

@@ -1,6 +1,7 @@
 use super::*;
 use tui::{
-    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    layout::{Direction, Group, Rect, Size},
+    style::{Color, Style},
     widgets::{Block, Borders, SelectableList, Widget},
 };
 
@@ -58,7 +59,8 @@ impl Dialog for MultiDialog {
     /// Draws the dialog in the given terminal and area.
     fn draw(&self, term: &mut Terminal<MouseBackend>, area: &Rect) {
         let dialog_rect = Rect::new((area.width - 60) / 2, (area.height - 5) / 2, 60, 5);
-        let labels: Vec<String> = self.actions
+        let labels: Vec<String> = self
+            .actions
             .iter()
             .map(|&(s, _)| format!("{:^1$}", s, 60))
             .collect::<Vec<_>>();

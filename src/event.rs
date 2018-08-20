@@ -1,9 +1,12 @@
 use game::Game;
 use std::{
-    io, sync::{
-        mpsc::{channel, Receiver, Sender}, Arc, Mutex,
+    io,
+    sync::{
+        mpsc::{channel, Receiver, Sender},
+        Arc, Mutex,
     },
-    thread::{park_timeout, spawn}, time::{Duration, Instant},
+    thread::{park_timeout, spawn},
+    time::{Duration, Instant},
 };
 use termion::{event, input::TermRead};
 
