@@ -1,7 +1,10 @@
 use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use std::{
-    collections::HashMap, iter::FromIterator, sync::atomic::{AtomicBool, Ordering}, time::Instant,
+    collections::HashMap,
+    iter::FromIterator,
+    sync::atomic::{AtomicBool, Ordering},
+    time::Instant,
     usize::MAX,
 };
 

@@ -66,7 +66,8 @@ impl Tab for MarketTab {
                 let system = galaxy
                     .system(&self.state.player.lock().unwrap().location())
                     .unwrap();
-                self.max_selected = self.state
+                self.max_selected = self
+                    .state
                     .economy
                     .lock()
                     .unwrap()

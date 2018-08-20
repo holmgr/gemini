@@ -1,7 +1,9 @@
 use rand::{ChaChaRng, SeedableRng};
 use statrs::distribution::{Continuous, DiscreteUniform, Distribution, Gamma};
 use std::{
-    collections::HashMap, iter::{repeat, FromIterator}, ops::Range,
+    collections::HashMap,
+    iter::{repeat, FromIterator},
+    ops::Range,
 };
 
 use super::*;
@@ -135,7 +137,8 @@ impl Agent {
     /// Returns the balance of a given commodity compared to the ideal amount currently in inventory.
     fn balance(&self, commodity: &Commodity) -> i64 {
         let current_stock = self.inventory.get(commodity).unwrap_or(&0);
-        let ideal_stock = self.ideals
+        let ideal_stock = self
+            .ideals
             .iter()
             .enumerate()
             .fold(0, |acc, (index, ideal)| {
@@ -255,7 +258,8 @@ impl Agent {
 impl Updatable for Agent {
     /// Updates the inventory based on the consumption and production.
     fn update(&mut self) {
-        for (index, (commodity, amount)) in self.productions
+        for (index, (commodity, amount)) in self
+            .productions
             .clone()
             .iter()
             .enumerate()
@@ -267,7 +271,8 @@ impl Updatable for Agent {
                 (*amount as f64 * population * Agent::POPULATION_FACTOR) as i64,
             );
         }
-        for (index, (commodity, amount)) in self.ideals
+        for (index, (commodity, amount)) in self
+            .ideals
             .clone()
             .iter()
             .enumerate()
