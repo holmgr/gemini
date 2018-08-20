@@ -2,7 +2,8 @@ use super::*;
 use std::collections::HashMap;
 use termion::event as keyevent;
 use tui::{
-    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    layout::{Direction, Group, Rect, Size},
+    style::{Color, Style},
     widgets::{canvas::Canvas, Block, Borders, Paragraph, Row, SelectableList, Table, Widget},
 };
 

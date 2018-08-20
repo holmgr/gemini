@@ -3,7 +3,8 @@ use std::iter;
 use termion::event as keyevent;
 use textwrap::fill;
 use tui::{
-    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    layout::{Direction, Group, Rect, Size},
+    style::{Color, Style},
     widgets::{Block, Borders, Paragraph, SelectableList, Widget},
 };
 
@@ -71,7 +72,8 @@ impl Tab for ShipyardTab {
                 let player_system = galaxy
                     .system(&self.state.player.lock().unwrap().location())
                     .unwrap();
-                self.available_ships = self.state
+                self.available_ships = self
+                    .state
                     .shipyard
                     .lock()
                     .unwrap()
@@ -107,10 +109,12 @@ fn draw_ship_list(
 ) {
     SelectableList::default()
         .block(Block::default().title("Ships").borders(Borders::ALL))
-        .items(&ships
-            .iter()
-            .map(|ref ship| ship.name.clone())
-            .collect::<Vec<String>>())
+        .items(
+            &ships
+                .iter()
+                .map(|ref ship| ship.name.clone())
+                .collect::<Vec<String>>(),
+        )
         .select(selected)
         .style(Style::default())
         .highlight_style(Style::default().bg(Color::White))

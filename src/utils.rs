@@ -1,6 +1,9 @@
 use spade::{PointN, TwoDimensional};
 use std::{
-    cmp::{min, Ordering}, hash::{Hash, Hasher}, mem::swap, ops::{Add, AddAssign, MulAssign},
+    cmp::{min, Ordering},
+    hash::{Hash, Hasher},
+    mem::swap,
+    ops::{Add, AddAssign, MulAssign},
 };
 
 /// Generic Point type for geometry.

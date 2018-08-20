@@ -4,7 +4,9 @@ use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
 use astronomicals::{
-    planet::{Planet, PlanetBuilder}, system::SystemBuilder, Galaxy,
+    planet::{Planet, PlanetBuilder},
+    system::SystemBuilder,
+    Galaxy,
 };
 use game_config::GameConfig;
 use resources::{fetch_resource, AstronomicalNamesResource};

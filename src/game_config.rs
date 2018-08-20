@@ -1,6 +1,7 @@
 use app_dirs::{get_data_root, AppDataType};
 use std::{
-    fs::{create_dir_all, File}, io::{Read, Write},
+    fs::{create_dir_all, File},
+    io::{Read, Write},
 };
 use toml::{de::from_str, ser::to_string_pretty};
 

@@ -3,7 +3,8 @@ use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
 use astronomicals::{
-    planet::{PlanetBuilder, PlanetEconomy, PlanetType}, Star,
+    planet::{PlanetBuilder, PlanetEconomy, PlanetType},
+    Star,
 };
 
 /// Basic non deterministic name generator for generating new Planets which
