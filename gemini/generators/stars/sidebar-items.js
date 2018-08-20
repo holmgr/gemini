@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["StarGen","Basic non deterministic name generator for generating new Stars."]]});

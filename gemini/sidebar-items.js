@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["main",""],["setup_logger","Setup logging to file in user data dir."]],"mod":[["astronomicals",""],["economy",""],["entities",""],["event",""],["game",""],["game_config",""],["generators",""],["gui",""],["player",""],["resources",""],["ship",""],["simulator",""],["utils",""]]});

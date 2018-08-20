@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MultiDialog","Multiple choice dialog window."]],"type":[["Action",""]]});

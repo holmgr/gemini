@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["MIN_SNAP_DIST","The minimum distance within which the gui will snap to the closest system."]],"static":[["DEFAULT_STYLE",""],["FACTION_COLORS",""]],"struct":[["DEFAULT_STYLE","Styling for unselected item."],["FACTION_COLORS","Color mapping for each faction."],["GalaxyMapTab","Displays the galaxy map tab."]]});

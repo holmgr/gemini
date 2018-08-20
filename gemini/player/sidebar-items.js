@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_Player",""],["_IMPL_DESERIALIZE_FOR_PlayerState",""],["_IMPL_SERIALIZE_FOR_Player",""],["_IMPL_SERIALIZE_FOR_PlayerState",""]],"enum":[["PlayerState","Holds the current state of the player which affects the options of interaction."]],"struct":[["Player","Player type holding the player's current ship, credits etc."]]});

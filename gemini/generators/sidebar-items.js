@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["generate_galaxy","Generate a galaxy with systems etc, will use the provided config to guide the generation."]],"mod":[["names",""],["planets",""],["sectors",""],["stars",""],["systems",""]]});

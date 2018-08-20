@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["GUIEvent","Events used for communicating specifically between GUI components."]],"mod":[["dialog",""],["info",""],["tab",""],["title",""]],"struct":[["Gui","Handles the graphical user interface to the user."]]});

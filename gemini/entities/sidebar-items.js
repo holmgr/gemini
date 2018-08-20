@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_Faction",""],["_IMPL_SERIALIZE_FOR_Faction",""]],"enum":[["Faction","Represents a single Faction which is assigned on Sector level."]]});

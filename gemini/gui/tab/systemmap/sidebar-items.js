@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["draw_system_map",""],["draw_system_table",""]],"static":[["DEFAULT_STYLE",""],["DOCKED_STYLE",""],["SELECTED_STYLE",""]],"struct":[["DEFAULT_STYLE","Styling for unselected item."],["DOCKED_STYLE","Styling for selected item."],["SELECTED_STYLE","Styling for selected item."],["SystemMapTab","Displays the map tab."]]});

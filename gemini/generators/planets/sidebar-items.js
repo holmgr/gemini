@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PlanetGen","Basic non deterministic name generator for generating new Planets which are similar to the trained data provided."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NameGen","Name generator which generates based on names given in training data."]]});

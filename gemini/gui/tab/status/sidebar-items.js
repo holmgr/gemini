@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["draw_player_info","Draw detailed player information."]],"struct":[["StatusTab","Displays the status tab."]]});

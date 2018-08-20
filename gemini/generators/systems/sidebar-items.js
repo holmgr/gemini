@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SystemGen","Used for generating systems."]]});

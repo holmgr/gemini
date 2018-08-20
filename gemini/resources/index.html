@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `resources` mod in crate `gemini`."><meta name="keywords" content="rust, rustlang, rust-lang, resources"><title>gemini::resources - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module resources</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#structs">Structs</a></li><li><a href="#constants">Constants</a></li><li><a href="#statics">Statics</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'><a href='../index.html'>gemini</a></p><script>window.sidebarCurrent = {name: 'resources', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>gemini</a>::<wbr><a class="mod" href=''>resources</a></span><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/gemini/resources.rs.html#1-87' title='goto source code'>[src]</a></span></h1><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>use serde::de::<a class="trait" href="https://docs.rs/serde/1.0.71/serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>;</code></td></tr><tr><td><code>use <a class="mod" href="https://docs.rs/serde_json/1.0.26/serde_json/index.html" title="mod serde_json">serde_json</a>;</code></td></tr><tr><td><code>use std::collections::<a class="struct" href="https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html" title="struct std::collections::hash::map::HashMap">HashMap</a>;</code></td></tr><tr><td><code>use std::<a class="mod" href="https://doc.rust-lang.org/nightly/alloc/str/index.html" title="mod alloc::str">str</a>;</code></td></tr><tr><td><code>use astronomicals::planet::<a class="enum" href="../../gemini/astronomicals/planet/enum.PlanetEconomy.html" title="enum gemini::astronomicals::planet::PlanetEconomy">PlanetEconomy</a>;</code></td></tr><tr><td><code>use economy::<a class="enum" href="../../gemini/economy/enum.Commodity.html" title="enum gemini::economy::Commodity">Commodity</a>;</code></td></tr><tr><td><code>use entities::<a class="enum" href="../../gemini/entities/enum.Faction.html" title="enum gemini::entities::Faction">Faction</a>;</code></td></tr><tr><td><code>use ship::<a class="struct" href="../../gemini/ship/struct.ShipCharacteristics.html" title="struct gemini::ship::ShipCharacteristics">ShipCharacteristics</a>;</code></td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.AgentResource.html"
+                                  title='struct gemini::resources::AgentResource'>AgentResource</a></td>
+                           <td class='docblock-short'>
+                                <p>Resource containing all production/consumptions for factions and planets.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.AstronomicalNamesResource.html"
+                                  title='struct gemini::resources::AstronomicalNamesResource'>AstronomicalNamesResource</a></td>
+                           <td class='docblock-short'>
+                                <p>Resource used in name generation of celestial objects.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.RESOURCES.html"
+                                  title='struct gemini::resources::RESOURCES'>RESOURCES</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ShipResource.html"
+                                  title='struct gemini::resources::ShipResource'>ShipResource</a></td>
+                           <td class='docblock-short'>
+                                <p>Resource with all ships available in the game.</p>
+
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_DESERIALIZE_FOR_AgentResource.html"
+                                  title='constant gemini::resources::_IMPL_DESERIALIZE_FOR_AgentResource'>_IMPL_DESERIALIZE_FOR_AgentResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_DESERIALIZE_FOR_AstronomicalNamesResource.html"
+                                  title='constant gemini::resources::_IMPL_DESERIALIZE_FOR_AstronomicalNamesResource'>_IMPL_DESERIALIZE_FOR_AstronomicalNamesResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_DESERIALIZE_FOR_ShipResource.html"
+                                  title='constant gemini::resources::_IMPL_DESERIALIZE_FOR_ShipResource'>_IMPL_DESERIALIZE_FOR_ShipResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_SERIALIZE_FOR_AgentResource.html"
+                                  title='constant gemini::resources::_IMPL_SERIALIZE_FOR_AgentResource'>_IMPL_SERIALIZE_FOR_AgentResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_SERIALIZE_FOR_AstronomicalNamesResource.html"
+                                  title='constant gemini::resources::_IMPL_SERIALIZE_FOR_AstronomicalNamesResource'>_IMPL_SERIALIZE_FOR_AstronomicalNamesResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="constant" href="constant._IMPL_SERIALIZE_FOR_ShipResource.html"
+                                  title='constant gemini::resources::_IMPL_SERIALIZE_FOR_ShipResource'>_IMPL_SERIALIZE_FOR_ShipResource</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr></table><h2 id='statics' class='section-header'><a href="#statics">Statics</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="static" href="static.RESOURCES.html"
+                                  title='static gemini::resources::RESOURCES'>RESOURCES</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Resource.html"
+                                  title='trait gemini::resources::Resource'>Resource</a></td>
+                           <td class='docblock-short'>
+                                <p>Generic Resource trait to be implemented by all resource types which should
+be loaded at compile time.
+KEY must be unique to the specific resource (e.g the filename of the
+resource).</p>
+
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.fetch_resource.html"
+                                  title='fn gemini::resources::fetch_resource'>fetch_resource</a></td>
+                           <td class='docblock-short'>
+                                <p>Attempts to returns the resource with the given type, will return None
+if the type has no resource or if the deserialization fails.</p>
+
+                           </td>
+                       </tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "gemini";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

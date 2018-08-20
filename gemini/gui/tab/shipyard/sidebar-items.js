@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["draw_ship_info","Draw detailed ship information for a given ship."],["draw_ship_list","Draw a list of the given ships with their names."]],"struct":[["ShipyardTab","Displays the shipyard tab."]]});

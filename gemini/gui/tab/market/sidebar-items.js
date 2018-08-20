@@ -1,0 +1,1 @@
+initSidebarItems({"static":[["DEFAULT_STYLE",""],["SELECTED_STYLE",""]],"struct":[["DEFAULT_STYLE","Styling for unselected item."],["MarketTab","Displays the market tab."],["SELECTED_STYLE","Styling for selected item."]]});

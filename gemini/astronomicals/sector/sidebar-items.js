@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_Sector",""],["_IMPL_SERIALIZE_FOR_Sector",""]],"struct":[["Sector","Represents a group of systems in close proximity within the same faction. Markets in the economy is handled on this level of scale."]]});

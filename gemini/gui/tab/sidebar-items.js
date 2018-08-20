@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create_tabs","Returns a vector of tabs to be used."]],"mod":[["galaxymap",""],["market",""],["mission",""],["shipyard",""],["status",""],["systemmap",""]],"trait":[["Tab","Interface for dealing with visual tabs in the GUI."]]});

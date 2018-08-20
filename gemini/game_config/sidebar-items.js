@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["PREFS_PATH",""],["_IMPL_DESERIALIZE_FOR_GameConfig",""],["_IMPL_SERIALIZE_FOR_GameConfig",""]],"struct":[["GameConfig","Contains high level configuration parameters for the game such as constants for generation."]]});

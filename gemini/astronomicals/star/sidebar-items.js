@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_Star",""],["_IMPL_DESERIALIZE_FOR_StarType",""],["_IMPL_SERIALIZE_FOR_Star",""],["_IMPL_SERIALIZE_FOR_StarType",""]],"enum":[["StarType","Describes the type of star: Single or Binary."]],"struct":[["Star","Represents a Star in a system."],["StarBuilder","Builder for `Star`."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_Galaxy",""],["_IMPL_SERIALIZE_FOR_Galaxy",""]],"struct":[["Galaxy","A galaxy of systems."]]});

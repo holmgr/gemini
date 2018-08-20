@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["TITLE_ART",""]],"fn":[["draw_info_page","Draws a information page with the given information."]]});

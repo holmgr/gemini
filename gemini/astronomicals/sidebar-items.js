@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["galaxy",""],["planet",""],["sector",""],["star",""],["system",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SectorGen","Used for generating sectors."]]});

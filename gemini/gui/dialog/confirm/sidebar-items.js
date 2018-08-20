@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ConfirmDialog","Confirmation dialog window."]],"type":[["Action",""]]});
