@@ -1,8 +1,11 @@
 use std::{io, sync::Arc};
 use termion::event as keyevent;
 use tui::{
-    backend::MouseBackend, layout::{Direction, Group, Rect, Size}, style::{Color, Style},
-    widgets::{Block, Borders, Tabs, Widget}, Terminal,
+    backend::MouseBackend,
+    layout::{Direction, Group, Rect, Size},
+    style::{Color, Style},
+    widgets::{Block, Borders, Tabs, Widget},
+    Terminal,
 };
 
 use event::{add_keyboard_handler, add_player_handler, add_update_handler, Event, HANDLER};

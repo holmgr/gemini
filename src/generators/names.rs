@@ -95,7 +95,8 @@ impl NameGen {
         match subname_type.sample(&mut self.rng) as usize {
             0 => {
                 for _ in 1..subcount {
-                    let sub_name = self.generate_name()
+                    let sub_name = self
+                        .generate_name()
                         .unwrap_or_else(|| String::from("Unnamed"));
                     sub_names.push(sub_name);
                 }

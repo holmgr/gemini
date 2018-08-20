@@ -1,6 +1,7 @@
 use super::*;
 use tui::{
-    layout::{Direction, Group, Rect, Size}, style::{Color, Style},
+    layout::{Direction, Group, Rect, Size},
+    style::{Color, Style},
     widgets::{Block, Borders, Paragraph, SelectableList, Widget},
 };
 

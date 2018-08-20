@@ -3,7 +3,8 @@ use statrs::distribution::{Distribution, Poisson};
 use std::f64;
 
 use astronomicals::{
-    planet::PlanetBuilder, system::{Reputation, SystemBuilder, SystemSecurity, SystemState},
+    planet::PlanetBuilder,
+    system::{Reputation, SystemBuilder, SystemSecurity, SystemState},
 };
 use entities::Faction;
 use generators::{planets::PlanetGen, stars::StarGen};

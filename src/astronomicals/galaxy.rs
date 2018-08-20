@@ -3,7 +3,8 @@ use super::*;
 use rayon::prelude::*;
 use spade::{rtree::RTree, BoundingRect};
 use std::{
-    collections::{BinaryHeap, HashMap}, u32::MAX,
+    collections::{BinaryHeap, HashMap},
+    u32::MAX,
 };
 
 /// A galaxy of systems.

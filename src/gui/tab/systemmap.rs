@@ -109,7 +109,8 @@ impl Tab for SystemMapTab {
             Event::Input(input) => {
                 // Open planet interaction dialog if appropriate.
                 if let keyevent::Key::Char('\n') = input {
-                    return self.try_open_dialog()
+                    return self
+                        .try_open_dialog()
                         .map(|dialog| GUIEvent::OpenDialog(dialog));
                 }
                 self.selected_astronomical = match input {
