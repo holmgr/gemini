@@ -2,9 +2,7 @@ use serde::de::Deserialize;
 use serde_json;
 use std::{collections::HashMap, str};
 
-use astronomicals::planet::PlanetEconomy;
-use economy::Commodity;
-use entities::Faction;
+use economy::Schematic;
 use ship::ShipCharacteristics;
 
 /// Generic Resource trait to be implemented by all resource types which should
@@ -29,8 +27,8 @@ lazy_static! {
             include_str!("../res/ships.json"),
         );
         res.insert(
-            AgentResource::KEY,
-            include_str!("../res/economic_agents.json"),
+            SchematicResource::KEY,
+            include_str!("../res/schematics.json"),
         );
         res
     };
@@ -74,14 +72,11 @@ impl Resource for ShipResource {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-/// Resource containing all production/consumptions for factions and planets.
-pub struct AgentResource {
-    pub faction_ideals: HashMap<Faction, HashMap<Commodity, u64>>,
-    pub faction_production: HashMap<Faction, HashMap<Commodity, u64>>,
-    pub planet_ideals: HashMap<PlanetEconomy, HashMap<Commodity, u64>>,
-    pub planet_production: HashMap<PlanetEconomy, HashMap<Commodity, u64>>,
+/// Resource containing all schematics.
+pub struct SchematicResource {
+    pub schematics: Vec<Schematic>,
 }
 
-impl Resource for AgentResource {
-    const KEY: &'static str = "economic_agents";
+impl Resource for SchematicResource {
+    const KEY: &'static str = "schematics";
 }
