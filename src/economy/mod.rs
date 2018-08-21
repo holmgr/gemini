@@ -2,7 +2,6 @@ use rayon::prelude::*;
 use std::{
     fmt,
     slice::Iter,
-    sync::{Arc, Mutex},
 };
 
 use astronomicals::{system::System, Galaxy};
