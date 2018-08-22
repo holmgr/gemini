@@ -1,17 +1,16 @@
 use rayon::prelude::*;
-use std::{
-    fmt,
-    slice::Iter,
-};
+use std::{fmt, slice::Iter};
 
 use astronomicals::{system::System, Galaxy};
 use game::Updatable;
 
 mod agent;
 mod market;
+pub mod schematic;
 
 use self::agent::Agent;
 use self::market::Market;
+pub use self::schematic::Schematic;
 
 /// Holds the economic state for the entire game.
 #[derive(Default, Serialize, Deserialize)]
