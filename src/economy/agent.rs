@@ -6,7 +6,7 @@ pub struct Agent {}
 
 impl Agent {
     /// Create a new economic agent for the given system.
-    pub fn new(system: &System) -> Self {
+    pub fn new(system: &System, population: u64) -> Self {
         Agent {}
     }
 }

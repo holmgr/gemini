@@ -12,6 +12,9 @@ use self::agent::Agent;
 use self::market::Market;
 pub use self::schematic::Schematic;
 
+/// The total amount of workers in the galaxy at any point in time.
+static GALAXY_WORKER_POPULATION: u64 = 1_000_000_000_000;
+
 /// Holds the economic state for the entire game.
 #[derive(Default, Serialize, Deserialize)]
 pub struct Economy {
@@ -24,14 +27,17 @@ impl Economy {
         // Create one market per sector.
         let mut markets = vec![];
         for sector in &galaxy.sectors {
-            let mut market = Market::new();
-            for system in sector
+            let systems = sector
                 .system_locations
                 .iter()
                 .map(|loc| galaxy.system(loc).unwrap())
-            {
-                market.add_system(system);
-            }
+                .collect::<Vec<_>>();
+
+            // Assign an equal amount of workers to each sector.
+            let market = Market::new(
+                systems,
+                GALAXY_WORKER_POPULATION / galaxy.sectors.len() as u64,
+            );
             markets.push(market);
         }
 

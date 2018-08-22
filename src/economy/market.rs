@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::FromIterator};
 
 use super::*;
 use astronomicals::System;
@@ -11,21 +11,21 @@ pub struct Market {
 }
 
 impl Market {
-    /// Creates a new empty market.
-    pub fn new() -> Self {
-        Market {
-            agents: HashMap::new(),
-        }
+    /// Creates a market with the given systems and population.
+    pub fn new(systems: Vec<&System>, population: u64) -> Self {
+        let system_count = systems.len() as u64;
+        let agents = HashMap::from_iter(systems.into_iter().map(|system| {
+            (
+                system.location,
+                Agent::new(system, population / system_count),
+            )
+        }));
+        Market { agents }
     }
 
     /// Returns the agent, if any, which is associated with the given system.
     pub fn agent(&self, location: &Point) -> Option<&Agent> {
         self.agents.get(location)
-    }
-
-    /// Adds the given system to this market.
-    pub fn add_system(&mut self, system: &System) {
-        self.agents.insert(system.location, Agent::new(&system));
     }
 }
 
