@@ -16,7 +16,7 @@ pub struct Schematic {
 impl Schematic {
     /// Loads a random sample of schematics which are compatable with the planet
     /// economy type.
-    pub fn new<R: Rng>(rng: &mut R, planet: &Planet) -> Vec<Self> {
+    pub fn get_all<R: Rng>(rng: &mut R, planet: &Planet) -> Vec<Self> {
         let mut schematics = fetch_resource::<SchematicResource>().unwrap().schematics;
         rng.shuffle(&mut schematics);
         schematics
