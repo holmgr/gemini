@@ -8,9 +8,9 @@ use resources::{fetch_resource, SchematicResource};
 /// Requires that the given planet has the a specific economy.
 #[derive(Serialize, Deserialize, Debug, Clone, Hash)]
 pub struct Schematic {
-    required_env: PlanetEconomy,
-    import: Vec<(Commodity, u64)>,
-    export: Vec<(Commodity, u64)>,
+    pub required_env: PlanetEconomy,
+    pub import: Vec<(Commodity, u64)>,
+    pub export: Vec<(Commodity, u64)>,
 }
 
 impl Schematic {
