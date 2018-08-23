@@ -62,4 +62,59 @@ impl Agent {
         }));
         Agent { industries }
     }
+
+    /// Get the amount exported from this agent if any.
+    pub fn get_export(&self, commodity: Commodity) -> u64 {
+        self.industries
+            .values()
+            .flat_map(|local_industries| local_industries.iter())
+            .filter_map(|industry| match industry.kind {
+                IndustryKind::Production(ref schematic) => {
+                    if let Some((_, base_export)) =
+                        schematic.export.iter().find(|&&(c, _)| c == commodity)
+                    {
+                        Some(base_export * industry.workers)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .sum()
+    }
+
+    /// Get the amount this agent wants to import if any.
+    pub fn get_import(&self, commodity: Commodity) -> u64 {
+        self.industries
+            .values()
+            .flat_map(|local_industries| local_industries.iter())
+            .filter_map(|industry| match industry.kind {
+                IndustryKind::Production(ref schematic) => {
+                    if let Some((_, base_export)) =
+                        schematic.import.iter().find(|&&(c, _)| c == commodity)
+                    {
+                        Some(base_export * industry.workers)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .sum()
+    }
+
+    /// Get the maximum amount of trade that this agent can handle.
+    pub fn get_trade(&self) -> u64 {
+        self.industries
+            .values()
+            .flat_map(|local_industries| local_industries.iter())
+            .filter_map(|industry| {
+                if let IndustryKind::Trade = industry.kind {
+                    Some(industry.workers)
+                } else {
+                    None
+                }
+            })
+            .sum()
+    }
 }
