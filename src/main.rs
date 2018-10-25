@@ -29,7 +29,6 @@ mod event;
 mod game;
 mod game_config;
 mod generators;
-mod gui;
 mod player;
 mod resources;
 mod ship;
@@ -71,8 +70,4 @@ fn main() {
 
     // Start simulator
     let simulator = Simulator::new();
-
-    // Init and start gui
-    let mut gui = gui::Gui::new(simulator);
-    gui.start();
 }

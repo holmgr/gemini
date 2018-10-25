@@ -14,12 +14,9 @@ log = "0.4"
 statrs = "0.9.0"
 lazy_static = "1.0"
 derive_builder = "0.5.1"
-tui = "0.2.3"
-termion = "1.5.1"
 Inflector = "^0.11"
 toml = "0.4.5"
 spade = { version = "1.4.0", features = ["serde_serialize"] }
-textwrap = { version = "0.9" }
 bincode = "1.0.0"
 chrono = { version = "0.4", features = ["serde"] }
 fern = "0.5"

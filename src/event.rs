@@ -8,12 +8,10 @@ use std::{
     thread::{park_timeout, spawn},
     time::{Duration, Instant},
 };
-use termion::{event, input::TermRead};
 
 /// User and system events.
 #[derive(Clone, Copy)]
 pub enum Event {
-    Input(event::Key),
     Update,
     Travel,
     Refuel,
@@ -66,21 +64,6 @@ impl EventHandler {
         self.listeners.lock().unwrap().push(tx);
         rx
     }
-}
-
-/// Start listener for keyboard events and forward to event handler.
-pub fn add_keyboard_handler() {
-    let send_handle = HANDLER.send_handle();
-    spawn(move || {
-        let stdin = io::stdin();
-        for c in stdin.keys() {
-            let evt = c.unwrap();
-            send_handle.send(Event::Input(evt)).unwrap();
-            if evt == event::Key::Char('q') {
-                break;
-            }
-        }
-    });
 }
 
 /// Start listener for events that should update player state.
