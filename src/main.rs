@@ -22,7 +22,6 @@ extern crate toml;
 mod astronomicals;
 mod economy;
 mod entities;
-mod event;
 mod game;
 mod game_config;
 mod generators;
