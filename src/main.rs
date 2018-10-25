@@ -19,21 +19,14 @@ extern crate spade;
 extern crate statrs;
 extern crate toml;
 
-mod astronomicals;
-mod economy;
-mod entities;
-mod game;
-mod game_config;
-mod generators;
+mod core;
 mod player;
-mod resources;
-mod ship;
-mod simulator;
+mod simulate;
 mod utils;
 
 use app_dirs::{get_data_root, AppDataType};
 use log::LevelFilter;
-use simulator::Simulator;
+use simulate::Simulator;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger() -> Result<(), fern::InitError> {
@@ -59,9 +52,6 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
 fn main() {
     // Init logger
     setup_logger().unwrap();
-
-    // Start event handler
-    event::EventHandler::start();
 
     // Start simulator
     let simulator = Simulator::new();

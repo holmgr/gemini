@@ -2,10 +2,10 @@ use serde::de::Deserialize;
 use serde_json;
 use std::{collections::HashMap, str};
 
-use astronomicals::planet::PlanetEconomy;
-use economy::Commodity;
-use entities::Faction;
-use ship::ShipCharacteristics;
+use core::astronomicals::planet::PlanetEconomy;
+use core::economy::Commodity;
+use core::faction::Faction;
+use core::ship::ShipCharacteristics;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.
@@ -22,15 +22,15 @@ lazy_static! {
         let mut res = HashMap::new();
         res.insert(
             AstronomicalNamesResource::KEY,
-            include_str!("../res/astronomical_names.json"),
+            include_str!("../../res/astronomical_names.json"),
         );
         res.insert(
             ShipResource::KEY,
-            include_str!("../res/ships.json"),
+            include_str!("../../res/ships.json"),
         );
         res.insert(
             AgentResource::KEY,
-            include_str!("../res/economic_agents.json"),
+            include_str!("../../res/economic_agents.json"),
         );
         res
     };

@@ -1,11 +1,15 @@
 use std::sync::Arc;
 
-use economy::Economy;
-use game::Game;
-use game_config::GameConfig;
-use generators::generate_galaxy;
+mod config;
+mod generators;
+pub mod resources;
+
+use self::config::GameConfig;
+use self::generators::generate_galaxy;
+use self::resources::{fetch_resource, ShipResource};
+use core::economy::Economy;
+use core::game::Game;
 use player::Player;
-use resources::{fetch_resource, ShipResource};
 use utils::Point;
 
 pub struct Simulator {

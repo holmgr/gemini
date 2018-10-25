@@ -3,13 +3,9 @@ use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
-use astronomicals::{
-    planet::{Planet, PlanetBuilder},
-    system::SystemBuilder,
-    Galaxy,
-};
-use game_config::GameConfig;
-use resources::{fetch_resource, AstronomicalNamesResource};
+use super::config::GameConfig;
+use super::resources::{fetch_resource, AstronomicalNamesResource};
+use core::astronomicals::{planet::*, sector::*, star::*, system::*, Galaxy};
 use utils::Point;
 
 pub mod names;

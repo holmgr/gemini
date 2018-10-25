@@ -1,5 +1,5 @@
 use super::*;
-use entities::Faction;
+use core::faction::Faction;
 
 /// Represents a group of systems in close proximity within the same faction.
 /// Markets in the economy is handled on this level of scale.

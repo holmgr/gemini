@@ -1,6 +1,6 @@
 use super::*;
-use entities::Faction;
-use game::Updatable;
+use core::faction::Faction;
+use core::game::Updatable;
 use std::{
     fmt,
     hash::{Hash, Hasher},

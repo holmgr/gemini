@@ -1,4 +1,4 @@
-use game::Updatable;
+use super::game::Updatable;
 use utils::{edit_distance, OrdPoint, Point};
 
 pub mod galaxy;

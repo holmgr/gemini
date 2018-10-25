@@ -1,6 +1,6 @@
 use chrono::{DateTime, Duration, Local, TimeZone, Utc};
 
-use ship::Ship;
+use core::ship::Ship;
 use utils::Point;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

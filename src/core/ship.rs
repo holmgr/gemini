@@ -1,6 +1,6 @@
-use astronomicals::System;
-use entities::Faction;
-use resources::ShipResource;
+use core::astronomicals::System;
+use core::faction::Faction;
+use simulate::resources::ShipResource;
 use std::fmt;
 
 /// Ship currently owned by the player.

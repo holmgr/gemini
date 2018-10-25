@@ -7,8 +7,8 @@ use std::{
 };
 
 use super::*;
-use astronomicals::{planet::PlanetType, system::System};
-use resources::{fetch_resource, AgentResource};
+use core::astronomicals::{planet::PlanetType, system::System};
+use simulate::resources::{fetch_resource, AgentResource};
 
 /// Economic agent, able to take part in transactions.
 #[derive(Serialize, Deserialize, Debug)]

@@ -1,6 +1,7 @@
-use astronomicals::star::{Star, StarType};
 use rand;
 use statrs::distribution::{Distribution, Gamma};
+
+use super::*;
 
 /// Basic non deterministic name generator for generating new Stars.
 pub struct StarGen {

@@ -8,11 +8,11 @@ use std::{
     time::Instant,
 };
 
-use astronomicals::Galaxy;
-use economy::Economy;
+use core::astronomicals::Galaxy;
+use core::economy::Economy;
+use core::ship::Shipyard;
 use player::Player;
-use resources::{fetch_resource, ShipResource};
-use ship::Shipyard;
+use simulate::resources::{fetch_resource, ShipResource};
 
 const SAVE_PATH: &str = "gemini/saves/";
 
