@@ -107,8 +107,7 @@ impl SectorGen {
                     system_locations,
                     faction: Faction::random_faction(&mut faction_rng),
                 }
-            })
-            .collect::<Vec<Sector>>();
+            }).collect::<Vec<Sector>>();
 
         info!(
             "Mapped galaxy into {} sectors of {} systems, avg size: {}, 

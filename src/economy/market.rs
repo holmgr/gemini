@@ -167,8 +167,7 @@ impl Updatable for Market {
                     *demand.get(&commodity).unwrap_or(&0) as u64,
                     *supply.get(&commodity).unwrap_or(&0) as u64,
                 )
-            })
-            .collect::<Vec<(Commodity, u64, u64)>>();
+            }).collect::<Vec<(Commodity, u64, u64)>>();
 
         for agent in &self.agents {
             agent.lock().unwrap().update_population(&demand_supply);

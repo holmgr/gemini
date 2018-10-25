@@ -133,8 +133,7 @@ impl Shipyard {
                     return *faction == system.faction;
                 }
                 true
-            })
-            .collect::<Vec<_>>()
+            }).collect::<Vec<_>>()
     }
 
     /// Create a new starting ship.

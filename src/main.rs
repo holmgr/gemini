@@ -17,10 +17,7 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate spade;
 extern crate statrs;
-extern crate termion;
-extern crate textwrap;
 extern crate toml;
-extern crate tui;
 
 mod astronomicals;
 mod economy;
@@ -53,8 +50,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 record.level(),
                 message
             ))
-        })
-        .level(log::LevelFilter::Off)
+        }).level(log::LevelFilter::Off)
         .level_for("gemini", LevelFilter::Trace)
         .chain(fern::log_file(output_path)?)
         .apply()?;

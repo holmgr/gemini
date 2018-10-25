@@ -66,8 +66,7 @@ impl SystemGen {
                     .planet_type(planet_type)
                     .economic_type(economic_type);
                 builder
-            })
-            .collect();
+            }).collect();
 
         // Set the security level based on faction and a probability.
         let random_val: f64 = rng.gen();

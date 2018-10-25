@@ -64,8 +64,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                 }
                 systems
             },
-        )
-        .reduce(
+        ).reduce(
             Vec::<(SystemBuilder, Vec<PlanetBuilder>)>::new,
             |mut systems, subsystems| {
                 systems.extend(subsystems);
@@ -95,8 +94,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
                 .satelites(planets)
                 .build()
                 .unwrap()
-        })
-        .collect::<Vec<_>>();
+        }).collect::<Vec<_>>();
 
     info!(
         "Generated new galaxy containing: {} systems and {} planets taking {} ms",

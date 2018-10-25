@@ -33,15 +33,14 @@ impl GameConfig {
                 .join("general.toml")
                 .as_path(),
         ).ok()
-            .and_then(|mut config_file| {
-                let mut config_str = String::new();
-                match config_file.read_to_string(&mut config_str) {
-                    Ok(_) => Some(config_str),
-                    Err(_) => None,
-                }
-            })
-            .and_then(|config_str| from_str(&config_str).ok())
-            .or_else(|| None);
+        .and_then(|mut config_file| {
+            let mut config_str = String::new();
+            match config_file.read_to_string(&mut config_str) {
+                Ok(_) => Some(config_str),
+                Err(_) => None,
+            }
+        }).and_then(|config_str| from_str(&config_str).ok())
+        .or_else(|| None);
 
         match config {
             Some(config) => config,

@@ -47,10 +47,9 @@ impl Player {
                                     as f64
                                     * Player::TRAVEL_SPEED =>
                         {
-                            let new_start = *start
-                                + Duration::milliseconds(
-                                    (self.location.distance(&next) / Player::TRAVEL_SPEED) as i64,
-                                );
+                            let new_start = *start + Duration::milliseconds(
+                                (self.location.distance(&next) / Player::TRAVEL_SPEED) as i64,
+                            );
 
                             // Update position and reduce fuel.
                             self.location = *next;
