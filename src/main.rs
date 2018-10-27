@@ -30,6 +30,8 @@ use app_dirs::{get_data_root, AppDataType};
 use clap::{App, Arg, SubCommand};
 use config::Config;
 use log::LevelFilter;
+use simulate::Simulator;
+use std::fs::create_dir_all;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger(to_stdout: bool) -> Result<(), fern::InitError> {
@@ -89,6 +91,7 @@ fn main() {
     match matches.subcommand() {
         ("simulator", Some(_)) => {
             debug!("Starting simulator");
+            let simulator = Simulator::new(config.simulation);
         }
         ("new", Some(_)) => {
             // Safe since its required.

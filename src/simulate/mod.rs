@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
-mod config;
 mod generators;
 pub mod resources;
 
-use self::config::GameConfig;
 use self::generators::generate_galaxy;
 use self::resources::{fetch_resource, ShipResource};
+use config::Simulation as SimulationConfig;
 use core::economy::Economy;
 use core::game::Game;
 use player::Player;
@@ -14,17 +13,14 @@ use utils::Point;
 
 pub struct Simulator {
     game_state: Option<Arc<Game>>,
-    game_config: GameConfig,
+    config: SimulationConfig,
 }
 
 impl Simulator {
-    pub fn new() -> Self {
-        // Load GameConfig from disk
-        let game_config = GameConfig::retrieve();
-        info!("Initial config is: {:#?}", game_config);
+    pub fn new(config: SimulationConfig) -> Self {
         Simulator {
-            game_config,
             game_state: None,
+            config,
         }
     }
 
@@ -33,7 +29,7 @@ impl Simulator {
 
         // Generate galaxy
         info!("Generating galaxy...");
-        let galaxy = generate_galaxy(&self.game_config);
+        let galaxy = generate_galaxy(&self.config);
 
         info!("Setting up economy...");
         *game_state.economy.lock().unwrap() = Economy::new(&galaxy);
@@ -49,7 +45,7 @@ impl Simulator {
 
         info!("Creating player...");
         *game_state.player.lock().unwrap() = Player::new(
-            self.game_config.starting_credits,
+            self.config.starting_credits,
             game_state.shipyard.lock().unwrap().create_base_ship(),
             // TODO: Replace starting point in config.
             game_state

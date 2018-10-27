@@ -3,8 +3,8 @@ use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
-use super::config::GameConfig;
 use super::resources::{fetch_resource, AstronomicalNamesResource};
+use super::SimulationConfig;
 use core::astronomicals::{planet::*, sector::*, star::*, system::*, Galaxy};
 use utils::Point;
 
@@ -16,7 +16,7 @@ pub mod systems;
 
 /// Generate a galaxy with systems etc, will use the provided config to guide
 /// the generation.
-pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
+pub fn generate_galaxy(config: &SimulationConfig) -> Galaxy {
     let new_seed: &[_] = &[config.map_seed as u32];
     let mut rng = ChaChaRng::from_seed(new_seed);
 

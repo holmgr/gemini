@@ -8,7 +8,6 @@ use std::{
     usize::MAX,
 };
 
-use super::super::config::GameConfig;
 use super::*;
 use core::faction::Faction;
 use utils::Point;
@@ -23,7 +22,7 @@ impl SectorGen {
     }
 
     /// Split the systems in to a set number of clusters using K-means.
-    pub fn generate(&self, config: &GameConfig, system_locations: Vec<Point>) -> Vec<Sector> {
+    pub fn generate(&self, config: &SimulationConfig, system_locations: Vec<Point>) -> Vec<Sector> {
         // Measure time for generation.
         let now = Instant::now();
 

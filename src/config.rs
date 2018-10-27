@@ -10,8 +10,8 @@ pub struct Config {
 /// Options for where the game data should be loaded from and to.
 #[derive(Debug, Deserialize)]
 pub struct Data {
-    remote: String,
-    local: PathBuf,
+    pub remote: String,
+    pub local: PathBuf,
 }
 
 /// Parameters used for the simulation engine when generating and simulating the game.
