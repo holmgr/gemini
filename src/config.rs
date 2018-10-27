@@ -4,6 +4,7 @@ use std::path::PathBuf;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub data: Data,
+    pub simulation: Simulation,
 }
 
 /// Options for where the game data should be loaded from and to.
@@ -11,4 +12,14 @@ pub struct Config {
 pub struct Data {
     remote: String,
     local: PathBuf,
+}
+
+/// Parameters used for the simulation engine when generating and simulating the game.
+#[derive(Debug, Deserialize)]
+pub struct Simulation {
+    pub map_seed: u32,
+    pub starting_credits: u32,
+    pub number_of_systems: u64,
+    pub system_spread: f64,
+    pub number_of_sectors: usize,
 }

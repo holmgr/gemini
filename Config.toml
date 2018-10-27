@@ -1,3 +1,10 @@
 [data]
 remote = "git@github.com:holmgr/gemini-data.git"
 local = "resources"
+
+[simulation]
+map_seed = 42
+starting_credits = 1000
+number_of_systems = 10000
+system_spread = 150
+number_of_sectors = 150
