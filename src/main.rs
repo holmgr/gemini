@@ -14,26 +14,29 @@ extern crate rayon;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate clap;
 extern crate serde_json;
 extern crate spade;
 extern crate statrs;
 extern crate toml;
 
+mod config;
 mod core;
 mod player;
 mod simulate;
 mod utils;
 
 use app_dirs::{get_data_root, AppDataType};
+use clap::{App, Arg, SubCommand};
+use config::Config;
 use log::LevelFilter;
-use simulate::Simulator;
 
 /// Setup logging to file in user data dir.
-pub fn setup_logger() -> Result<(), fern::InitError> {
+pub fn setup_logger(to_stdout: bool) -> Result<(), fern::InitError> {
     let output_path = get_data_root(AppDataType::UserConfig)
         .unwrap()
         .join("gemini/debug.log");
-    fern::Dispatch::new()
+    let mut logger = fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
                 "{}[{}][{}] {}",
@@ -44,15 +47,55 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
             ))
         }).level(log::LevelFilter::Off)
         .level_for("gemini", LevelFilter::Trace)
-        .chain(fern::log_file(output_path)?)
-        .apply()?;
+        .chain(fern::log_file(output_path)?);
+
+    if to_stdout {
+        logger = logger.chain(std::io::stdout());
+    }
+    logger.apply()?;
     Ok(())
 }
 
 fn main() {
-    // Init logger
-    setup_logger().unwrap();
+    let matches = App::new("Gemini")
+        .version("0.1")
+        .author("Viktor Holmgren <viktor.holmgren@gmail.com>")
+        .about("Procedurally generated space RPG")
+        .arg(
+            Arg::with_name("debug")
+                .short("d")
+                .help("Print debug information to stdout"),
+        ).subcommand(
+            SubCommand::with_name("simulator")
+                .about("Runs the simulator")
+                .version("0.1")
+                .author("Viktor Holmgren <viktor.holmgren@gmail.com>"),
+        ).subcommand(
+            SubCommand::with_name("new")
+                .about("Creates a new world by running the simulator for initial state")
+                .version("0.1")
+                .author("Viktor Holmgren <viktor.holmgren@gmail.com>"),
+        ).get_matches();
 
-    // Start simulator
-    let simulator = Simulator::new();
+    // Setup logging.
+    let debug_to_stdout = matches.is_present("debug");
+    // Init logger
+    setup_logger(debug_to_stdout).unwrap();
+
+    // Load config on compile.
+    let config: Config =
+        toml::from_str(include_str!("../Config.toml")).expect("Failed to load config");
+
+    match matches.subcommand() {
+        ("simulator", Some(_)) => {
+            debug!("Starting simulator");
+        }
+        ("new", Some(_)) => {
+            // Safe since its required.
+            debug!("Creating new game");
+        }
+        _ => {}
+    };
+
+    // more program logic goes here...
 }

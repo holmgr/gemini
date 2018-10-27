@@ -20,3 +20,4 @@ spade = { version = "1.4.0", features = ["serde_serialize"] }
 bincode = "1.0.0"
 chrono = { version = "0.4", features = ["serde"] }
 fern = "0.5"
+clap = "2.32.0"

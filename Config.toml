@@ -1,0 +1,3 @@
+[data]
+remote = "git@github.com:holmgr/gemini-data.git"
+local = "resources"
