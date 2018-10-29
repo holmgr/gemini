@@ -12,6 +12,9 @@ pub struct Config {
 pub struct Data {
     pub remote: String,
     pub local: PathBuf,
+    pub public_key: PathBuf,
+    pub private_key: PathBuf,
+    pub passphrase: Option<String>,
 }
 
 /// Parameters used for the simulation engine when generating and simulating the game.

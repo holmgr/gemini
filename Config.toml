@@ -1,6 +1,8 @@
 [data]
 remote = "git@github.com:holmgr/gemini-data.git"
 local = "resources"
+public_key = "/Users/holmgr/.ssh/id_rsa.pub"
+private_key = "/Users/holmgr/.ssh/id_rsa"
 
 [simulation]
 map_seed = 42

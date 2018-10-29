@@ -15,6 +15,8 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate clap;
+extern crate failure;
+extern crate git2;
 extern crate serde_json;
 extern crate spade;
 extern crate statrs;
@@ -22,6 +24,7 @@ extern crate toml;
 
 mod config;
 mod core;
+mod data;
 mod player;
 mod simulate;
 mod utils;
@@ -29,9 +32,10 @@ mod utils;
 use app_dirs::{get_data_root, AppDataType};
 use clap::{App, Arg, SubCommand};
 use config::Config;
+use data::DataService;
+use failure::Error;
 use log::LevelFilter;
 use simulate::Simulator;
-use std::fs::create_dir_all;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger(to_stdout: bool) -> Result<(), fern::InitError> {
@@ -58,7 +62,7 @@ pub fn setup_logger(to_stdout: bool) -> Result<(), fern::InitError> {
     Ok(())
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let matches = App::new("Gemini")
         .version("0.1")
         .author("Viktor Holmgren <viktor.holmgren@gmail.com>")
@@ -88,17 +92,23 @@ fn main() {
     let config: Config =
         toml::from_str(include_str!("../Config.toml")).expect("Failed to load config");
 
+    let data_service = DataService::new(config.data)?;
+
     match matches.subcommand() {
         ("simulator", Some(_)) => {
             debug!("Starting simulator");
-            let simulator = Simulator::new(config.simulation);
         }
         ("new", Some(_)) => {
             // Safe since its required.
             debug!("Creating new game");
+            let simulator = Simulator::new(config.simulation);
+            let game = simulator.new_game();
+
+            data_service.store(&game)?;
+            data_service.sync_up("Initial world simulation")?;
         }
         _ => {}
     };
 
-    // more program logic goes here...
+    Ok(())
 }
