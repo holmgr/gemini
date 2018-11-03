@@ -97,12 +97,19 @@ fn main() -> Result<(), Error> {
     match matches.subcommand() {
         ("simulator", Some(_)) => {
             debug!("Starting simulator");
+            let mut game = data_service.try_load()?;
+            if let Some(days) = game.attempt_advance_time() {
+                debug!("Simulated {} days", days);
+                data_service.store(&game)?;
+                data_service.sync_up(&format!("Simulated: {} days forward", days))?;
+            }
         }
         ("new", Some(_)) => {
             // Safe since its required.
             debug!("Creating new game");
             let simulator = Simulator::new(config.simulation);
-            let game = simulator.new_game();
+            let mut game = simulator.new_game();
+            game.attempt_advance_time();
 
             data_service.store(&game)?;
             data_service.sync_up("Initial world simulation")?;

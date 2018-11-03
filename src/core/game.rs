@@ -29,7 +29,7 @@ impl Game {
     }
 
     /// Attemps to advance time returning the number of days advanced if any.
-    fn attempt_advance_time(&mut self) -> Option<i64> {
+    pub fn attempt_advance_time(&mut self) -> Option<i64> {
         let updated: &mut DateTime<Utc> = &mut self.updated;
         // Check if we need to advance time.
         let days_passed = Utc::now().signed_duration_since(*updated).num_days();

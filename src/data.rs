@@ -1,4 +1,4 @@
-use bincode::serialize_into;
+use bincode::{serialize_into, deserialize_from};
 use failure::Error;
 use git2::{
     build::{CheckoutBuilder, RepoBuilder}, Cred, FetchOptions, IndexAddOption, PushOptions, RemoteCallbacks,
@@ -6,10 +6,15 @@ use git2::{
 };
 use std::{
     fs::{create_dir, remove_dir_all, File},
-    io::BufWriter,
+    io::{BufReader, BufWriter},
     path::PathBuf,
 };
 
+use super::core::astronomicals::Galaxy;
+use super::core::economy::Economy;
+use super::player::Player;
+use super::simulate::resources::{fetch_resource, ShipResource};
+use super::core::ship::Shipyard;
 use super::config::Data as DataConfig;
 use super::core::game::Game;
 
@@ -20,6 +25,7 @@ pub struct DataService {
 }
 
 impl<'a> DataService {
+    /// Create a new data service, loading and syncing all game data.
     pub fn new(config: DataConfig) -> Result<DataService, Error> {
         let auth =
             Self::create_auth_callback(config.public_key.clone(), config.private_key.clone());
@@ -139,7 +145,33 @@ impl<'a> DataService {
         Ok(())
     }
 
+    /// Attempts to load game data from disk.
     pub fn try_load(&self) -> Result<Game, Error> {
-        unimplemented!();
+        let base_path = &self.config.local;
+
+        // Load all data from disk.
+        let mut galaxy_file =
+            BufReader::new(File::open(base_path.join("galaxy.cbor").as_path())?);
+        let galaxy = deserialize_from(&mut galaxy_file)?;
+        let mut player_file =
+            BufReader::new(File::open(base_path.join("player.cbor").as_path())?);
+        let player = deserialize_from(&mut player_file)?;
+        let mut economy_file =
+            BufReader::new(File::open(base_path.join("economy.cbor").as_path())?);
+        let economy = deserialize_from(&mut economy_file)?;
+        let mut update_file =
+            BufReader::new(File::open(base_path.join("updated.cbor").as_path())?);
+        let updated = deserialize_from(&mut update_file)?;
+
+        let mut shipyard = Shipyard::new();
+        shipyard.add_ships(fetch_resource::<ShipResource>().unwrap());
+
+        Ok(Game {
+            galaxy,
+            shipyard,
+            player,
+            economy,
+            updated
+        })
     }
 }
