@@ -1,7 +1,7 @@
 use bincode::serialize_into;
 use failure::Error;
 use git2::{
-    build::RepoBuilder, Cred, FetchOptions, IndexAddOption, PushOptions, RemoteCallbacks,
+    build::{CheckoutBuilder, RepoBuilder}, Cred, FetchOptions, IndexAddOption, PushOptions, RemoteCallbacks,
     Repository, Signature,
 };
 use std::{
@@ -44,17 +44,32 @@ impl<'a> DataService {
         callbacks
     }
 
-    /// Syncs down the changes upstream, returning a Repository.
-    /// Currently assumes that there are no upstream changes.
+    /// Opens the given remote repository in the local path, if already exists, 
+    /// any remote changes will be synced down.
     fn open_repository(
         local: &PathBuf,
         remote: &str,
         auth: RemoteCallbacks,
     ) -> Result<Repository, Error> {
+        let mut options = FetchOptions::new();
+        options.remote_callbacks(auth);
+
         // Try opening repository if it already exits.
         match Repository::open(local) {
             Ok(repo) => {
                 debug!("Repository already exists, opening");
+                debug!("Fetching remote data if needed");
+                debug!("Current head: {}", repo.head()?.peel_to_commit()?.id());
+                repo.find_remote("origin")?.fetch(&["master"], Some(&mut options), None)?;
+                // Dummy block to avoid NLL.
+                {
+                    let remote_ref = repo.find_reference("refs/remotes/origin/master")?;
+                    let remote_commit = repo.reference_to_annotated_commit(&remote_ref)?;
+                    debug!("Remote head: {}", remote_commit.id());
+                    let mut builder = CheckoutBuilder::new();
+                    builder.force();
+                    repo.checkout_head(Some(&mut builder))?;
+                }
                 Ok(repo)
             }
             Err(_) => {
@@ -65,11 +80,7 @@ impl<'a> DataService {
                 // Clone the simulatino data repository.
                 debug!("Cloning repository: {:?} to {:?}...", remote, local);
                 let repo = RepoBuilder::new()
-                    .fetch_options({
-                        let mut options = FetchOptions::new();
-                        options.remote_callbacks(auth);
-                        options
-                    }).clone(remote, local)?;
+                    .fetch_options(options).clone(remote, local)?;
                 repo.remote_add_push("origin", "refs/heads/master:refs/heads/master")?;
                 debug!("Cloning sucessful");
                 Ok(repo)
