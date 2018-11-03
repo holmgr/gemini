@@ -1,8 +1,8 @@
-use bincode::{serialize_into, deserialize_from};
+use bincode::{deserialize_from, serialize_into};
 use failure::Error;
 use git2::{
-    build::{CheckoutBuilder, RepoBuilder}, Cred, FetchOptions, IndexAddOption, PushOptions, RemoteCallbacks,
-    Repository, Signature,
+    build::{CheckoutBuilder, RepoBuilder},
+    Cred, FetchOptions, IndexAddOption, PushOptions, RemoteCallbacks, Repository, Signature,
 };
 use std::{
     fs::{create_dir, remove_dir_all, File},
@@ -10,13 +10,10 @@ use std::{
     path::PathBuf,
 };
 
-use super::core::astronomicals::Galaxy;
-use super::core::economy::Economy;
-use super::player::Player;
-use super::simulate::resources::{fetch_resource, ShipResource};
-use super::core::ship::Shipyard;
 use super::config::Data as DataConfig;
 use super::core::game::Game;
+use super::core::ship::Shipyard;
+use super::simulate::resources::{fetch_resource, ShipResource};
 
 /// Data service for interfacing with the game data on local and remote locations.
 pub struct DataService {
@@ -50,7 +47,7 @@ impl<'a> DataService {
         callbacks
     }
 
-    /// Opens the given remote repository in the local path, if already exists, 
+    /// Opens the given remote repository in the local path, if already exists,
     /// any remote changes will be synced down.
     fn open_repository(
         local: &PathBuf,
@@ -66,7 +63,8 @@ impl<'a> DataService {
                 debug!("Repository already exists, opening");
                 debug!("Fetching remote data if needed");
                 debug!("Current head: {}", repo.head()?.peel_to_commit()?.id());
-                repo.find_remote("origin")?.fetch(&["master"], Some(&mut options), None)?;
+                repo.find_remote("origin")?
+                    .fetch(&["master"], Some(&mut options), None)?;
                 // Dummy block to avoid NLL.
                 {
                     let remote_ref = repo.find_reference("refs/remotes/origin/master")?;
@@ -86,7 +84,8 @@ impl<'a> DataService {
                 // Clone the simulatino data repository.
                 debug!("Cloning repository: {:?} to {:?}...", remote, local);
                 let repo = RepoBuilder::new()
-                    .fetch_options(options).clone(remote, local)?;
+                    .fetch_options(options)
+                    .clone(remote, local)?;
                 repo.remote_add_push("origin", "refs/heads/master:refs/heads/master")?;
                 debug!("Cloning sucessful");
                 Ok(repo)
@@ -150,17 +149,14 @@ impl<'a> DataService {
         let base_path = &self.config.local;
 
         // Load all data from disk.
-        let mut galaxy_file =
-            BufReader::new(File::open(base_path.join("galaxy.cbor").as_path())?);
+        let mut galaxy_file = BufReader::new(File::open(base_path.join("galaxy.cbor").as_path())?);
         let galaxy = deserialize_from(&mut galaxy_file)?;
-        let mut player_file =
-            BufReader::new(File::open(base_path.join("player.cbor").as_path())?);
+        let mut player_file = BufReader::new(File::open(base_path.join("player.cbor").as_path())?);
         let player = deserialize_from(&mut player_file)?;
         let mut economy_file =
             BufReader::new(File::open(base_path.join("economy.cbor").as_path())?);
         let economy = deserialize_from(&mut economy_file)?;
-        let mut update_file =
-            BufReader::new(File::open(base_path.join("updated.cbor").as_path())?);
+        let mut update_file = BufReader::new(File::open(base_path.join("updated.cbor").as_path())?);
         let updated = deserialize_from(&mut update_file)?;
 
         let mut shipyard = Shipyard::new();
@@ -171,7 +167,7 @@ impl<'a> DataService {
             shipyard,
             player,
             economy,
-            updated
+            updated,
         })
     }
 }
