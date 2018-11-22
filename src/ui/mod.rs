@@ -41,12 +41,14 @@ enum Event {
 pub struct UI {
     game_state: Game,
     states: StateMachine,
+    frames: u64,
 }
 
 impl UI {
     /// Create a new UI.
     pub fn new(game_state: Game) -> Self {
         UI {
+            frames: 0,
             game_state,
             states: StateMachine::default(),
         }
@@ -103,6 +105,12 @@ impl event::EventHandler for UI {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
         graphics::present(ctx);
+        if self.frames % 100 == 0 {
+            debug!("FPS: {:.1}", timer::get_fps(ctx));
+        }
+        self.frames += 1;
+
+        timer::yield_now();
         Ok(())
     }
 }
