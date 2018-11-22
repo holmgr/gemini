@@ -74,11 +74,11 @@ impl SectorGen {
                 .for_each(|(id, centroid)| {
                     let mut count = 0.;
                     let mut new_centroid = Point::origin();
-                    for (system_location, _) in cluster_map.iter()
-                        .filter(|&(_, c_id)| *c_id == id) {
-                            new_centroid += *system_location;
-                            count += 1.;
-                        }
+                    for (system_location, _) in cluster_map.iter().filter(|&(_, c_id)| *c_id == id)
+                    {
+                        new_centroid += *system_location;
+                        count += 1.;
+                    }
                     new_centroid *= 1. / count;
                     *centroid = new_centroid;
                 });
