@@ -1,44 +1,61 @@
 use super::*;
 
+mod empty;
+use self::empty::Empty;
+
 /// Variants of UI state transtions (i.e switching between views).
 enum Trans {
     None,
     Pop,
     Push(Box<dyn View>),
     Replace(Box<dyn View>),
-    Quit
+    Quit,
 }
 
 /// Holds the state of multiple different views which can be switched.
-struct StateMachine {
-    stack: Vec<Box<dyn View>>
+pub struct StateMachine {
+    stack: Vec<Box<dyn View>>,
 }
 
 impl StateMachine {
+    /// Create a new state machine with the given view as starting view.
     pub fn new(start_view: Box<dyn View>) -> StateMachine {
         StateMachine {
-            stack: vec![start_view]
+            stack: vec![start_view],
         }
     }
 
     /// Handles the given event which can update the current view.
+    /// TODO: Handle quit events properly.
     pub fn handle_event(&mut self, event: Event) {
         match self.stack.last_mut().unwrap().handle_event(event) {
-             Trans::None => {},
-             Trans::Pop => { self.stack.pop(); },
-             Trans::Push(view) => { self.stack.push(view) },
-             Trans::Replace(view) => { self.stack.pop(); self.stack.push(view) },
-             Trans::Quit => { self.stack.clear() }
+            Trans::None => {}
+            Trans::Pop => {
+                self.stack.pop();
+            }
+            Trans::Push(view) => self.stack.push(view),
+            Trans::Replace(view) => {
+                self.stack.pop();
+                self.stack.push(view)
+            }
+            Trans::Quit => self.stack.clear(),
         }
     }
 
+    /// The current view, if any.
     pub fn current(&self) -> Option<&Box<dyn View>> {
         self.stack.last()
     }
 }
 
+impl Default for StateMachine {
+    fn default() -> Self {
+        StateMachine::new(Box::new(Empty::new()))
+    }
+}
+
 trait View {
-    /// Updates this View.
+    /// Handles the given input in the view.
     fn handle_event(&mut self, event: Event) -> Trans;
 }
 
@@ -57,7 +74,7 @@ mod tests {
     fn test_state_pop() {
         let mut sm = StateMachine::new(Box::new(PopView {}));
         assert!(sm.current().is_some());
-        sm.handle_event(Event::Quit);
+        sm.handle_event(Event::MouseWheel { x: 0, y: 0 });
         assert!(sm.current().is_none());
     }
 }
