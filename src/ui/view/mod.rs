@@ -63,18 +63,41 @@ trait View {
 mod tests {
     use super::*;
 
-    pub struct PopView {}
-    impl View for PopView {
-        fn handle_event(&mut self, _event: Event) -> Trans {
-            Trans::Pop
+    pub struct TestView {}
+    impl View for TestView {
+        fn handle_event(&mut self, event: Event) -> Trans {
+            match event {
+                Event::MouseDown { .. } => Trans::Push(Box::new(TestView {})),
+                Event::MouseUp { .. } => Trans::Pop,
+                _ => Trans::None,
+            }
         }
     }
 
     #[test]
     fn test_state_pop() {
-        let mut sm = StateMachine::new(Box::new(PopView {}));
+        let mut sm = StateMachine::new(Box::new(TestView {}));
         assert!(sm.current().is_some());
-        sm.handle_event(Event::MouseWheel { x: 0, y: 0 });
+
+        sm.handle_event(Event::MouseDown {
+            button: MouseButton::Left,
+            x: 0,
+            y: 0,
+        });
+        assert!(sm.current().is_some());
+
+        // Should be able to pop twice
+        sm.handle_event(Event::MouseUp {
+            button: MouseButton::Left,
+            x: 0,
+            y: 0,
+        });
+        assert!(sm.current().is_some());
+        sm.handle_event(Event::MouseUp {
+            button: MouseButton::Left,
+            x: 0,
+            y: 0,
+        });
         assert!(sm.current().is_none());
     }
 }
