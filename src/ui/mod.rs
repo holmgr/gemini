@@ -1,6 +1,13 @@
 use core::game::Game;
 use ggez::*;
 
+mod view;
+
+/// UI events, mainly user interactions.
+enum Event {
+    Quit
+}
+
 /// UI handler for dispatching events and holding main state.
 pub struct UI {
     game_state: Game,
