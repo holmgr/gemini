@@ -16,6 +16,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate clap;
 extern crate failure;
+extern crate ggez;
 extern crate git2;
 extern crate serde_json;
 extern crate spade;
@@ -27,6 +28,7 @@ mod core;
 mod data;
 mod player;
 mod simulate;
+mod ui;
 mod utils;
 
 use app_dirs::{get_data_root, AppDataType};
@@ -72,6 +74,11 @@ fn main() -> Result<(), Error> {
                 .short("d")
                 .help("Print debug information to stdout"),
         ).subcommand(
+            SubCommand::with_name("start")
+                .about("Start the game client")
+                .version("0.1")
+                .author("Viktor Holmgren <viktor.holmgren@gmail.com>"),
+        ).subcommand(
             SubCommand::with_name("simulator")
                 .about("Runs the simulator")
                 .version("0.1")
@@ -95,6 +102,12 @@ fn main() -> Result<(), Error> {
     let data_service = DataService::new(config.data)?;
 
     match matches.subcommand() {
+        ("start", Some(_)) => {
+            debug!("Starting client");
+            let mut game = data_service.try_load()?;
+            let mut ui = ui::UI::new(game);
+            ui.start();
+        }
         ("simulator", Some(_)) => {
             debug!("Starting simulator");
             let mut game = data_service.try_load()?;
