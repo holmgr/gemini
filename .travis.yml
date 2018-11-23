@@ -10,11 +10,10 @@ rust:
 
 before_script:
     - rustup component add rustfmt-preview
-    - rustup install nightly
-    - rustup component add --toolchain=nightly clippy-preview
+    - rustup component add clippy-preview
 script:
     - cargo fmt --all -- --check
-    - cargo +nightly clippy
+    - cargo clippy
     - cargo build
     - cargo test
 
