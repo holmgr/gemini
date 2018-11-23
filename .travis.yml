@@ -9,6 +9,8 @@ rust:
   - stable
 
 before_script:
+    - sudo apt-get update
+    - sudo apt-get install -y libasound2-dev libsdl2-dev pkg-config
     - rustup component add rustfmt-preview
     - rustup component add clippy-preview
 script:
