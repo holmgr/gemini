@@ -1,9 +1,15 @@
-use ggez::{event::*, *};
+use ggez::{event::*, *, graphics::{Vector2, Point2, Drawable}};
 
 use core::game::Game;
 mod view;
+mod layout;
+mod component;
+mod render;
 
+use self::component::Component;
+use self::layout::{LayoutBuilder, Layout, LayoutDirection};
 use self::view::StateMachine;
+use self::render::{Renderable, RenderArea, RenderContext};
 
 /// UI user interaction events.
 enum Event {
