@@ -1,3 +1,3 @@
+use super::*;
 
-
-pub trait Component {}
+pub trait Component: Renderable {}
