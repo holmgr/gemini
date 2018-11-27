@@ -7,7 +7,7 @@ pub type RenderArea = Rect;
 
 /// Context used for rendering.
 pub struct RenderContext<'a> {
-    game_state: &'a Game
+    game_state: &'a Game,
 }
 
 impl<'a> RenderContext<'a> {
