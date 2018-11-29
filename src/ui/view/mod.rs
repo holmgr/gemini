@@ -57,26 +57,39 @@ impl Default for StateMachine {
 trait View {
     /// Handles the given input in the view.
     fn handle_event(&mut self, event: Event) -> Trans;
+
+    /// Returns the current layout for this view.
+    fn layout(&self) -> &Layout;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    pub struct TestView {}
+    pub struct TestView {
+        layout: Layout,
+    }
     impl View for TestView {
         fn handle_event(&mut self, event: Event) -> Trans {
             match event {
-                Event::MouseDown { .. } => Trans::Push(Box::new(TestView {})),
+                Event::MouseDown { .. } => Trans::Push(Box::new(TestView {
+                    layout: LayoutBuilder::new(LayoutDirection::Horizontal).build(),
+                })),
                 Event::MouseUp { .. } => Trans::Pop,
                 _ => Trans::None,
             }
+        }
+
+        fn layout(&self) -> &Layout {
+            &self.layout
         }
     }
 
     #[test]
     fn test_state_pop() {
-        let mut sm = StateMachine::new(Box::new(TestView {}));
+        let mut sm = StateMachine::new(Box::new(TestView {
+            layout: LayoutBuilder::new(LayoutDirection::Horizontal).build(),
+        }));
         assert!(sm.current().is_some());
 
         sm.handle_event(Event::MouseDown {

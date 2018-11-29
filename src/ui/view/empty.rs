@@ -1,12 +1,16 @@
 use super::*;
 
 /// Empty View used as baseline.
-pub struct Empty {}
+pub struct Empty {
+    layout: Layout,
+}
 
 impl Empty {
     /// Create a new empty view.
     pub fn new() -> Self {
-        Empty {}
+        Empty {
+            layout: LayoutBuilder::new(LayoutDirection::Horizontal).build(),
+        }
     }
 }
 
@@ -14,5 +18,9 @@ impl View for Empty {
     /// Handles the given input in the view.
     fn handle_event(&mut self, event: Event) -> Trans {
         Trans::None
+    }
+
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 }
