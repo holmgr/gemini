@@ -1,6 +1,6 @@
 use ggez::{
     event::*,
-    graphics::{Drawable, Point2, Vector2},
+    graphics::{DrawParam, Drawable, Point2, Vector2},
     *,
 };
 
@@ -13,7 +13,7 @@ mod view;
 use self::component::Component;
 use self::layout::{Layout, LayoutBuilder, LayoutDirection};
 use self::render::{RenderArea, RenderContext, Renderable};
-use self::view::StateMachine;
+use self::view::{StateMachine, View};
 
 /// UI user interaction events.
 enum Event {
@@ -119,6 +119,16 @@ impl event::EventHandler for UI {
             debug!("FPS: {:.1}", timer::get_fps(ctx));
         }
         self.frames += 1;
+
+        // Render the current view, if any.
+        if let Some(view) = self.states.current() {
+            let render_ctx = RenderContext::new(&self.game_state);
+            let drawables = view.layout().render(RenderArea::one(), &render_ctx);
+            for drawable in drawables {
+                // TODO: Need to supply drawparams and a drawable.
+                drawable.draw_ex(ctx, DrawParam::default());
+            }
+        }
 
         timer::yield_now();
         Ok(())

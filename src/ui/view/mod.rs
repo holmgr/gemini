@@ -54,7 +54,7 @@ impl Default for StateMachine {
     }
 }
 
-trait View {
+pub trait View {
     /// Handles the given input in the view.
     fn handle_event(&mut self, event: Event) -> Trans;
 
