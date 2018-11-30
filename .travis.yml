@@ -1,17 +1,38 @@
+sudo: true
 language: rust
 cache: cargo
 dist: trusty
 os: 
   - linux
+  - osx
 
 # Run builds for all the supported trains
 rust:
   - stable
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+
+before_install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      sudo apt-get -qq update
+      && sudo apt-get install -y libasound2-dev;
+    fi
+
+install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      wget http://libsdl.org/release/SDL2-2.0.5.tar.gz
+      && tar -xzvf SDL2-2.0.5.tar.gz
+      && pushd SDL2-2.0.5 && ./configure --prefix=/usr && make && sudo make install && popd;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      brew update
+      && brew install sdl2;
+    fi
 
 before_script:
-    - sudo apt-get update
-    - sudo apt-get install -y libegl1-mesa-dev libgles2-mesa-dev
-    - sudo apt-get install -y libasound2-dev libsdl2-dev pkg-config
     - rustup component add rustfmt-preview
     - rustup component add clippy-preview
 script:
