@@ -43,8 +43,7 @@ pub struct Layout {
 }
 
 impl Renderable for Layout {
-    fn render(&self, area: RenderArea, context: &RenderContext) -> Vec<Box<Drawable>> {
-        let mut drawables = Vec::<Box<Drawable>>::new();
+    fn render(&self, area: RenderArea, context: &mut RenderContext) {
         let mut offset = 0.;
         for (child, size) in &self.children {
             let sub_area = match self.direction {
@@ -62,9 +61,6 @@ impl Renderable for Layout {
                 }
             };
             offset += size;
-            drawables.extend(child.render(sub_area, &context));
         }
-
-        drawables
     }
 }

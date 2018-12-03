@@ -122,12 +122,8 @@ impl event::EventHandler for UI {
 
         // Render the current view, if any.
         if let Some(view) = self.states.current() {
-            let render_ctx = RenderContext::new(&self.game_state);
-            let drawables = view.layout().render(RenderArea::one(), &render_ctx);
-            for drawable in drawables {
-                // TODO: Need to supply drawparams and a drawable.
-                drawable.draw_ex(ctx, DrawParam::default());
-            }
+            let mut render_ctx = RenderContext::new(&self.game_state, ctx);
+            view.layout().render(RenderArea::one(), &mut render_ctx);
         }
 
         timer::yield_now();
