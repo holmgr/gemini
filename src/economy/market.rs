@@ -25,6 +25,7 @@ impl Market {
     }
 
     /// Returns the agent, if any, which is associated with the given system.
+    #[allow(dead_code)]
     pub fn agent(&self, system_hash: u32) -> Option<&Arc<Mutex<Agent>>> {
         self.agents
             .iter()

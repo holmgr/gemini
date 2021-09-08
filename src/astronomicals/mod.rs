@@ -1,5 +1,5 @@
 use game::Updatable;
-use utils::{edit_distance, OrdPoint, Point};
+use utils::Point;
 
 pub mod galaxy;
 pub mod planet;
