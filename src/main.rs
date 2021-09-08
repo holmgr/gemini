@@ -25,26 +25,20 @@ extern crate tui;
 mod astronomicals;
 mod economy;
 mod entities;
-mod event;
 mod game;
 mod game_config;
 mod generators;
-mod gui;
-mod player;
 mod resources;
-mod ship;
 mod simulator;
 mod utils;
 
-use app_dirs::{get_data_root, AppDataType};
+use std::io;
+
 use log::LevelFilter;
 use simulator::Simulator;
 
 /// Setup logging to file in user data dir.
 pub fn setup_logger() -> Result<(), fern::InitError> {
-    let output_path = get_data_root(AppDataType::UserConfig)
-        .unwrap()
-        .join("gemini/debug.log");
     fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
@@ -57,7 +51,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         })
         .level(log::LevelFilter::Off)
         .level_for("gemini", LevelFilter::Trace)
-        .chain(fern::log_file(output_path)?)
+        .chain(io::stdout())
         .apply()?;
     Ok(())
 }
@@ -66,13 +60,8 @@ fn main() {
     // Init logger
     setup_logger().unwrap();
 
-    // Start event handler
-    event::EventHandler::start();
-
     // Start simulator
-    let simulator = Simulator::new();
+    let mut simulator = Simulator::new();
 
-    // Init and start gui
-    let mut gui = gui::Gui::new(simulator);
-    gui.start();
+    simulator.new_game();
 }

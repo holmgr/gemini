@@ -41,6 +41,7 @@ impl Economy {
     }
 
     /// Returns the prices for the available commodities the the given system.
+    #[allow(dead_code)]
     pub fn commodity_prices(&self, system: &System) -> Vec<(Commodity, i64)> {
         let mut prices = vec![];
 
@@ -55,6 +56,7 @@ impl Economy {
         prices
     }
 
+    #[allow(dead_code)]
     pub fn populations(&self, system: &System) -> Vec<f64> {
         let mut populations = vec![];
 

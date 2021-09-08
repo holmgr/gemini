@@ -132,6 +132,7 @@ impl Eq for OrdPoint {}
 /// distance.
 /// The runtime complexity is `O(m*n)`, where `m` and `n` are the
 /// strings' lengths.
+#[allow(dead_code)]
 pub fn edit_distance(a: &str, b: &str) -> i32 {
     // Handle zero length case.
     if a.is_empty() {

@@ -109,16 +109,19 @@ impl Agent {
     }
 
     /// Returns the hash of the system to which the agent is associated.
+    #[allow(dead_code)]
     pub fn hash(&self) -> u32 {
         self.seed
     }
 
     /// Returns the system populations.
+    #[allow(dead_code)]
     pub fn populations(&self) -> Vec<f64> {
         self.populations.clone()
     }
 
     /// Returns the prices for all commodities known.
+    #[allow(dead_code)]
     pub fn prices(&self) -> Vec<(Commodity, i64)> {
         Commodity::values().fold(vec![], |mut prices, commodity| {
             if let Some(range) = self.price_beliefs.get(commodity) {
