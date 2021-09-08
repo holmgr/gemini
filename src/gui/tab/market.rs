@@ -72,7 +72,8 @@ impl Tab for MarketTab {
                     .lock()
                     .unwrap()
                     .commodity_prices(system)
-                    .len() - 1;
+                    .len()
+                    - 1;
                 self.selected = self.selected.min(self.max_selected);
             }
             _ => {}
@@ -102,14 +103,16 @@ impl Tab for MarketTab {
                             commodity.to_string(),
                             format!("{:.1}", price),
                             format!("{:.1}", (*price as f64 * 0.8) as i64),
-                        ].into_iter(),
+                        ]
+                        .into_iter(),
                         &style,
                     )
                 }),
-            ).block(Block::default().title("Commodities").borders(Borders::ALL))
-                .header_style(Style::default().fg(Color::Yellow))
-                .widths(&[40, 50, 50, 90])
-                .render(term, &area);
+            )
+            .block(Block::default().title("Commodities").borders(Borders::ALL))
+            .header_style(Style::default().fg(Color::Yellow))
+            .widths(&[40, 50, 50, 90])
+            .render(term, &area);
         }
     }
 }

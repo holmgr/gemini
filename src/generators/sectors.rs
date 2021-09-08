@@ -75,11 +75,11 @@ impl SectorGen {
                 .for_each(|(id, centroid)| {
                     let mut count = 0.;
                     let mut new_centroid = Point::origin();
-                    for (system_location, _) in cluster_map.iter()
-                        .filter(|&(_, c_id)| *c_id == id) {
-                            new_centroid += *system_location;
-                            count += 1.;
-                        }
+                    for (system_location, _) in cluster_map.iter().filter(|&(_, c_id)| *c_id == id)
+                    {
+                        new_centroid += *system_location;
+                        count += 1.;
+                    }
                     new_centroid *= 1. / count;
                     *centroid = new_centroid;
                 });
@@ -129,27 +129,23 @@ impl SectorGen {
                 .iter()
                 .fold(MAX, |acc, ref sec| acc.min(sec.system_locations.len())),
             ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis())),
-            sectors
-                .iter()
-                .fold(0, |acc, ref sec| acc + match sec.faction {
+            sectors.iter().fold(0, |acc, ref sec| acc
+                + match sec.faction {
                     Faction::Cartel => 1,
                     _ => 0,
                 }),
-            sectors
-                .iter()
-                .fold(0, |acc, ref sec| acc + match sec.faction {
+            sectors.iter().fold(0, |acc, ref sec| acc
+                + match sec.faction {
                     Faction::Empire => 1,
                     _ => 0,
                 }),
-            sectors
-                .iter()
-                .fold(0, |acc, ref sec| acc + match sec.faction {
+            sectors.iter().fold(0, |acc, ref sec| acc
+                + match sec.faction {
                     Faction::Federation => 1,
                     _ => 0,
                 }),
-            sectors
-                .iter()
-                .fold(0, |acc, ref sec| acc + match sec.faction {
+            sectors.iter().fold(0, |acc, ref sec| acc
+                + match sec.faction {
                     Faction::Independent => 1,
                     _ => 0,
                 })

@@ -102,12 +102,16 @@ impl NameGen {
                 }
                 sub_names.push(main_name.clone());
             }
-            1 => for index in 1..subcount {
-                sub_names.push(format!("{} A-{}", main_name, index));
-            },
-            _ => for character in alphabet.iter().take(subcount) {
-                sub_names.push(format!("{} {}", main_name, character));
-            },
+            1 => {
+                for index in 1..subcount {
+                    sub_names.push(format!("{} A-{}", main_name, index));
+                }
+            }
+            _ => {
+                for character in alphabet.iter().take(subcount) {
+                    sub_names.push(format!("{} {}", main_name, character));
+                }
+            }
         };
         self.rng.shuffle(&mut sub_names);
 

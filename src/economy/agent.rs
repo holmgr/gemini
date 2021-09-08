@@ -239,13 +239,15 @@ impl Agent {
     pub fn update_population(&mut self, demand_supply: &[(Commodity, u64, u64)]) {
         for (index, population) in self.populations.iter_mut().enumerate() {
             let productions = &self.productions[index];
-            let potential_earnings = demand_supply.iter().fold(
-                0,
-                |acc, (commodity, demand, supply)| match productions.get(commodity) {
-                    Some(0) | None => acc,
-                    Some(prod) => acc + ((demand - supply) as i64) / (*prod as i64),
-                },
-            );
+            let potential_earnings =
+                demand_supply
+                    .iter()
+                    .fold(0, |acc, (commodity, demand, supply)| {
+                        match productions.get(commodity) {
+                            Some(0) | None => acc,
+                            Some(prod) => acc + ((demand - supply) as i64) / (*prod as i64),
+                        }
+                    });
             *population += match potential_earnings.signum() {
                 1 => (*population * 0.1).min(10.),
                 -1 => (*population * -0.1).max(-10.).max(-*population),
