@@ -192,7 +192,8 @@ fn draw_system_table(
             "Temperature",
             "Type",
             "Economy",
-        ].into_iter(),
+        ]
+        .into_iter(),
         system
             .satelites
             .iter()
@@ -211,14 +212,16 @@ fn draw_system_table(
                         format!("{:.1}", planet.surface_temperature),
                         planet.planet_type.to_string(),
                         planet.economic_type.to_string(),
-                    ].into_iter(),
+                    ]
+                    .into_iter(),
                     &style,
                 )
             }),
-    ).block(Block::default().title(&system.name).borders(Borders::ALL))
-        .header_style(Style::default().fg(Color::Yellow))
-        .widths(&[15, 5, 15, 15, 10, 15])
-        .render(term, &area);
+    )
+    .block(Block::default().title(&system.name).borders(Borders::ALL))
+    .header_style(Style::default().fg(Color::Yellow))
+    .widths(&[15, 5, 15, 15, 10, 15])
+    .render(term, &area);
 }
 
 fn draw_system_map(

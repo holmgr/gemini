@@ -34,7 +34,7 @@ impl PlanetGen {
     pub fn calculate_surface_temperature(orbit_distance: f64, star: &Star) -> f64 {
         (star.luminosity * 3.846 * 10f64.powi(26) * (1. - 0.29)
             / (16. * PI * (299_692_458. * orbit_distance).powi(2) * 5.670_373 * 10f64.powi(-8)))
-            .powf(0.25)
+        .powf(0.25)
     }
 
     /// Predict the planet type based on surface_temperature and mass.
