@@ -1,6 +1,6 @@
 use super::*;
 
-type Action = Fn(&mut Sender<Event>) -> Option<GUIEvent>;
+type Action = dyn Fn(&mut Sender<Event>) -> Option<GUIEvent>;
 
 /// Alert dialog window.
 pub struct AlertDialog(MultiDialog);

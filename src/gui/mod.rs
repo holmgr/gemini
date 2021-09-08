@@ -33,9 +33,9 @@ pub enum GUIEvent {
 pub struct Gui {
     simulator: Simulator,
     size: Rect,
-    tabs: Vec<Box<tab::Tab>>,
+    tabs: Vec<Box<dyn tab::Tab>>,
     selected_tab: usize,
-    dialog: Option<Box<Dialog>>,
+    dialog: Option<Box<dyn Dialog>>,
     title_page: Option<TitlePage>,
 }
 
@@ -62,7 +62,7 @@ impl Gui {
         add_update_handler(game_state.clone());
 
         // Initialize all tabs.
-        self.tabs = tab::create_tabs(&game_state);
+        self.tabs = tab::create_tabs(game_state);
 
         // Disable title screen and initial dialog window if any.
         self.title_page = None;
@@ -185,7 +185,7 @@ impl Gui {
                     });
             }
         };
-        try!(term.draw());
+        term.draw()?;
         Ok(())
     }
 }

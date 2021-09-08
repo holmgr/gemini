@@ -49,7 +49,7 @@ impl Player {
                         {
                             let new_start = *start
                                 + Duration::milliseconds(
-                                    (self.location.distance(&next) / Player::TRAVEL_SPEED) as i64,
+                                    (self.location.distance(next) / Player::TRAVEL_SPEED) as i64,
                                 );
 
                             // Update position and reduce fuel.
@@ -93,6 +93,7 @@ impl Player {
     }
 
     /// Returns an reference to the player's active ship.
+    #[allow(dead_code)]
     pub fn ship_mut(&mut self) -> &mut Option<Ship> {
         &mut self.ship
     }

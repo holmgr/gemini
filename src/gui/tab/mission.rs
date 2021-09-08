@@ -1,18 +1,12 @@
 use super::*;
 
 /// Displays the mission tab.
-pub struct MissionTab {
-    state: Arc<Game>,
-    sender: Sender<Event>,
-}
+pub struct MissionTab {}
 
 impl Tab for MissionTab {
     /// Creates a mission tab.
-    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
-        Box::new(MissionTab {
-            state,
-            sender: send_handle,
-        })
+    fn new(_: Arc<Game>, _: Sender<Event>) -> Box<Self> {
+        Box::new(MissionTab {})
     }
 
     /// Returns the title string describing the tab.

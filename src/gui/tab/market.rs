@@ -20,6 +20,8 @@ pub struct MarketTab {
     selected: usize,
     max_selected: usize,
     state: Arc<Game>,
+
+    #[allow(dead_code)]
     sender: Sender<Event>,
 }
 
@@ -91,7 +93,7 @@ impl Tab for MarketTab {
             let prices = self.state.economy.lock().unwrap().commodity_prices(system);
 
             Table::new(
-                ["Commodity", "Buy", "Sell"].into_iter(),
+                ["Commodity", "Buy", "Sell"].iter(),
                 prices.iter().enumerate().map(|(idx, (commodity, price))| {
                     let style: &Style = if idx == self.selected {
                         &SELECTED_STYLE
@@ -105,14 +107,14 @@ impl Tab for MarketTab {
                             format!("{:.1}", (*price as f64 * 0.8) as i64),
                         ]
                         .into_iter(),
-                        &style,
+                        style,
                     )
                 }),
             )
             .block(Block::default().title("Commodities").borders(Borders::ALL))
             .header_style(Style::default().fg(Color::Yellow))
             .widths(&[40, 50, 50, 90])
-            .render(term, &area);
+            .render(term, area);
         }
     }
 }

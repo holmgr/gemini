@@ -10,16 +10,12 @@ use player::{Player, PlayerState};
 /// Displays the status tab.
 pub struct StatusTab {
     state: Arc<Game>,
-    sender: Sender<Event>,
 }
 
 impl Tab for StatusTab {
     /// Creates a status tab.
-    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
-        Box::new(StatusTab {
-            state,
-            sender: send_handle,
-        })
+    fn new(state: Arc<Game>, _: Sender<Event>) -> Box<Self> {
+        Box::new(StatusTab { state })
     }
 
     /// Returns the title string describing the tab.
@@ -39,7 +35,7 @@ impl Tab for StatusTab {
             .sizes(&[Size::Fixed(70), Size::Min(1)])
             .render(term, area, |term, chunks| {
                 let player = &self.state.player.lock().unwrap();
-                draw_player_info(&player, &self.state, term, chunks[0]);
+                draw_player_info(player, &self.state, term, chunks[0]);
             });
     }
 }

@@ -5,7 +5,7 @@ use tui::{
     widgets::{Block, Borders, SelectableList, Widget},
 };
 
-type Action = Fn(&mut Sender<Event>) -> Option<GUIEvent>;
+type Action = dyn Fn(&mut Sender<Event>) -> Option<GUIEvent>;
 
 /// Multiple choice dialog window.
 pub struct MultiDialog {

@@ -138,7 +138,7 @@ impl Commodity {
             Commodity::Waste,
             Commodity::Weapon,
         ];
-        COMMODITIES.into_iter()
+        COMMODITIES.iter()
     }
 }
 

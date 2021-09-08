@@ -41,8 +41,7 @@ impl GameConfig {
                 Err(_) => None,
             }
         })
-        .and_then(|config_str| from_str(&config_str).ok())
-        .or_else(|| None);
+        .and_then(|config_str| from_str(&config_str).ok());
 
         match config {
             Some(config) => config,

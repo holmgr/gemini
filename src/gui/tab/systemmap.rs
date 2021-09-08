@@ -23,7 +23,6 @@ lazy_static! {
 /// Displays the map tab.
 pub struct SystemMapTab {
     state: Arc<Game>,
-    send_handle: Sender<Event>,
     selected_astronomical: usize,
     max_selected_astronomical: usize,
 }
@@ -87,12 +86,11 @@ impl SystemMapTab {
 
 impl Tab for SystemMapTab {
     /// Creates a system map tab.
-    fn new(state: Arc<Game>, send_handle: Sender<Event>) -> Box<Self> {
+    fn new(state: Arc<Game>, _: Sender<Event>) -> Box<Self> {
         let max_selected_astronomical = SystemMapTab::num_astronomicals(&state);
 
         Box::new(SystemMapTab {
             state,
-            send_handle,
             selected_astronomical: 0,
             max_selected_astronomical,
         })
@@ -144,30 +142,30 @@ impl Tab for SystemMapTab {
                     PlayerState::InSystem => {
                         let galaxy = self.state.galaxy.lock().unwrap();
                         let system = galaxy.system(&player.location()).unwrap();
-                        let populations = self.state.economy.lock().unwrap().populations(&system);
+                        let populations = self.state.economy.lock().unwrap().populations(system);
                         draw_system_table(
                             self.selected_astronomical,
                             None,
                             &populations,
-                            &system,
+                            system,
                             term,
                             chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
+                        draw_system_map(self.selected_astronomical, system, term, chunks[1]);
                     }
                     PlayerState::Docked(id) => {
                         let galaxy = self.state.galaxy.lock().unwrap();
                         let system = galaxy.system(&player.location()).unwrap();
-                        let populations = self.state.economy.lock().unwrap().populations(&system);
+                        let populations = self.state.economy.lock().unwrap().populations(system);
                         draw_system_table(
                             self.selected_astronomical,
                             Some(id),
                             &populations,
-                            &system,
+                            system,
                             term,
                             chunks[0],
                         );
-                        draw_system_map(self.selected_astronomical, &system, term, chunks[1]);
+                        draw_system_map(self.selected_astronomical, system, term, chunks[1]);
                     }
                     _ => {}
                 }
@@ -193,30 +191,26 @@ fn draw_system_table(
             "Type",
             "Economy",
         ]
-        .into_iter(),
-        system
-            .satelites
-            .iter()
-            .enumerate()
-            .map(|(idx, ref planet)| {
-                let style: &Style = match docked_at {
-                    _ if idx == selected => &SELECTED_STYLE,
-                    Some(id) if idx == id => &DOCKED_STYLE,
-                    _ => &DEFAULT_STYLE,
-                };
-                Row::StyledData(
-                    vec![
-                        format!(" {}", planet.name.clone()),
-                        format!("{:.1}", planet.mass),
-                        format!("{:.1} M", populations[idx]),
-                        format!("{:.1}", planet.surface_temperature),
-                        planet.planet_type.to_string(),
-                        planet.economic_type.to_string(),
-                    ]
-                    .into_iter(),
-                    &style,
-                )
-            }),
+        .iter(),
+        system.satelites.iter().enumerate().map(|(idx, planet)| {
+            let style: &Style = match docked_at {
+                _ if idx == selected => &SELECTED_STYLE,
+                Some(id) if idx == id => &DOCKED_STYLE,
+                _ => &DEFAULT_STYLE,
+            };
+            Row::StyledData(
+                vec![
+                    format!(" {}", planet.name.clone()),
+                    format!("{:.1}", planet.mass),
+                    format!("{:.1} M", populations[idx]),
+                    format!("{:.1}", planet.surface_temperature),
+                    planet.planet_type.to_string(),
+                    planet.economic_type.to_string(),
+                ]
+                .into_iter(),
+                style,
+            )
+        }),
     )
     .block(Block::default().title(&system.name).borders(Borders::ALL))
     .header_style(Style::default().fg(Color::Yellow))

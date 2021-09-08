@@ -28,10 +28,11 @@ impl Market {
     pub fn agent(&self, system_hash: u32) -> Option<&Arc<Mutex<Agent>>> {
         self.agents
             .iter()
-            .find(|ref agent| agent.lock().unwrap().hash() == system_hash)
+            .find(|agent| agent.lock().unwrap().hash() == system_hash)
     }
 
     /// Returns a reference to all agents.
+    #[allow(dead_code)]
     pub fn agents(&self) -> &Vec<Arc<Mutex<Agent>>> {
         &self.agents
     }
@@ -75,12 +76,12 @@ impl Market {
                 seller.update_credits(money_traded as i64);
 
                 // Transfer goods.
-                buyer.update_inventory(&commodity, quantity_traded as i64);
-                seller.update_inventory(&commodity, -(quantity_traded as i64));
+                buyer.update_inventory(commodity, quantity_traded as i64);
+                seller.update_inventory(commodity, -(quantity_traded as i64));
 
                 // Update agent price beliefs on success
-                buyer.update_price_belief(&commodity, clearing_price, true);
-                seller.update_price_belief(&commodity, clearing_price, true);
+                buyer.update_price_belief(commodity, clearing_price, true);
+                seller.update_price_belief(commodity, clearing_price, true);
             }
             // Remove bid or ask if the seller/buyer is out of need or stock
             if ask.amount > 0 {
@@ -94,11 +95,11 @@ impl Market {
 
         // Use previous average if no trades were made.
         if amount_traded > 0 {
-            let average_price = self.average_prices.get_mut(&commodity).unwrap();
+            let average_price = self.average_prices.get_mut(commodity).unwrap();
             *average_price = money_traded / amount_traded;
         }
 
-        let average_price = self.average_prices[&commodity];
+        let average_price = self.average_prices[commodity];
 
         // Update price beliefs for unsuccessful bids/asks.
         for bid in bids {
@@ -164,8 +165,8 @@ impl Updatable for Market {
             .map(|commodity| {
                 (
                     commodity.clone(),
-                    *demand.get(&commodity).unwrap_or(&0) as u64,
-                    *supply.get(&commodity).unwrap_or(&0) as u64,
+                    *demand.get(commodity).unwrap_or(&0) as u64,
+                    *supply.get(commodity).unwrap_or(&0) as u64,
                 )
             })
             .collect::<Vec<(Commodity, u64, u64)>>();
