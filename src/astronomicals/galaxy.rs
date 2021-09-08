@@ -21,7 +21,7 @@ impl Galaxy {
         let map = RTree::bulk_load(
             systems
                 .iter()
-                .map(|ref system| system.location)
+                .map(|system| system.location)
                 .collect::<Vec<_>>(),
         );
 
@@ -44,16 +44,19 @@ impl Galaxy {
     }
 
     /// Returns a mutable reference to the system at the given location.
+    #[allow(dead_code)]
     pub fn system_mut(&mut self, location: &Point) -> Option<&mut system::System> {
         self.systems.get_mut(location)
     }
 
     /// Returns references to all systems.
+    #[allow(dead_code)]
     pub fn systems(&self) -> impl Iterator<Item = &System> {
         self.systems.values()
     }
 
     /// Returns mutable references to all systems.
+    #[allow(dead_code)]
     pub fn systems_mut(&mut self) -> impl Iterator<Item = &mut System> {
         self.systems.values_mut()
     }
@@ -79,7 +82,7 @@ impl Galaxy {
 
     /// Returns the nearest system location to the given point.
     pub fn nearest(&self, location: &Point) -> Option<&Point> {
-        self.map.nearest_neighbor(&location)
+        self.map.nearest_neighbor(location)
     }
 
     /// Finds the shortest path from start to goal with at most range along

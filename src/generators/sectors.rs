@@ -2,7 +2,6 @@ use rand::{seq, ChaChaRng, SeedableRng};
 use rayon::prelude::*;
 use std::{
     collections::HashMap,
-    iter::FromIterator,
     sync::atomic::{AtomicBool, Ordering},
     time::Instant,
     usize::MAX,
@@ -40,8 +39,10 @@ impl SectorGen {
                 .collect::<Vec<_>>();
 
         // System to cluster_id mapping
-        let mut cluster_map: HashMap<Point, usize> =
-            HashMap::from_iter(system_locations.into_iter().map(|point| (point, 0)));
+        let mut cluster_map: HashMap<Point, usize> = system_locations
+            .into_iter()
+            .map(|point| (point, 0))
+            .collect();
 
         // Run K means until convergence, i.e until no reassignments
         let mut has_assigned = true;
@@ -117,34 +118,34 @@ impl SectorGen {
             sectors.len(),
             sectors
                 .iter()
-                .fold(0, |acc, ref sec| acc + sec.system_locations.len()),
+                .fold(0, |acc, sec| acc + sec.system_locations.len()),
             sectors
                 .iter()
-                .fold(0, |acc, ref sec| acc + sec.system_locations.len())
+                .fold(0, |acc, sec| acc + sec.system_locations.len())
                 / sectors.len(),
             sectors
                 .iter()
-                .fold(0, |acc, ref sec| acc.max(sec.system_locations.len())),
+                .fold(0, |acc, sec| acc.max(sec.system_locations.len())),
             sectors
                 .iter()
-                .fold(MAX, |acc, ref sec| acc.min(sec.system_locations.len())),
+                .fold(MAX, |acc, sec| acc.min(sec.system_locations.len())),
             ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis())),
-            sectors.iter().fold(0, |acc, ref sec| acc
+            sectors.iter().fold(0, |acc, sec| acc
                 + match sec.faction {
                     Faction::Cartel => 1,
                     _ => 0,
                 }),
-            sectors.iter().fold(0, |acc, ref sec| acc
+            sectors.iter().fold(0, |acc, sec| acc
                 + match sec.faction {
                     Faction::Empire => 1,
                     _ => 0,
                 }),
-            sectors.iter().fold(0, |acc, ref sec| acc
+            sectors.iter().fold(0, |acc, sec| acc
                 + match sec.faction {
                     Faction::Federation => 1,
                     _ => 0,
                 }),
-            sectors.iter().fold(0, |acc, ref sec| acc
+            sectors.iter().fold(0, |acc, sec| acc
                 + match sec.faction {
                     Faction::Independent => 1,
                     _ => 0,

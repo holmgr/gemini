@@ -60,7 +60,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
             |mut systems: Vec<(SystemBuilder, Vec<PlanetBuilder>)>, sector| {
                 for location in &sector.system_locations {
                     // Generate system
-                    systems.push(system_gen.generate(location.clone(), sector.faction.clone()));
+                    systems.push(system_gen.generate(*location, sector.faction.clone()));
                 }
                 systems
             },
@@ -103,7 +103,7 @@ pub fn generate_galaxy(config: &GameConfig) -> Galaxy {
         systems.len(),
         systems
             .iter()
-            .fold(0, |acc, ref sys| acc + sys.satelites.len(),),
+            .fold(0, |acc, sys| acc + sys.satelites.len(),),
         ((now.elapsed().as_secs() * 1_000) + u64::from(now.elapsed().subsec_millis()))
     );
 

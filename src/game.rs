@@ -88,16 +88,16 @@ impl Game {
         if create_dir_all(base_path.as_path()).is_ok() {
             let mut galaxy_file =
                 BufWriter::new(File::create(base_path.join("galaxy.cbor").as_path()).unwrap());
-            serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap()));
+            serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).unwrap();
             let mut player_file =
                 BufWriter::new(File::create(base_path.join("player.cbor").as_path()).unwrap());
-            serialize_into(&mut player_file, &(*self.player.lock().unwrap()));
+            serialize_into(&mut player_file, &(*self.player.lock().unwrap())).unwrap();
             let mut economy_file =
                 BufWriter::new(File::create(base_path.join("economy.cbor").as_path()).unwrap());
-            serialize_into(&mut economy_file, &(*self.economy.lock().unwrap()));
+            serialize_into(&mut economy_file, &(*self.economy.lock().unwrap())).unwrap();
             let mut update_file =
                 BufWriter::new(File::create(base_path.join("updated.cbor").as_path()).unwrap());
-            serialize_into(&mut update_file, &(*self.updated.lock().unwrap()));
+            serialize_into(&mut update_file, &(*self.updated.lock().unwrap())).unwrap();
         }
     }
 
@@ -110,7 +110,7 @@ impl Game {
         if create_dir_all(base_path.as_path()).is_ok() {
             let mut player_file =
                 BufWriter::new(File::create(base_path.join("player.cbor").as_path()).unwrap());
-            serialize_into(&mut player_file, &(*self.player.lock().unwrap()));
+            serialize_into(&mut player_file, &(*self.player.lock().unwrap())).unwrap();
         }
     }
 

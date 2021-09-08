@@ -53,8 +53,8 @@ impl Updatable for Reputation {
     fn update(&mut self) {
         // "Extreme" repuation levels converges towards lower levels.
         self.0 += match self.0 {
-            -1000...-300 => 5,
-            300...1000 => -5,
+            -1000..=-300 => 5,
+            300..=1000 => -5,
             _ => 0,
         }
     }
@@ -69,11 +69,11 @@ impl Default for Reputation {
 impl fmt::Display for Reputation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let out_str = match self.0 {
-            -1000...-300 => "Hostile",
-            -299...-100 => "Unfriendly",
-            -99...100 => "Neutral",
-            101...300 => "Friendly",
-            301...1000 => "Allied",
+            -1000..=-300 => "Hostile",
+            -299..=-100 => "Unfriendly",
+            -99..=100 => "Neutral",
+            101..=300 => "Friendly",
+            301..=1000 => "Allied",
             _ => "Neutral",
         };
         write!(f, "{}", out_str)

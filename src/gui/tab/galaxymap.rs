@@ -107,7 +107,7 @@ impl GalaxyMapTab {
             return;
         }
         let system = selected_system.unwrap();
-        let populations = self.state.economy.lock().unwrap().populations(&system);
+        let populations = self.state.economy.lock().unwrap().populations(system);
 
         let system_data = vec![
             format!("Faction:       {}", system.faction.to_string()),
@@ -142,26 +142,22 @@ impl GalaxyMapTab {
                         "Type",
                         "Economy",
                     ]
-                    .into_iter(),
-                    system
-                        .satelites
-                        .iter()
-                        .enumerate()
-                        .map(|(index, ref planet)| {
-                            let style: &Style = &DEFAULT_STYLE;
-                            Row::StyledData(
-                                vec![
-                                    format!(" {}", planet.name.clone()),
-                                    format!("{:.1}", planet.mass),
-                                    format!("{:.1} M", populations[index]),
-                                    format!("{:.1}", planet.surface_temperature),
-                                    planet.planet_type.to_string(),
-                                    planet.economic_type.to_string(),
-                                ]
-                                .into_iter(),
-                                &style,
-                            )
-                        }),
+                    .iter(),
+                    system.satelites.iter().enumerate().map(|(index, planet)| {
+                        let style: &Style = &DEFAULT_STYLE;
+                        Row::StyledData(
+                            vec![
+                                format!(" {}", planet.name.clone()),
+                                format!("{:.1}", planet.mass),
+                                format!("{:.1} M", populations[index]),
+                                format!("{:.1}", planet.surface_temperature),
+                                planet.planet_type.to_string(),
+                                planet.economic_type.to_string(),
+                            ]
+                            .into_iter(),
+                            style,
+                        )
+                    }),
                 )
                 .block(Block::default().title("Planets"))
                 .header_style(Style::default().fg(Color::Yellow))
@@ -334,7 +330,7 @@ impl Tab for GalaxyMapTab {
 
             // Check if cursor should snap to closest system.
             if let Some(neighbor) = self.state.galaxy.lock().unwrap().nearest(&self.cursor) {
-                if self.cursor.distance(&neighbor) < MIN_SNAP_DIST {
+                if self.cursor.distance(neighbor) < MIN_SNAP_DIST {
                     self.cursor = *neighbor;
                     self.selected = Some(*neighbor);
                 }
@@ -375,7 +371,7 @@ impl Tab for GalaxyMapTab {
                 let systems = galaxy
                     .reachable_rect(&upper_left, &lower_right)
                     .into_iter()
-                    .map(|loc| galaxy.system(&loc).unwrap())
+                    .map(|loc| galaxy.system(loc).unwrap())
                     .collect::<Vec<_>>();
                 self.draw_galaxy_map(player, &systems, map_radius, term, chunks[1]);
             });

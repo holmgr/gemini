@@ -33,7 +33,7 @@ impl Point {
     /// Hash based on algorithm used is presented in the paper:
     /// Optimized Spatial Hashing for Collision Detection of Deformable Objects.
     pub fn hash(&self) -> u64 {
-        ((self.x * 73_856_093f64) as u64 ^ (self.y * 19_349_663f64) as u64)
+        (self.x * 73_856_093f64) as u64 ^ (self.y * 19_349_663f64) as u64
     }
 }
 

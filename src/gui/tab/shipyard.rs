@@ -13,6 +13,8 @@ use ship::ShipCharacteristics;
 /// Displays the shipyard tab.
 pub struct ShipyardTab {
     state: Arc<Game>,
+
+    #[allow(dead_code)]
     sender: Sender<Event>,
     selected: usize,
     max_selected: usize,
@@ -112,7 +114,7 @@ fn draw_ship_list(
         .items(
             &ships
                 .iter()
-                .map(|ref ship| ship.name.clone())
+                .map(|ship| ship.name.clone())
                 .collect::<Vec<String>>(),
         )
         .select(selected)

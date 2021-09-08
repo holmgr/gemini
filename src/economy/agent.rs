@@ -1,10 +1,6 @@
 use rand::{ChaChaRng, SeedableRng};
 use statrs::distribution::{Continuous, DiscreteUniform, Distribution, Gamma};
-use std::{
-    collections::HashMap,
-    iter::{repeat, FromIterator},
-    ops::Range,
-};
+use std::{collections::HashMap, iter::repeat, ops::Range};
 
 use super::*;
 use astronomicals::{planet::PlanetType, system::System};
@@ -41,10 +37,10 @@ impl Agent {
                 Commodity::values()
                     .map(|commodity| {
                         let planet_ideal = *resource.faction_ideals[&system.faction]
-                            .get(&commodity)
+                            .get(commodity)
                             .unwrap_or(&0)
                             + *resource.planet_ideals[&planet.economic_type]
-                                .get(&commodity)
+                                .get(commodity)
                                 .unwrap_or(&0);
                         (commodity.clone(), planet_ideal)
                     })
@@ -62,10 +58,10 @@ impl Agent {
                     Commodity::values()
                         .map(|commodity| {
                             let planet_production = *resource.faction_production[&system.faction]
-                                .get(&commodity)
+                                .get(commodity)
                                 .unwrap_or(&0)
                                 + *resource.planet_production[&planet.economic_type]
-                                    .get(&commodity)
+                                    .get(commodity)
                                     .unwrap_or(&0);
                             (commodity.clone(), planet_production)
                         })
@@ -75,12 +71,14 @@ impl Agent {
             });
 
         // Create initial price beliefs.
-        let price_beliefs = HashMap::from_iter(Commodity::values().map(|commodity| {
-            (
-                commodity.clone(),
-                Agent::INITIAL_LOWER_BELIEF..Agent::INITIAL_UPPER_BELIEF,
-            )
-        }));
+        let price_beliefs = Commodity::values()
+            .map(|commodity| {
+                (
+                    commodity.clone(),
+                    Agent::INITIAL_LOWER_BELIEF..Agent::INITIAL_UPPER_BELIEF,
+                )
+            })
+            .collect();
 
         Agent {
             seed: system.location.hash() as u32,
@@ -123,7 +121,7 @@ impl Agent {
     /// Returns the prices for all commodities known.
     pub fn prices(&self) -> Vec<(Commodity, i64)> {
         Commodity::values().fold(vec![], |mut prices, commodity| {
-            if let Some(range) = self.price_beliefs.get(&commodity) {
+            if let Some(range) = self.price_beliefs.get(commodity) {
                 let price = (range.start + range.end) / 2;
                 if price != Agent::DEFAULT_PRICE {
                     prices.push((commodity.clone(), (range.start + range.end) / 2));
@@ -198,7 +196,7 @@ impl Agent {
             let seed: &[u32] = &[self.seed];
             let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
 
-            let price_belief = &self.price_beliefs[&commodity];
+            let price_belief = &self.price_beliefs[commodity];
 
             let price_model = DiscreteUniform::new(price_belief.start, price_belief.end).unwrap();
             let mut partial_bid = BidBuilder::default();
@@ -221,7 +219,7 @@ impl Agent {
             let seed: &[u32] = &[self.seed];
             let mut rng: ChaChaRng = SeedableRng::from_seed(seed);
 
-            let price_belief = &self.price_beliefs[&commodity];
+            let price_belief = &self.price_beliefs[commodity];
 
             let price_model = DiscreteUniform::new(price_belief.start, price_belief.end).unwrap();
             let mut partial_ask = AskBuilder::default();
@@ -269,7 +267,7 @@ impl Updatable for Agent {
         {
             let population = self.populations[index];
             self.update_inventory(
-                &commodity,
+                commodity,
                 (*amount as f64 * population * Agent::POPULATION_FACTOR) as i64,
             );
         }
@@ -282,7 +280,7 @@ impl Updatable for Agent {
         {
             let population = self.populations[index];
             self.update_inventory(
-                &commodity,
+                commodity,
                 -(*amount as f64 * population * Agent::POPULATION_FACTOR) as i64,
             );
         }

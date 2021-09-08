@@ -127,7 +127,7 @@ impl Shipyard {
         self.ships
             .iter()
             .cloned()
-            .filter(|ref ship| {
+            .filter(|ship| {
                 // Only return if the faction matches, if any faction is specified.
                 if let Some(ref faction) = ship.faction {
                     return *faction == system.faction;

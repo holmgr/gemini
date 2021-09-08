@@ -15,7 +15,7 @@ mod systemmap;
 /// Interface for dealing with visual tabs in the GUI.
 pub trait Tab {
     /// Creates a new tab.
-    fn new(Arc<Game>, Sender<Event>) -> Box<Self>
+    fn new(_: Arc<Game>, _: Sender<Event>) -> Box<Self>
     where
         Self: Sized;
 
@@ -30,7 +30,7 @@ pub trait Tab {
 }
 
 /// Returns a vector of tabs to be used.
-pub fn create_tabs(state: &Arc<Game>) -> Vec<Box<Tab>> {
+pub fn create_tabs(state: &Arc<Game>) -> Vec<Box<dyn Tab>> {
     vec![
         status::StatusTab::new(state.clone(), HANDLER.send_handle()),
         galaxymap::GalaxyMapTab::new(state.clone(), HANDLER.send_handle()),
