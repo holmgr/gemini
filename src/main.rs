@@ -43,6 +43,10 @@ fn main() {
 
     match opts.subcmd {
         SubCommand::NewGame(t) => {
+            // Display title.
+            let title = include_str!("../res/title.txt");
+            println!("{}", title);
+
             // Gets a value for config if supplied by user, or defaults to "genconfig.toml"
             let config = match parse_config(&t.config_path) {
                 Ok(config) => config,
