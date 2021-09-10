@@ -8,8 +8,8 @@ use std::{
 };
 
 use astronomicals::Sector;
+use config::GameConfig;
 use entities::Faction;
-use game_config::GameConfig;
 use utils::Point;
 
 /// Used for generating sectors.
