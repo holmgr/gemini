@@ -1,5 +1,3 @@
-extern crate app_dirs;
-extern crate bincode;
 extern crate chrono;
 #[macro_use]
 extern crate derive_builder;
@@ -17,10 +15,7 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate spade;
 extern crate statrs;
-extern crate termion;
-extern crate textwrap;
 extern crate toml;
-extern crate tui;
 
 mod astronomicals;
 mod economy;

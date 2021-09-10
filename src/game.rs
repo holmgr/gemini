@@ -1,17 +1,11 @@
-use app_dirs::{get_data_root, AppDataType};
-use bincode::serialize_into;
 use chrono::{DateTime, Duration, TimeZone, Utc};
 use std::{
-    fs::{create_dir_all, File},
-    io::BufWriter,
     sync::{Arc, Mutex},
     time::Instant,
 };
 
 use astronomicals::Galaxy;
 use economy::Economy;
-
-const SAVE_PATH: &str = "gemini/saves/";
 
 /// Main game state object, shared and syncronized by use of Arc and Mutex.
 pub struct Game {
@@ -33,9 +27,7 @@ impl Game {
     /// Update Game information, may advance time.
     pub fn update(&self) {
         // If we have advanced time some steps.
-        if self.attempt_advance_time().is_some() {
-            self.save_all();
-        }
+        self.attempt_advance_time();
     }
 
     /// Attemps to advance time returning the number of days advanced if any.
@@ -66,25 +58,6 @@ impl Game {
             Some(days_passed)
         } else {
             None
-        }
-    }
-
-    /// Creates and stores a quicksave of the current game.
-    pub fn save_all(&self) {
-        let base_path = get_data_root(AppDataType::UserConfig)
-            .unwrap()
-            .join(SAVE_PATH);
-
-        if create_dir_all(base_path.as_path()).is_ok() {
-            let mut galaxy_file =
-                BufWriter::new(File::create(base_path.join("galaxy.cbor").as_path()).unwrap());
-            serialize_into(&mut galaxy_file, &(*self.galaxy.lock().unwrap())).unwrap();
-            let mut economy_file =
-                BufWriter::new(File::create(base_path.join("economy.cbor").as_path()).unwrap());
-            serialize_into(&mut economy_file, &(*self.economy.lock().unwrap())).unwrap();
-            let mut update_file =
-                BufWriter::new(File::create(base_path.join("updated.cbor").as_path()).unwrap());
-            serialize_into(&mut update_file, &(*self.updated.lock().unwrap())).unwrap();
         }
     }
 }
