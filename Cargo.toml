@@ -18,3 +18,5 @@ toml = "0.4.5"
 spade = { version = "1.4.0", features = ["serde_serialize"] }
 chrono = { version = "0.4", features = ["serde"] }
 fern = "0.5"
+clap = "3.0.0-beta.4"
+anyhow = "1.0"

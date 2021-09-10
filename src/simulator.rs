@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
+use config::GameConfig;
 use economy::Economy;
 use game::Game;
-use game_config::GameConfig;
 use generators::generate_galaxy;
 
 pub struct Simulator {
@@ -11,12 +11,10 @@ pub struct Simulator {
 }
 
 impl Simulator {
-    pub fn new() -> Self {
-        // Load GameConfig from disk
-        let game_config = GameConfig::default();
-        info!("Initial config is: {:#?}", game_config);
+    pub fn new(config: GameConfig) -> Self {
+        info!("Initial config is: {:#?}", config);
         Simulator {
-            game_config,
+            game_config: config,
             game_state: None,
         }
     }

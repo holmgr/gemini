@@ -8,7 +8,7 @@ use astronomicals::{
     system::SystemBuilder,
     Galaxy,
 };
-use game_config::GameConfig;
+use config::GameConfig;
 use resources::{fetch_resource, AstronomicalNamesResource};
 use utils::Point;
 
