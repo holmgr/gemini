@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use astronomicals::System;
+use entities::System;
 
 use super::*;
 

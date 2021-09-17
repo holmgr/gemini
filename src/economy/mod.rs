@@ -5,7 +5,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use astronomicals::{system::System, Galaxy};
+use entities::{Galaxy, System};
 use game::Updatable;
 
 mod agent;

@@ -2,9 +2,9 @@ use serde::de::Deserialize;
 use serde_json;
 use std::{collections::HashMap, str};
 
-use astronomicals::planet::PlanetEconomy;
 use economy::Commodity;
 use entities::Faction;
+use entities::PlanetEconomy;
 
 /// Generic Resource trait to be implemented by all resource types which should
 /// be loaded at compile time.

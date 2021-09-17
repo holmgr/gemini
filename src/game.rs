@@ -4,8 +4,8 @@ use std::{
     time::Instant,
 };
 
-use astronomicals::Galaxy;
 use economy::Economy;
+use entities::Galaxy;
 
 /// Main game state object, shared and syncronized by use of Arc and Mutex.
 pub struct Game {
