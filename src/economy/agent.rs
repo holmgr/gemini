@@ -3,7 +3,7 @@ use statrs::distribution::{Continuous, DiscreteUniform, Distribution, Gamma};
 use std::{collections::HashMap, iter::repeat, ops::Range};
 
 use super::*;
-use astronomicals::{planet::PlanetType, system::System};
+use entities::{PlanetType, System};
 use resources::{fetch_resource, AgentResource};
 
 /// Economic agent, able to take part in transactions.

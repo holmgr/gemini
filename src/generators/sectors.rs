@@ -7,9 +7,9 @@ use std::{
     usize::MAX,
 };
 
-use astronomicals::Sector;
 use config::GameConfig;
 use entities::Faction;
+use entities::Sector;
 use utils::Point;
 
 /// Used for generating sectors.

@@ -19,7 +19,6 @@ extern crate spade;
 extern crate statrs;
 extern crate toml;
 
-mod astronomicals;
 mod config;
 mod economy;
 mod entities;

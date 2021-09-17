@@ -1,4 +1,4 @@
-use astronomicals::star::{Star, StarType};
+use entities::{Star, StarType};
 use rand;
 use statrs::distribution::{Distribution, Gamma};
 

@@ -2,11 +2,10 @@ use rand::{ChaChaRng, Rng, SeedableRng};
 use statrs::distribution::{Distribution, Poisson};
 use std::f64;
 
-use astronomicals::{
-    planet::PlanetBuilder,
-    system::{Reputation, SystemBuilder, SystemSecurity, SystemState},
-};
 use entities::Faction;
+use entities::{
+    PlanetBuilder, {Reputation, SystemBuilder, SystemSecurity, SystemState},
+};
 use generators::{planets::PlanetGen, stars::StarGen};
 use utils::Point;
 
