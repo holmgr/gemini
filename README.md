@@ -14,76 +14,32 @@ Source code documentation for the project is available at: https://holmgr.github
 
 ### Prerequisites
 
-To start developing or running the project you will need to install Rust stable, preferably using the Rustup tool
+This project is based on the Tauri cross-platform desktop framework which combines Rust code in the "backend" with a lightweight webbased frontend similar to Electron but with much lower overhead.
 
-```
-rustup install stable
-```
+To start developing or running the project you will need the prerequisits for Tauri. See https://tauri.app/v1/guides/getting-started/prerequisites.
 
-### Installing
+### Running
 
-Start by cloning the repository, then installing all the dependencies is as simple as running the following in the root directory:
+After cloning the repository it is as simple as first installing all dependencies with
 
-```
-cargo build
+```sh
+npm install
 ```
 
-To run the project execute the following:
+And then running the dev-server with
 
 ```
-cargo run
+npm run tauri dev
 ```
 
-Since the project uses quite a lot of compuations for generating a new galaxy you might want to run with optimizations on.
-To do that run:
-
-```
-cargo run --release
-```
-
-Furthermore, to see debug and info logs you need to run with the RUST_LOG environment variable:
-
-```
-bash/zsh: RUST_LOG=gemini=debug cargo run
-fish: env RUST_LOG=gemini=debug cargo run
-```
-
-To build and install the executable on your system simply run:
-
-```
-cargo install
-```
-
-## Running the tests
-
-To run the automated tests, run:
-
-```
-cargo test
-```
-
-Note: No branch or pull request can be merged before all tests has passed in Travis.
-
-### And coding style tests
-
-This project follows the Rust standard as specified by the Rustfmt project.
-Install Rustfmt by doing the following:
-
-```
-rustup component add rustfmt-preview --toolchain=nightly
-```
-
-To format the code run:
-
-```
-cargo +nightly fmt
-```
-
-Note: No branch or pull request can be merged before the style-guide has passed Rustfmt.
+The application should start by itself.
 
 ## Built With
 
 * [Rust](https://www.rust-lang.org/en-US/) - The Rust language
+* [Tauri](https://tauri.app/) - Build an optimized, secure, and frontend-independent application for multi-platform deployment.
+* [Vite](https://vitejs.dev) - Next Generation Frontend Tooling
+* [Typescript](https://www.typescriptlang.org) - TypeScript is JavaScript with syntax for types.
 
 ## Contributing
 
