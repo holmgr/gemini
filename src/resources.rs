@@ -1,5 +1,5 @@
 use serde::de::Deserialize;
-use serde_json;
+
 use std::{collections::HashMap, str};
 
 use crate::economy::Commodity;
@@ -44,7 +44,7 @@ pub fn fetch_resource<T: Resource>() -> Option<T> {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 /// Resource used in name generation of celestial objects.
 pub struct AstronomicalNamesResource {
     pub names: Vec<String>,
