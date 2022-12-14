@@ -97,7 +97,7 @@ struct NewGame {
 
 /// Try parse the Generation Config at the specified path.
 fn parse_config(path: &str) -> Result<config::GameConfig> {
-    let mut file = File::open(&path)?;
+    let mut file = File::open(path)?;
 
     let mut file_content = String::new();
     file.read_to_string(&mut file_content)?;

@@ -185,7 +185,7 @@ impl fmt::Display for PlanetEconomy {
 
 /// Represents a group of systems in close proximity within the same faction.
 /// Markets in the economy is handled on this level of scale.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Sector {
     pub faction: Faction,
     pub system_locations: Vec<Point>,
@@ -264,7 +264,7 @@ impl PartialEq for System {
 impl Eq for System {}
 
 /// Represents the current player level of reputation with the system.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Reputation(i32);
 
 impl Updatable for Reputation {
@@ -276,12 +276,6 @@ impl Updatable for Reputation {
             300..=1000 => -5,
             _ => 0,
         }
-    }
-}
-
-impl Default for Reputation {
-    fn default() -> Reputation {
-        Reputation { 0: 0 }
     }
 }
 
