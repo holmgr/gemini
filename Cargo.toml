@@ -2,6 +2,7 @@
 name = "gemini"
 version = "0.1.0"
 authors = ["holmgr <viktor.holmgren@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 serde = "^1.0"

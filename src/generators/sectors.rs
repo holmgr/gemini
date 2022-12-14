@@ -7,10 +7,10 @@ use std::{
     usize::MAX,
 };
 
-use config::GameConfig;
-use entities::Faction;
-use entities::Sector;
-use utils::Point;
+use crate::config::GameConfig;
+use crate::entities::Faction;
+use crate::entities::Sector;
+use crate::utils::Point;
 
 /// Used for generating sectors.
 pub struct SectorGen {}

@@ -1,4 +1,5 @@
-use game::Updatable;
+use crate::game::Updatable;
+use crate::utils::Point;
 use rand::Rng;
 use rayon::iter::IntoParallelRefMutIterator;
 use statrs::distribution::{Categorical, Distribution};
@@ -6,7 +7,6 @@ use std::{
     fmt,
     hash::{Hash, Hasher},
 };
-use utils::Point;
 
 use rayon::iter::ParallelIterator;
 use spade::rtree::RTree;

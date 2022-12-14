@@ -1,4 +1,4 @@
-use entities::{Star, StarType};
+use crate::entities::{Star, StarType};
 use rand;
 use statrs::distribution::{Distribution, Gamma};
 

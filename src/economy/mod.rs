@@ -5,8 +5,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use entities::{Galaxy, System};
-use game::Updatable;
+use crate::entities::{Galaxy, System};
+use crate::game::Updatable;
 
 mod agent;
 mod market;

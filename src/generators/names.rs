@@ -1,6 +1,6 @@
+use crate::resources::AstronomicalNamesResource;
 use inflector::Inflector;
 use rand::{ChaChaRng, Rng, SeedableRng};
-use resources::AstronomicalNamesResource;
 use statrs::distribution::{Categorical, Distribution};
 
 /// Name generator which generates based on names given in training data.

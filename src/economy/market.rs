@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use entities::System;
+use crate::entities::System;
 
 use super::*;
 
