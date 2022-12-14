@@ -2,7 +2,7 @@ use rand::Rng;
 use statrs::distribution::{Distribution, Exponential, Gamma};
 use std::f64::consts::PI;
 
-use entities::{
+use crate::entities::{
     Star, {PlanetBuilder, PlanetEconomy, PlanetType},
 };
 

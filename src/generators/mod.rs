@@ -3,12 +3,12 @@ use rayon::prelude::*;
 use statrs::distribution::{Distribution, Normal};
 use std::time::Instant;
 
-use config::GameConfig;
-use entities::{
+use crate::config::GameConfig;
+use crate::entities::{
     Galaxy, SystemBuilder, {Planet, PlanetBuilder},
 };
-use resources::{fetch_resource, AstronomicalNamesResource};
-use utils::Point;
+use crate::resources::{fetch_resource, AstronomicalNamesResource};
+use crate::utils::Point;
 
 pub mod names;
 pub mod planets;

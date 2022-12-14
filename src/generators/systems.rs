@@ -2,12 +2,12 @@ use rand::{ChaChaRng, Rng, SeedableRng};
 use statrs::distribution::{Distribution, Poisson};
 use std::f64;
 
-use entities::Faction;
-use entities::{
+use crate::entities::Faction;
+use crate::entities::{
     PlanetBuilder, {Reputation, SystemBuilder, SystemSecurity, SystemState},
 };
-use generators::{planets::PlanetGen, stars::StarGen};
-use utils::Point;
+use crate::generators::{planets::PlanetGen, stars::StarGen};
+use crate::utils::Point;
 
 /// Used for generating systems.
 pub struct SystemGen {

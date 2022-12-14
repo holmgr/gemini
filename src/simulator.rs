@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use config::GameConfig;
-use economy::Economy;
-use game::Game;
-use generators::generate_galaxy;
+use crate::config::GameConfig;
+use crate::economy::Economy;
+use crate::game::Game;
+use crate::generators::generate_galaxy;
 
 pub struct Simulator {
     game_state: Option<Arc<Game>>,
